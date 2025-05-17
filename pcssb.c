@@ -22,7 +22,7 @@ struct FSB readFile(const char* fileName) {
 }
 
 int main(int argc, char* argv[]) {
-    struct FSB fsb = readFile(argv[1]);
+    const struct FSB fsb = readFile(argv[1]);
     printf("%u", fsb.unknown1);
 }
 
