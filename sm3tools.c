@@ -1,25 +1,29 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-enum FILE_TYPES {
+typedef enum FILE_TYPE {
     PCPACK,
     PCSSB
-};
+} FileType;
 
-enum FILE_TYPES getFileType(const char* fileName) {
-    char *const fileExtension = strrchr(fileName, '.');
-    //printf("%s", fileExtension);
+// Checks the file extension of the file name, and returns the relevant
+// file type if one is matched. Otherwise it exits with an error message
+FileType getFileType(const char* fileName) {
+    const char *const fileExtension = strrchr(fileName, '.');
 
     // TODO could check magic numbers as well
-
     // FIXME case sensitive currently
 
     if (strcmp(fileExtension, ".PCPACK") == 0) return PCPACK;
     if (strcmp(fileExtension, ".pcssb") == 0) return PCSSB;
+
+    fprintf(stderr, "ERROR: File extension not recognised.");
+    exit(EXIT_FAILURE);
 }
 
 int main(int argc, char* argv[]) {
-    getFileType(argv[1]);
+    FileType fileType = getFileType(argv[1]);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
