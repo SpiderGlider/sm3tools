@@ -18,11 +18,20 @@ FileType getFileType(const char* fileName) {
     if (strcmp(fileExtension, ".PCPACK") == 0) return PCPACK;
     if (strcmp(fileExtension, ".pcssb") == 0) return PCSSB;
 
-    fprintf(stderr, "ERROR: File extension not recognised.");
+    fprintf(stderr, "ERROR: File extension not recognised.\n");
     exit(EXIT_FAILURE);
 }
 
 int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "ERROR: Must have 1 argument.\n");
+        exit(EXIT_FAILURE);
+    }
+    if (argc > 2) {
+        fprintf(stderr, "WARNING: Arguments after the 1st"
+                        " argument are currently ignored.\n");
+    }
+
     FileType fileType = getFileType(argv[1]);
 
     return EXIT_SUCCESS;
