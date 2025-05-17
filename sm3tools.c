@@ -15,9 +15,14 @@ FileType getFileType(const char* fileName) {
 
     const char *const fileExtension = strrchr(fileName, '.');
 
+    if (fileExtension == NULL) {
+        fprintf(stderr, "ERROR: Argument doesn't have a file extension."
+                        "Are you sure this is a path to a file?\n");
+        exit(EXIT_FAILURE);
+    }
+
     // TODO could check magic numbers as well
     // FIXME case sensitive currently
-
     if (strcmp(fileExtension, ".PCPACK") == 0) return PCPACK;
     if (strcmp(fileExtension, ".pcssb") == 0) return PCSSB;
 
