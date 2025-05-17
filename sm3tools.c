@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,8 @@ typedef enum FILE_TYPE {
 // Checks the file extension of the file name, and returns the relevant
 // file type if one is matched. Otherwise it exits with an error message
 FileType getFileType(const char* fileName) {
+    assert(fileName != NULL);
+
     const char *const fileExtension = strrchr(fileName, '.');
 
     // TODO could check magic numbers as well
@@ -33,6 +36,13 @@ int main(int argc, char* argv[]) {
     }
 
     FileType fileType = getFileType(argv[1]);
+    if (fileType == PCPACK) {
+        fprintf(stderr, "ERROR: PCPACK parsing is not yet implemented.\n");
+    }
+    // currently getFileType should never return a value outside of these two
+    assert(fileType == PCSSB);
+
+
 
     return EXIT_SUCCESS;
 }
