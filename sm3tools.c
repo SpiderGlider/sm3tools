@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
     FileType fileType = getFileType(argv[1]);
     if (fileType == PCPACK) {
         fprintf(stderr, "ERROR: PCPACK parsing is not yet implemented.\n");
+        exit(EXIT_FAILURE);
     }
     // currently getFileType should never return a value outside of these two
     assert(fileType == PCSSB);
