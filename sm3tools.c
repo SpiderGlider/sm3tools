@@ -10,14 +10,14 @@ typedef enum FILE_TYPE {
 
 // Checks the file extension of the file name, and returns the relevant
 // file type if one is matched. Otherwise it exits with an error message
-FileType getFileType(const char* fileName) {
+FileType getFileType(const char *const fileName) {
     assert(fileName != NULL);
 
     const char *const fileExtension = strrchr(fileName, '.');
 
     if (fileExtension == NULL) {
         fprintf(stderr, "ERROR: Argument doesn't have a file extension."
-                        "Are you sure this is a path to a file?\n");
+                        " Are you sure this is a path to a file?\n");
         exit(EXIT_FAILURE);
     }
 
@@ -30,9 +30,13 @@ FileType getFileType(const char* fileName) {
     exit(EXIT_FAILURE);
 }
 
-int main(int argc, char* argv[]) {
+// Program takes one argument, that being the path to a file to parse.
+// Currently only PCSSB parsing is implemented. The file type is determined
+// only through the file extension currently.
+int main(const int argc, const char *const argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "ERROR: Must have 1 argument.\n");
+        fprintf(stderr, "ERROR: Must have 1 argument"
+                        " (the path to a file to parse).\n");
         exit(EXIT_FAILURE);
     }
     if (argc > 2) {
@@ -40,15 +44,14 @@ int main(int argc, char* argv[]) {
                         " argument are currently ignored.\n");
     }
 
-    FileType fileType = getFileType(argv[1]);
+    const FileType fileType = getFileType(argv[1]);
     if (fileType == PCPACK) {
         fprintf(stderr, "ERROR: PCPACK parsing is not yet implemented.\n");
         exit(EXIT_FAILURE);
     }
     // currently getFileType should never return a value outside of these two
     assert(fileType == PCSSB);
-
-
+    printf("INFO: Parsing as a PCSSB file.\n");
 
     return EXIT_SUCCESS;
 }
