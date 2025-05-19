@@ -7,7 +7,12 @@ struct FSB readFile(const char* fileName) {
     FILE *fileHandle = fopen(fileName, "rb");
 
     uint32_t buffer[6] = {};
-    fread(buffer, 4, 6, fileHandle);
+
+    const size_t count = 6;
+    const size_t numRead = fread(buffer, 4, count , fileHandle);
+    if (numRead < count) {
+        printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
+    }
 
     fsb.fsb3Header = buffer[0];
     fsb.numFiles = buffer[1];
