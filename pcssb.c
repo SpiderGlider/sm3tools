@@ -22,7 +22,7 @@ size_t findFSBHeaderIndexes(
     char buffer[100] = {};
     assert((sizeof(buffer) / sizeof(char)) == buffSize);
 
-    const size_t numRead = fread(buffer, sizeof(size_t), buffSize , fileHandle);
+    const size_t numRead = fread(buffer, sizeof(char), buffSize , fileHandle);
     if (numRead < buffSize) {
         printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
     }
@@ -30,6 +30,7 @@ size_t findFSBHeaderIndexes(
 
     fclose(fileHandle);
 
+    //TODO: Would comparing to a long constant be easier?
     //string to match in the file (except for null termination)
     const char fsbHeaderString[5] = "FSB3";
     //represents current character in the string to match
@@ -83,6 +84,6 @@ int main(int argc, char* argv[]) {
     size_t result[100];
     findFSBHeaderIndexes(argv[1], result, 100);
 
-    printf("%lu\n", result[0]);
+    printf("%lu\n", result[2]);
 }
 
