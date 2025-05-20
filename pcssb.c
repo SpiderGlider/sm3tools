@@ -19,8 +19,8 @@ size_t findFSBHeaderIndexes(
 
     const size_t buffSize = 100;
     //magic number needs to be reused to avoid Variable Length Array
-    size_t buffer[100] = {};
-    assert((sizeof(buffer) / sizeof(size_t)) == buffSize);
+    char buffer[100] = {};
+    assert((sizeof(buffer) / sizeof(char)) == buffSize);
 
     const size_t numRead = fread(buffer, sizeof(size_t), buffSize , fileHandle);
     if (numRead < buffSize) {
@@ -80,7 +80,9 @@ struct FSB readFile(const char* fileName) {
 }
 
 int main(int argc, char* argv[]) {
-    const struct FSB fsb = readFile(argv[1]);
-    printf("%s", (char*) &fsb.fsb3Header);
+    size_t result[100];
+    findFSBHeaderIndexes(argv[1], result, 100);
+
+    printf("%lu\n", result[0]);
 }
 
