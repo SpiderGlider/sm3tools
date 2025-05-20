@@ -8,7 +8,7 @@
 //that means resultArr was too small and there may have been more results that couldn't fit.
 size_t findFSBHeaderIndexes(
     const char *const inputFileName,
-    char *const resultArr,
+    size_t *const resultArr,
     const size_t resultArrLen) {
 
     //next index in resultArr to fill (0 indexed)
@@ -19,10 +19,10 @@ size_t findFSBHeaderIndexes(
 
     const size_t buffSize = 100;
     //magic number needs to be reused to avoid Variable Length Array
-    char buffer[100] = {};
-    assert(sizeof(buffer) == buffSize);
+    size_t buffer[100] = {};
+    assert((sizeof(buffer) / sizeof(size_t)) == buffSize);
 
-    const size_t numRead = fread(buffer, 1, buffSize , fileHandle);
+    const size_t numRead = fread(buffer, sizeof(size_t), buffSize , fileHandle);
     if (numRead < buffSize) {
         printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
     }
@@ -46,7 +46,8 @@ size_t findFSBHeaderIndexes(
                            "what result array can hold.");
                     return resultCount;
                 }
-                resultArr[resultCount] = buffer[i];
+                //we are at the '3' character, but want to return index of 'F'
+                resultArr[resultCount] = i-3;
                 resultCount++;
             }
         }
