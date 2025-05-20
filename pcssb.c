@@ -1,8 +1,11 @@
 #include "pcssb.h"
 
+#include <assert.h>
 #include <stdio.h>
 
 //prints out indexes of every instance of "FSB3" header text in the sound file
+//returns number of results found. if it returns a value greater than resultArrLen,
+//that means resultArr was too small and there may have been more results that couldn't fit.
 size_t findFSBHeaderIndexes(
     const char *const inputFileName,
     char *const resultArr,
@@ -11,16 +14,16 @@ size_t findFSBHeaderIndexes(
     //next index in resultArr to fill
     size_t resultCount = 0;
 
-    FILE *fileHandle = fopen(inputFileName, "rb");
-
+    FILE *const fileHandle = fopen(inputFileName, "rb");
     const size_t buffSize = 100;
     //magic number needs to be reused to avoid Variable Length Array
     char buffer[100] = {};
-
     const size_t numRead = fread(buffer, 1, buffSize , fileHandle);
+    assert(numRead <= buffSize);
     if (numRead < buffSize) {
         printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
     }
+    fclose(fileHandle);
 
     //string to match in the file (except for null termination)
     const char fsbHeaderString[5] = "FSB3";
@@ -32,19 +35,22 @@ size_t findFSBHeaderIndexes(
             //if matched (ignore \0 character in fsbHeaderString)
             if (fsbStrIndex == 4) {
                 fsbStrIndex = 0;
-                //FIXME: add length checking
                 resultArr[resultCount] = buffer[i];
                 resultCount++;
+                if (resultCount >= resultArrLen) {
+                    printf("LOG: More results were found than "
+                           "what result array can hold.");
+                    return resultCount;
+                }
             }
         }
     }
-    //FIXME return more useful value which represents if resultArr was too small
     return resultCount;
 }
 
 struct FSB readFile(const char* fileName) {
     struct FSB fsb = {};
-    FILE *fileHandle = fopen(fileName, "rb");
+    FILE *const fileHandle = fopen(fileName, "rb");
 
     const size_t count = 100;
     uint32_t buffer[100] = {};
