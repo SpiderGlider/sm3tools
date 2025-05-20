@@ -34,10 +34,10 @@ size_t findFSBHeaderIndexes(
         if (ferror(fileHandle)) {
             perror("ERROR: I/O error when reading");
         }
-        if (numRead < buffSize) {
-            printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
-        }
-        assert(numRead == buffSize);
+        assert(numRead <= buffSize);
+        // if (numRead < buffSize) {
+        //     printf("LOG: buffSize is %lu, amount read was only %lu.\n", buffSize, numRead);
+        // }
 
         for (size_t i = 0; i < numRead; i++) {
             //string to match in the file, represented as an unsigned long
@@ -102,9 +102,13 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "ERROR: Failed to malloc result.\n");
         exit(EXIT_FAILURE);
     }
-    findFSBHeaderIndexes(argv[1], result, 100);
-
-    printf("%lu\n", result[1]);
+    size_t numResults = findFSBHeaderIndexes(argv[1], result, 100);
+    for (size_t i = 0; i < numResults; i++) {
+        printf("%lu * %lu = %lu \n",
+            result[i],
+            sizeof(uint32_t),
+            result[i] * sizeof(uint32_t));
+    }
     free(result);
 }
 
