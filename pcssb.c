@@ -20,10 +20,10 @@ size_t findFSBHeaderIndexes(
 
     const size_t buffSize = 100;
     //magic number needs to be reused to avoid Variable Length Array
-    char buffer[100] = {};
-    assert((sizeof(buffer) / sizeof(char)) == buffSize);
+    uint32_t buffer[100] = {};
+    assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
 
-    const size_t numRead = fread(buffer, sizeof(char), buffSize , fileHandle);
+    const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
     if (numRead < buffSize) {
         printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
     }
@@ -31,27 +31,18 @@ size_t findFSBHeaderIndexes(
 
     fclose(fileHandle);
 
-    //TODO: Would comparing to a long constant be easier?
-    //string to match in the file (except for null termination)
-    const char fsbHeaderString[5] = "FSB3";
-    //represents current character in the string to match
-    int fsbStrIndex = 0;
     for (size_t i = 0; i < numRead; i++) {
-        if (buffer[i] == fsbHeaderString[fsbStrIndex]) {
-            assert(0 <= fsbStrIndex && fsbStrIndex <= 3);
-            fsbStrIndex++;
-            //if matched (ignore \0 character in fsbHeaderString)
-            if (fsbStrIndex == 4) {
-                fsbStrIndex = 0;
-                if (resultCount >= resultArrLen) {
-                    printf("LOG: More results were found than "
-                           "what result array can hold.");
-                    return resultCount;
-                }
-                //we are at the '3' character, but want to return index of 'F'
-                resultArr[resultCount] = i-3;
-                resultCount++;
+        //string to match in the file, represented as an unsigned long
+        const uint32_t fsbHeader = 859984710; // = "FSB3"
+        if (buffer[i] == fsbHeader) {
+            if (resultCount >= resultArrLen) {
+                printf("LOG: More results were found than "
+                       "what result array can hold.");
+                return resultCount;
             }
+            //we are at the '3' character, but want to return index of 'F'
+            resultArr[resultCount] = i;
+            resultCount++;
         }
     }
     return resultCount;
@@ -83,9 +74,13 @@ struct FSB readFile(const char* fileName) {
 
 int main(int argc, char* argv[]) {
     size_t* result = (size_t*) malloc(sizeof(size_t) * 100);
+    if (result == NULL) {
+        fprintf(stderr, "ERROR: Failed to malloc result.\n");
+        exit(EXIT_FAILURE);
+    }
     findFSBHeaderIndexes(argv[1], result, 100);
 
-    printf("%lu\n", result[2]);
+    printf("%lu\n", result[1]);
     free(result);
 }
 
