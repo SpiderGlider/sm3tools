@@ -11,18 +11,23 @@ size_t findFSBHeaderIndexes(
     char *const resultArr,
     const size_t resultArrLen) {
 
-    //next index in resultArr to fill
+    //next index in resultArr to fill (0 indexed)
+    //also happens to be the number of results currently found
     size_t resultCount = 0;
 
     FILE *const fileHandle = fopen(inputFileName, "rb");
+
     const size_t buffSize = 100;
     //magic number needs to be reused to avoid Variable Length Array
     char buffer[100] = {};
+    assert(sizeof(buffer) == buffSize);
+
     const size_t numRead = fread(buffer, 1, buffSize , fileHandle);
-    assert(numRead <= buffSize);
     if (numRead < buffSize) {
         printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
     }
+    assert(numRead == buffSize);
+
     fclose(fileHandle);
 
     //string to match in the file (except for null termination)
@@ -31,17 +36,18 @@ size_t findFSBHeaderIndexes(
     int fsbStrIndex = 0;
     for (size_t i = 0; i < numRead; i++) {
         if (buffer[i] == fsbHeaderString[fsbStrIndex]) {
+            assert(0 <= fsbStrIndex && fsbStrIndex <= 3);
             fsbStrIndex++;
             //if matched (ignore \0 character in fsbHeaderString)
             if (fsbStrIndex == 4) {
                 fsbStrIndex = 0;
-                resultArr[resultCount] = buffer[i];
-                resultCount++;
                 if (resultCount >= resultArrLen) {
                     printf("LOG: More results were found than "
                            "what result array can hold.");
                     return resultCount;
                 }
+                resultArr[resultCount] = buffer[i];
+                resultCount++;
             }
         }
     }
