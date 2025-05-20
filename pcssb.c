@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//prints out indexes of every instance of "FSB3" header text in the sound file
-//returns number of results found. if it returns a value greater than resultArrLen,
+//finds every instance of "FSB3" header text in the sound file
+//puts the absolute position in bytes of those instances
+//into the given resultArr in the order they are found.
+//return value is number of results found. if it returns a value greater than resultArrLen,
 //that means resultArr was too small and there may have been more results that couldn't fit.
 size_t findFSBHeaderIndexes(
     const char *const inputFileName,
@@ -51,8 +53,10 @@ size_t findFSBHeaderIndexes(
 
                     return resultCount;
                 }
-                //add position (in terms of how many longs into the file it is)
-                resultArr[resultCount] = i + (readIndex * buffSize);
+                //position (in terms of how many longs into the file it is)
+                const size_t uint32Pos = i + (readIndex * buffSize);
+                //get how many bytes into the file it is
+                resultArr[resultCount] = uint32Pos * sizeof(uint32_t);
                 resultCount++;
             }
         }
@@ -104,11 +108,10 @@ int main(int argc, char* argv[]) {
     }
     size_t numResults = findFSBHeaderIndexes(argv[1], result, 100);
     for (size_t i = 0; i < numResults; i++) {
-        printf("%lu * %lu = %lu, hex = 0x%lX \n",
+        printf("%lu: decimal=%lu, hex = 0x%lX \n",
+            i,
             result[i],
-            sizeof(uint32_t),
-            result[i] * sizeof(uint32_t),
-            result[i] * sizeof(uint32_t)
+            result[i]
         );
     }
     free(result);
