@@ -11,12 +11,18 @@ size_t findFSBHeaderIndexes(
     const char *const inputFileName,
     size_t *const resultArr,
     const size_t resultArrLen) {
-
     //next index in resultArr to fill (0 indexed)
     //also happens to be the number of results currently found
     size_t resultCount = 0;
 
     FILE *const fileHandle = fopen(inputFileName, "rb");
+    if (!fileHandle) {
+        perror("ERROR: Failed to open file");
+        exit(EXIT_FAILURE);
+    }
+
+    //position in the file
+    size_t readIndex = 0;
 
     const size_t buffSize = 100;
     //magic number needs to be reused to avoid Variable Length Array
@@ -24,6 +30,9 @@ size_t findFSBHeaderIndexes(
     assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
 
     const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
+    if (ferror(fileHandle)) {
+        perror("ERROR: I/O error when reading");
+    }
     if (numRead < buffSize) {
         printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
     }
@@ -51,11 +60,18 @@ size_t findFSBHeaderIndexes(
 struct FSB readFile(const char* fileName) {
     struct FSB fsb = {};
     FILE *const fileHandle = fopen(fileName, "rb");
+    if (!fileHandle) {
+        perror("ERROR: Failed to open file");
+        exit(EXIT_FAILURE);
+    }
 
     const size_t count = 100;
     uint32_t buffer[100] = {};
 
     const size_t numRead = fread(buffer, 4, count , fileHandle);
+    if (ferror(fileHandle)) {
+        perror("ERROR: I/O error when reading");
+    }
     if (numRead < count) {
         printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
     }
