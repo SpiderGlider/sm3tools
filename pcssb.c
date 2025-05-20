@@ -29,7 +29,7 @@ size_t findFSBHeaderIndexes(
     while (!feof(fileHandle)) {
         const size_t buffSize = 100;
         //magic number needs to be reused to avoid Variable Length Array
-        uint32_t buffer[100] = {};
+        uint32_t buffer[100] = {0};
         assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
 
         const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
@@ -70,7 +70,7 @@ size_t findFSBHeaderIndexes(
 }
 
 struct FSB readFile(const char* fileName) {
-    struct FSB fsb = {};
+    struct FSB fsb = {0};
     FILE *const fileHandle = fopen(fileName, "rb");
     if (!fileHandle) {
         perror("ERROR: Failed to open file");
@@ -78,7 +78,7 @@ struct FSB readFile(const char* fileName) {
     }
 
     const size_t count = 100;
-    uint32_t buffer[100] = {};
+    uint32_t buffer[100] = {0};
 
     const size_t numRead = fread(buffer, 4, count , fileHandle);
     if (ferror(fileHandle)) {
