@@ -52,7 +52,7 @@ size_t findFSBHeaderIndexes(
                     return resultCount;
                 }
                 //add position (in terms of how many longs into the file it is)
-                resultArr[resultCount] = i + readIndex;
+                resultArr[resultCount] = i + (readIndex * buffSize);
                 resultCount++;
             }
         }
@@ -104,10 +104,12 @@ int main(int argc, char* argv[]) {
     }
     size_t numResults = findFSBHeaderIndexes(argv[1], result, 100);
     for (size_t i = 0; i < numResults; i++) {
-        printf("%lu * %lu = %lu \n",
+        printf("%lu * %lu = %lu, hex = 0x%lX \n",
             result[i],
             sizeof(uint32_t),
-            result[i] * sizeof(uint32_t));
+            result[i] * sizeof(uint32_t),
+            result[i] * sizeof(uint32_t)
+        );
     }
     free(result);
 }
