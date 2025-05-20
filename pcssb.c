@@ -21,39 +21,47 @@ size_t findFSBHeaderIndexes(
         exit(EXIT_FAILURE);
     }
 
-    //position in the file
+    //how many buffers into the file
     size_t readIndex = 0;
 
-    const size_t buffSize = 100;
-    //magic number needs to be reused to avoid Variable Length Array
-    uint32_t buffer[100] = {};
-    assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
+    while (!feof(fileHandle)) {
+        const size_t buffSize = 100;
+        //magic number needs to be reused to avoid Variable Length Array
+        uint32_t buffer[100] = {};
+        assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
 
-    const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
-    if (ferror(fileHandle)) {
-        perror("ERROR: I/O error when reading");
+        const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
+        if (ferror(fileHandle)) {
+            perror("ERROR: I/O error when reading");
+        }
+        if (numRead < buffSize) {
+            printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
+        }
+        assert(numRead == buffSize);
+
+        for (size_t i = 0; i < numRead; i++) {
+            //string to match in the file, represented as an unsigned long
+            const uint32_t fsbHeader = 859984710; // = "FSB3"
+            if (buffer[i] == fsbHeader) {
+                if (resultCount >= resultArrLen) {
+                    printf("LOG: More results were found than "
+                           "what result array can hold.");
+
+                    fclose(fileHandle);
+
+                    return resultCount;
+                }
+                //add position (in terms of how many longs into the file it is)
+                resultArr[resultCount] = i + readIndex;
+                resultCount++;
+            }
+        }
+
+        readIndex++;
     }
-    if (numRead < buffSize) {
-        printf("LOG: count was %lu, amount read was only %lu.\n", buffSize, numRead);
-    }
-    assert(numRead == buffSize);
 
     fclose(fileHandle);
 
-    for (size_t i = 0; i < numRead; i++) {
-        //string to match in the file, represented as an unsigned long
-        const uint32_t fsbHeader = 859984710; // = "FSB3"
-        if (buffer[i] == fsbHeader) {
-            if (resultCount >= resultArrLen) {
-                printf("LOG: More results were found than "
-                       "what result array can hold.");
-                return resultCount;
-            }
-            //we are at the '3' character, but want to return index of 'F'
-            resultArr[resultCount] = i;
-            resultCount++;
-        }
-    }
     return resultCount;
 }
 
