@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 //prints out indexes of every instance of "FSB3" header text in the sound file
 //returns number of results found. if it returns a value greater than resultArrLen,
@@ -81,9 +82,10 @@ struct FSB readFile(const char* fileName) {
 }
 
 int main(int argc, char* argv[]) {
-    size_t result[100];
+    size_t* result = (size_t*) malloc(sizeof(size_t) * 100);
     findFSBHeaderIndexes(argv[1], result, 100);
 
     printf("%lu\n", result[2]);
+    free(result);
 }
 
