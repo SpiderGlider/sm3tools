@@ -119,6 +119,7 @@ void printFSBHeaderIndexes(const char *const fileName) {
             result[i],
             result[i]
         );
+        outputAudioData(fileName, result[i]);
     }
     free(result);
 }
@@ -163,15 +164,18 @@ void outputAudioData(
 
     uint32_t dataSize = 0;
     const size_t numRead = fread(&dataSize, sizeof(uint32_t), 1, fileHandle);
-    if (numRead != sizeof(dataSize)) {
+    if (ferror(fileHandle)) {
         perror("ERROR: I/O error when reading");
         fclose(fileHandle);
         exit(EXIT_FAILURE);
     }
+    if (numRead != 1) {
+        (void) printf("LOG: count was 1, amount read was only %lu.\n", numRead);
+    }
 
     printf("DATA SIZE: %u\n", dataSize);
 
-};
+}
 
 int main(const int argc, const char *const argv[]) {
     printFSBHeaderIndexes(argv[1]);
