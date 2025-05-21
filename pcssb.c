@@ -19,6 +19,8 @@ struct FSB readFile(const char* fileName) {
     const size_t numRead = fread(buffer, 4, count , fileHandle);
     if (ferror(fileHandle)) {
         perror("ERROR: I/O error when reading");
+        fclose(fileHandle);
+        exit(EXIT_FAILURE);
     }
     if (numRead < count) {
         (void) printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
@@ -68,6 +70,8 @@ size_t findFSBHeaderIndexes(
         const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
         if (ferror(fileHandle)) {
             perror("ERROR: I/O error when reading");
+            fclose(fileHandle);
+            exit(EXIT_FAILURE);
         }
         assert(numRead <= buffSize);
         // if (numRead < buffSize) {
@@ -132,9 +136,9 @@ int fseekSetUnsigned(FILE *const fileHandle, const size_t offset) {
         if (return1 != 0) {
             return return1;
         }
-        return fseek(fileHandle, (long int)( offset - LONG_MAX ), SEEK_CUR);
+        return fseek(fileHandle, (long int)(offset - LONG_MAX), SEEK_CUR);
     }
-    return fseek(fileHandle, (long int) offset, SEEK_SET );
+    return fseek(fileHandle, (long int) offset, SEEK_SET);
 }
 
 void outputAudioData(
@@ -147,20 +151,26 @@ void outputAudioData(
         exit(EXIT_FAILURE);
     }
 
-    // Set the file position indicator in front of third double value.
+    //set the file position indicator to start of FSB file
     if (fseekSetUnsigned(fileHandle, fsb3HeaderPosition) != 0) {
         fprintf(stderr, "fseek() failed in file %s at line # %d\n",
                 __FILE__, __LINE__ - 2);
         fclose(fileHandle);
         exit(EXIT_FAILURE);
     }
+    //move to location where data size is written
+    fseek(fileHandle, 3 * sizeof(uint32_t), SEEK_CUR);
 
-    const size_t buffSize = 4;
-    //magic number needs to be reused to avoid Variable Length Array
-    uint32_t buffer[100] = {0};
-    assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
+    uint32_t dataSize = 0;
+    const size_t numRead = fread(&dataSize, sizeof(uint32_t), 1, fileHandle);
+    if (numRead != sizeof(dataSize)) {
+        perror("ERROR: I/O error when reading");
+        fclose(fileHandle);
+        exit(EXIT_FAILURE);
+    }
 
-    const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
+    printf("DATA SIZE: %u\n", dataSize);
+
 };
 
 int main(const int argc, const char *const argv[]) {
