@@ -9,6 +9,8 @@
 //into the given resultArr in the order they are found.
 //return value is number of results found. if it returns a value greater than resultArrLen,
 //that means resultArr was too small and there may have been more results that couldn't fit.
+//NOTE: we assume that the file is aligned in terms of longs (i.e. position of header in file
+//is divisible by 4). In the case of Spider-Man 3 PCSSB files this seems to be the case.
 size_t findFSBHeaderIndexes(
     const char *const inputFileName,
     size_t *const resultArr,
@@ -29,10 +31,10 @@ size_t findFSBHeaderIndexes(
     while (!feof(fileHandle)) {
         const size_t buffSize = 100;
         //magic number needs to be reused to avoid Variable Length Array
-        char buffer[100] = {0};
-        assert((sizeof(buffer) / sizeof(char)) == buffSize);
+        uint32_t buffer[100] = {0};
+        assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
 
-        const size_t numRead = fread(buffer, sizeof(char), buffSize , fileHandle);
+        const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
         if (ferror(fileHandle)) {
             perror("ERROR: I/O error when reading");
         }
@@ -41,35 +43,23 @@ size_t findFSBHeaderIndexes(
         //     printf("LOG: buffSize is %lu, amount read was only %lu.\n", buffSize, numRead);
         // }
 
-        //string to match in the file (not null terminated)
-        const char fsbHeader[4] = {'F', 'S', 'B', '3'}; // = "FSB3"
-        //represents current character in the string to match
-        int fsbHeaderIndex = 0;
         for (size_t i = 0; i < numRead; i++) {
-            if (buffer[i] == fsbHeader[fsbHeaderIndex]) {
-                assert(0 <= fsbHeaderIndex && fsbHeaderIndex <= 3);
-                //if header is matched
-                if (fsbHeaderIndex == 3) {
-                    fsbHeaderIndex = 0;
-                    if (resultCount >= resultArrLen) {
-                        printf("LOG: More results were found than "
-                               "what result array can hold.");
+            //string to match in the file, represented as an unsigned long
+            const uint32_t fsbHeader = 859984710; // = "FSB3"
+            if (buffer[i] == fsbHeader) {
+                if (resultCount >= resultArrLen) {
+                    printf("LOG: More results were found than "
+                           "what result array can hold.");
 
-                        fclose(fileHandle);
+                    fclose(fileHandle);
 
-                        return resultCount;
-                    }
-                    //position of 'F' in file
-                    //(in terms of how many bytes into the file it is)
-                    const size_t pos = (i-3) + (readIndex * buffSize);
-                    resultArr[resultCount] = pos * sizeof(char);
-                    resultCount++;
-                } else {
-                    fsbHeaderIndex++;
+                    return resultCount;
                 }
-            } else {
-                //FIXME: assigning in loop is probably bad for performance
-                fsbHeaderIndex = 0;
+                //position (in terms of how many longs into the file it is)
+                const size_t uint32Pos = i + (readIndex * buffSize);
+                //get how many bytes into the file it is
+                resultArr[resultCount] = uint32Pos * sizeof(uint32_t);
+                resultCount++;
             }
         }
 
