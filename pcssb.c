@@ -13,17 +13,17 @@ struct FSB readFile(const char* fileName) {
         exit(EXIT_FAILURE);
     }
 
-    const size_t count = 100;
+    const size_t BUFFER_SIZE = 100;
     uint32_t buffer[100] = {0};
 
-    const size_t numRead = fread(buffer, 4, count , fileHandle);
+    const size_t numRead = fread(buffer, 4, BUFFER_SIZE, fileHandle);
     if (ferror(fileHandle)) {
         perror("ERROR: I/O error when reading");
         (void) fclose(fileHandle);
         exit(EXIT_FAILURE);
     }
-    if (numRead < count) {
-        (void) printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
+    if (numRead < BUFFER_SIZE) {
+        (void) printf("LOG: count was %lu, amount read was only %lu.\n", BUFFER_SIZE, numRead);
     }
     if (feof(fileHandle)) {
         (void) printf("FEOF in file %s at line # %d\n",
@@ -66,26 +66,26 @@ size_t findFSBHeaderIndexes(
     size_t readIndex = 0;
 
     while (!feof(fileHandle)) {
-        const size_t buffSize = 100;
+        const size_t BUFFER_SIZE = 100;
         //magic number needs to be reused to avoid Variable Length Array
         uint32_t buffer[100] = {0};
-        assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
+        assert((sizeof(buffer) / sizeof(uint32_t)) == BUFFER_SIZE);
 
-        const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
+        const size_t numRead = fread(buffer, sizeof(uint32_t), BUFFER_SIZE, fileHandle);
         if (ferror(fileHandle)) {
             perror("ERROR: I/O error when reading");
             (void) fclose(fileHandle);
             exit(EXIT_FAILURE);
         }
-        assert(numRead <= buffSize);
+        assert(numRead <= BUFFER_SIZE);
         // if (numRead < buffSize) {
         //     (void) printf("LOG: buffSize is %lu, amount read was only %lu.\n", buffSize, numRead);
         // }
 
         for (size_t i = 0; i < numRead; i++) {
             //string to match in the file, represented as an unsigned long
-            const uint32_t fsbHeader = 859984710; // = "FSB3"
-            if (buffer[i] == fsbHeader) {
+            const uint32_t FSB_HEADER = 859984710; // = "FSB3"
+            if (buffer[i] == FSB_HEADER) {
                 if (resultCount >= resultArrLen) {
                     (void) printf("LOG: More results were found than "
                            "what result array can hold.\n");
@@ -95,7 +95,7 @@ size_t findFSBHeaderIndexes(
                     return resultCount;
                 }
                 //position (in terms of how many longs into the file it is)
-                const size_t uint32Pos = i + (readIndex * buffSize);
+                const size_t uint32Pos = i + (readIndex * BUFFER_SIZE);
                 //get how many bytes into the file it is
                 resultArr[resultCount] = uint32Pos * sizeof(uint32_t);
                 resultCount++;
@@ -186,6 +186,8 @@ uint32_t readDataSize(
 //Outputs the audio data in folder structure matching input file name.
 //e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
 void outputAudioData(const char *const inputFileName) {
+    const size_t HEADER_SIZE = 104;
+
     size_t fsbIndexes[100] = {0};
     const size_t numResults = findFSBHeaderIndexes(inputFileName, fsbIndexes, 100);
 
