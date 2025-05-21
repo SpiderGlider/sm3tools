@@ -35,11 +35,20 @@ struct FSB {
 
 struct FSB readFile(const char* fileName);
 
+//finds every instance of "FSB3" header text in the sound file
+//puts the absolute position in bytes of those instances
+//into the given resultArr in the order they are found.
+//return value is number of results found. if it returns a value greater than resultArrLen,
+//that means resultArr was too small and there may have been more results that couldn't fit.
+//NOTE: we assume that the file is aligned in terms of longs (i.e. position of header in file
+//is divisible by 4). In the case of Spider-Man 3 PCSSB files this seems to be the case.
 size_t findFSBHeaderIndexes(
     const char *const inputFileName,
     size_t *const resultArr,
     const size_t resultArrLen);
 
+//prints out location of each instance of the text "FSB3" in the file.
+//in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
 void printFSBHeaderIndexes(const char *const fileName);
 
 #endif
