@@ -193,6 +193,12 @@ void outputAudioData(const char *const inputFileName) {
 
     for (size_t i = 0; i < numResults; i++) {
         const uint32_t dataSize = readDataSize(inputFileName, fsbIndexes[i]);
+        //apart from the last FSB, actual data size iis
+        if (i < numResults - 1) {
+            if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + HEADER_SIZE))) {
+                (void) printf("LOG: Data size value doesn't match actual size!");
+            }
+        }
     }
 }
 
