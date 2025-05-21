@@ -111,11 +111,7 @@ size_t findFSBHeaderIndexes(
 }
 
 void printFSBHeaderIndexes(const char *const fileName) {
-    size_t *const result = (size_t*) malloc(sizeof(size_t) * 100);
-    if (result == NULL) {
-        (void) fprintf(stderr, "ERROR: Failed to malloc result.\n");
-        exit(EXIT_FAILURE);
-    }
+    size_t result[100] = {0};
     const size_t numResults = findFSBHeaderIndexes(fileName, result, 100);
     for (size_t i = 0; i < numResults; i++) {
         (void) printf("%lu: decimal = %lu, hex = 0x%lX \n",
@@ -124,7 +120,6 @@ void printFSBHeaderIndexes(const char *const fileName) {
             result[i]
         );
     }
-    free(result);
 }
 
 // fseek set to unsigned long values. accounts for values over what signed longs support
