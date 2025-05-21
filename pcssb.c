@@ -111,13 +111,13 @@ size_t findFSBHeaderIndexes(
 }
 
 void printFSBHeaderIndexes(const char *const fileName) {
-    size_t result[100] = {0};
-    const size_t numResults = findFSBHeaderIndexes(fileName, result, 100);
+    size_t fsbHeaderIndexes[100] = {0};
+    const size_t numResults = findFSBHeaderIndexes(fileName, fsbHeaderIndexes, 100);
     for (size_t i = 0; i < numResults; i++) {
         (void) printf("%lu: decimal = %lu, hex = 0x%lX \n",
             i+1,
-            result[i],
-            result[i]
+            fsbHeaderIndexes[i],
+            fsbHeaderIndexes[i]
         );
     }
 }
@@ -181,6 +181,17 @@ uint32_t readDataSize(
                         __FILE__, __LINE__ - 2);
     }
     return dataSize;
+}
+
+//Outputs the audio data in folder structure matching input file name.
+//e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
+void outputAudioData(const char *const inputFileName) {
+    size_t fsbIndexes[100] = {0};
+    const size_t numResults = findFSBHeaderIndexes(inputFileName, fsbIndexes, 100);
+
+    for (size_t i = 0; i < numResults; i++) {
+        const uint32_t dataSize = readDataSize(inputFileName, fsbIndexes[i]);
+    }
 }
 
 int main(const int argc, const char *const argv[]) {
