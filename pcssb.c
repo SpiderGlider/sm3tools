@@ -19,11 +19,15 @@ struct FSB readFile(const char* fileName) {
     const size_t numRead = fread(buffer, 4, count , fileHandle);
     if (ferror(fileHandle)) {
         perror("ERROR: I/O error when reading");
-        fclose(fileHandle);
+        (void) fclose(fileHandle);
         exit(EXIT_FAILURE);
     }
     if (numRead < count) {
         (void) printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
+    }
+    if (feof(fileHandle)) {
+        (void) printf("FEOF in file %s at line # %d\n",
+                        __FILE__, __LINE__ - 2);
     }
 
     fsb.fsb3Header = buffer[0];
@@ -70,7 +74,7 @@ size_t findFSBHeaderIndexes(
         const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
         if (ferror(fileHandle)) {
             perror("ERROR: I/O error when reading");
-            fclose(fileHandle);
+            (void) fclose(fileHandle);
             exit(EXIT_FAILURE);
         }
         assert(numRead <= buffSize);
@@ -86,7 +90,7 @@ size_t findFSBHeaderIndexes(
                     (void) printf("LOG: More results were found than "
                            "what result array can hold.\n");
 
-                    fclose(fileHandle);
+                    (void) fclose(fileHandle);
 
                     return resultCount;
                 }
@@ -155,14 +159,14 @@ uint32_t readDataSize(
     if (fseekSetUnsigned(fileHandle, fsb3HeaderPosition) != 0) {
         fprintf(stderr, "fseek() failed in file %s at line # %d\n",
                 __FILE__, __LINE__ - 2);
-        fclose(fileHandle);
+        (void) fclose(fileHandle);
         exit(EXIT_FAILURE);
     }
     //move to location where data size is written
     if (fseek(fileHandle, 3 * sizeof(uint32_t), SEEK_CUR) != 0) {
         fprintf(stderr, "fseek() failed in file %s at line # %d\n",
                 __FILE__, __LINE__ - 2);
-        fclose(fileHandle);
+        (void) fclose(fileHandle);
         exit(EXIT_FAILURE);
     };
 
@@ -171,11 +175,15 @@ uint32_t readDataSize(
     const size_t numRead = fread(&dataSize, sizeof(uint32_t), 1, fileHandle);
     if (ferror(fileHandle)) {
         perror("ERROR: I/O error when reading");
-        fclose(fileHandle);
+        (void) fclose(fileHandle);
         exit(EXIT_FAILURE);
     }
     if (numRead != 1) {
         (void) printf("LOG: count was 1, amount read was only %lu.\n", numRead);
+    }
+    if (feof(fileHandle)) {
+        (void) printf("LOG: FEOF in file %s at line # %d\n",
+                        __FILE__, __LINE__ - 2);
     }
     return dataSize;
 }
