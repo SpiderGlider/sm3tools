@@ -51,4 +51,10 @@ size_t findFSBHeaderIndexes(
 //in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
 void printFSBHeaderIndexes(const char *const fileName);
 
+//Outputs the audio data in folder structure matching input file name.
+//e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
+void outputAudioData(
+    const char *const inputFileName,
+    const size_t fsb3HeaderPosition);
+
 #endif

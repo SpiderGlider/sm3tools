@@ -118,6 +118,33 @@ void printFSBHeaderIndexes(const char *const fileName) {
     free(result);
 }
 
+void outputAudioData(
+    const char *const inputFileName,
+    const size_t fsb3HeaderPosition) {
+
+    FILE *const fileHandle = fopen(inputFileName, "rb");
+    if (!fileHandle) {
+        perror("ERROR: Failed to open file");
+        exit(EXIT_FAILURE);
+    }
+
+    // Set the file position indicator in front of third double value.
+    if (fseek(fileHandle, fsb3HeaderPosition, SEEK_SET) != 0)
+    {
+        fprintf(stderr, "fseek() failed in file %s at line # %d\n",
+                __FILE__, __LINE__ - 2);
+        fclose(fileHandle);
+        exit(EXIT_FAILURE);
+    }
+
+    const size_t buffSize = 4;
+    //magic number needs to be reused to avoid Variable Length Array
+    uint32_t buffer[100] = {0};
+    assert((sizeof(buffer) / sizeof(uint32_t)) == buffSize);
+
+    const size_t numRead = fread(buffer, sizeof(uint32_t), buffSize , fileHandle);
+};
+
 int main(const int argc, const char *const argv[]) {
     printFSBHeaderIndexes(argv[1]);
 }
