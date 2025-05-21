@@ -160,7 +160,12 @@ void outputAudioData(
         exit(EXIT_FAILURE);
     }
     //move to location where data size is written
-    fseek(fileHandle, 3 * sizeof(uint32_t), SEEK_CUR);
+    if (fseek(fileHandle, 3 * sizeof(uint32_t), SEEK_CUR) != 0) {
+        fprintf(stderr, "fseek() failed in file %s at line # %d\n",
+                __FILE__, __LINE__ - 2);
+        fclose(fileHandle);
+        exit(EXIT_FAILURE);
+    };
 
     uint32_t dataSize = 0;
     const size_t numRead = fread(&dataSize, sizeof(uint32_t), 1, fileHandle);
