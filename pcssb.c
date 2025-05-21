@@ -236,6 +236,11 @@ void outputAudioData(
         exit(EXIT_FAILURE);
     }
     size_t numWritten = fwrite(audioData, 1, dataSize, outputFileHandle);
+    if (ferror(outputFileHandle)) {
+        perror("ERROR: I/O error when writing");
+        (void) fclose(outputFileHandle);
+        exit(EXIT_FAILURE);
+    }
     if (numWritten < dataSize) {
         (void) printf("LOG: count was %lu, amount written was only %lu.\n", dataSize, numWritten);
     }
