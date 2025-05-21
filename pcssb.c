@@ -4,6 +4,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+struct FSB readFile(const char* fileName) {
+    struct FSB fsb = {0};
+    FILE *const fileHandle = fopen(fileName, "rb");
+    if (!fileHandle) {
+        perror("ERROR: Failed to open file");
+        exit(EXIT_FAILURE);
+    }
+
+    const size_t count = 100;
+    uint32_t buffer[100] = {0};
+
+    const size_t numRead = fread(buffer, 4, count , fileHandle);
+    if (ferror(fileHandle)) {
+        perror("ERROR: I/O error when reading");
+    }
+    if (numRead < count) {
+        (void) printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
+    }
+
+    fsb.fsb3Header = buffer[0];
+    fsb.numFiles = buffer[1];
+    fsb.unknown1 = buffer[2];
+    fsb.dataSize = buffer[3];
+    fsb.unknown2 = buffer[4];
+    fsb.null1 = buffer[5];
+
+    (void) fclose(fileHandle);
+
+    return fsb;
+}
+
 //finds every instance of "FSB3" header text in the sound file
 //puts the absolute position in bytes of those instances
 //into the given resultArr in the order they are found.
@@ -49,7 +80,7 @@ size_t findFSBHeaderIndexes(
             if (buffer[i] == fsbHeader) {
                 if (resultCount >= resultArrLen) {
                     (void) printf("LOG: More results were found than "
-                           "what result array can hold.");
+                           "what result array can hold.\n");
 
                     fclose(fileHandle);
 
@@ -71,44 +102,13 @@ size_t findFSBHeaderIndexes(
     return resultCount;
 }
 
-struct FSB readFile(const char* fileName) {
-    struct FSB fsb = {0};
-    FILE *const fileHandle = fopen(fileName, "rb");
-    if (!fileHandle) {
-        perror("ERROR: Failed to open file");
-        exit(EXIT_FAILURE);
-    }
-
-    const size_t count = 100;
-    uint32_t buffer[100] = {0};
-
-    const size_t numRead = fread(buffer, 4, count , fileHandle);
-    if (ferror(fileHandle)) {
-        perror("ERROR: I/O error when reading");
-    }
-    if (numRead < count) {
-        (void) printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
-    }
-
-    fsb.fsb3Header = buffer[0];
-    fsb.numFiles = buffer[1];
-    fsb.unknown1 = buffer[2];
-    fsb.dataSize = buffer[3];
-    fsb.unknown2 = buffer[4];
-    fsb.null1 = buffer[5];
-
-    (void) fclose(fileHandle);
-
-    return fsb;
-}
-
-int main(int argc, char* argv[]) {
-    size_t* result = (size_t*) malloc(sizeof(size_t) * 100);
+void printFSBHeaderIndexes(const char *const fileName) {
+    size_t *const result = (size_t*) malloc(sizeof(size_t) * 100);
     if (result == NULL) {
         (void) fprintf(stderr, "ERROR: Failed to malloc result.\n");
         exit(EXIT_FAILURE);
     }
-    size_t numResults = findFSBHeaderIndexes(argv[1], result, 100);
+    const size_t numResults = findFSBHeaderIndexes(fileName, result, 100);
     for (size_t i = 0; i < numResults; i++) {
         (void) printf("%lu: decimal=%lu, hex = 0x%lX \n",
             i,
@@ -117,5 +117,9 @@ int main(int argc, char* argv[]) {
         );
     }
     free(result);
+}
+
+int main(const int argc, const char *const argv[]) {
+    printFSBHeaderIndexes(argv[1]);
 }
 

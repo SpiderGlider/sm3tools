@@ -1,5 +1,6 @@
 #ifndef PCSSB_H
 #define PCSSB_H
+#include <stddef.h>
 #include <stdint.h>
 
 struct FSB {
@@ -33,5 +34,12 @@ struct FSB {
 };
 
 struct FSB readFile(const char* fileName);
+
+size_t findFSBHeaderIndexes(
+    const char *const inputFileName,
+    size_t *const resultArr,
+    const size_t resultArrLen);
+
+void printFSBHeaderIndexes(const char *const fileName);
 
 #endif
