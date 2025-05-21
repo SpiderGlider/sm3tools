@@ -1,6 +1,7 @@
 #include "pcssb.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -118,6 +119,24 @@ void printFSBHeaderIndexes(const char *const fileName) {
     free(result);
 }
 
+// fseek set to unsigned long values. accounts for values over what signed longs support
+// by seeking twice.
+// returns what fseek does. if first fseek fails second isn't executed.
+// credit to Tyler Durden on SO for this code, which is used with minor modifications.
+// source: https://stackoverflow.com/a/47740105
+// licensed under CC BY-SA 3.0
+int fseekSetUnsigned(FILE *const fileHandle, const size_t offset) {
+    if (offset > LONG_MAX){
+        // check whether first seek fails
+        const int return1 = fseek(fileHandle, LONG_MAX, SEEK_SET);
+        if (return1 != 0) {
+            return return1;
+        }
+        return fseek(fileHandle, (long int)( offset - LONG_MAX ), SEEK_CUR);
+    }
+    return fseek(fileHandle, (long int) offset, SEEK_SET );
+}
+
 void outputAudioData(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition) {
@@ -129,8 +148,7 @@ void outputAudioData(
     }
 
     // Set the file position indicator in front of third double value.
-    if (fseek(fileHandle, fsb3HeaderPosition, SEEK_SET) != 0)
-    {
+    if (fseekSetUnsigned(fileHandle, fsb3HeaderPosition) != 0) {
         fprintf(stderr, "fseek() failed in file %s at line # %d\n",
                 __FILE__, __LINE__ - 2);
         fclose(fileHandle);
