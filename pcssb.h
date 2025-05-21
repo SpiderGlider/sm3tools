@@ -57,4 +57,13 @@ void outputAudioData(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition);
 
+//Reads the data size field in the FSB file that starts at fsb3HeaderPosition.
+//fsb3HeaderPosition must be the location of the start of the "FSB3" header string.
+//This data size field is supposed to represent the length of the audio data embedded in
+//the FSB3 file (i.e. the rest of the data in the file after the 104 bytes of header information).
+//but it seems in the Spider-Man 3 PCSSB files this is not always the case.
+uint32_t readDataSize(
+    const char *const inputFileName,
+    const size_t fsb3HeaderPosition);
+
 #endif

@@ -119,7 +119,7 @@ void printFSBHeaderIndexes(const char *const fileName) {
             result[i],
             result[i]
         );
-        outputAudioData(fileName, result[i]);
+        readDataSize(fileName, result[i]);
     }
     free(result);
 }
@@ -142,7 +142,7 @@ int fseekSetUnsigned(FILE *const fileHandle, const size_t offset) {
     return fseek(fileHandle, (long int) offset, SEEK_SET);
 }
 
-void outputAudioData(
+uint32_t readDataSize(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition) {
 
@@ -167,6 +167,7 @@ void outputAudioData(
         exit(EXIT_FAILURE);
     };
 
+    //read data size long
     uint32_t dataSize = 0;
     const size_t numRead = fread(&dataSize, sizeof(uint32_t), 1, fileHandle);
     if (ferror(fileHandle)) {
@@ -180,6 +181,7 @@ void outputAudioData(
 
     printf("DATA SIZE: %u\n", dataSize);
 
+    return dataSize;
 }
 
 int main(const int argc, const char *const argv[]) {
