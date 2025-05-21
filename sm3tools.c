@@ -16,7 +16,7 @@ FileType getFileType(const char *const fileName) {
     const char *const fileExtension = strrchr(fileName, '.');
 
     if (fileExtension == NULL) {
-        fprintf(stderr, "ERROR: Argument doesn't have a file extension."
+        (void) fprintf(stderr, "ERROR: Argument doesn't have a file extension."
                         " Are you sure this is a path to a file?\n");
         exit(EXIT_FAILURE);
     }
@@ -26,7 +26,7 @@ FileType getFileType(const char *const fileName) {
     if (strcmp(fileExtension, ".PCPACK") == 0) return PCPACK;
     if (strcmp(fileExtension, ".pcssb") == 0) return PCSSB;
 
-    fprintf(stderr, "ERROR: File extension not recognised.\n");
+    (void) fprintf(stderr, "ERROR: File extension not recognised.\n");
     exit(EXIT_FAILURE);
 }
 
@@ -35,23 +35,23 @@ FileType getFileType(const char *const fileName) {
 // only through the file extension currently.
 int main(const int argc, const char *const argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "ERROR: Must have 1 argument"
+        (void) fprintf(stderr, "ERROR: Must have 1 argument"
                         " (the path to a file to parse).\n");
         exit(EXIT_FAILURE);
     }
     if (argc > 2) {
-        fprintf(stderr, "WARNING: Arguments after the 1st"
+        (void) fprintf(stderr, "WARNING: Arguments after the 1st"
                         " argument are currently ignored.\n");
     }
 
     const FileType fileType = getFileType(argv[1]);
     if (fileType == PCPACK) {
-        fprintf(stderr, "ERROR: PCPACK parsing is not yet implemented.\n");
+        (void) fprintf(stderr, "ERROR: PCPACK parsing is not yet implemented.\n");
         exit(EXIT_FAILURE);
     }
     // currently getFileType should never return a value outside of these two
     assert(fileType == PCSSB);
-    printf("INFO: Parsing as a PCSSB file.\n");
+    (void) printf("INFO: Parsing as a PCSSB file.\n");
 
     return EXIT_SUCCESS;
 }

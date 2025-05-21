@@ -40,7 +40,7 @@ size_t findFSBHeaderIndexes(
         }
         assert(numRead <= buffSize);
         // if (numRead < buffSize) {
-        //     printf("LOG: buffSize is %lu, amount read was only %lu.\n", buffSize, numRead);
+        //     (void) printf("LOG: buffSize is %lu, amount read was only %lu.\n", buffSize, numRead);
         // }
 
         for (size_t i = 0; i < numRead; i++) {
@@ -48,7 +48,7 @@ size_t findFSBHeaderIndexes(
             const uint32_t fsbHeader = 859984710; // = "FSB3"
             if (buffer[i] == fsbHeader) {
                 if (resultCount >= resultArrLen) {
-                    printf("LOG: More results were found than "
+                    (void) printf("LOG: More results were found than "
                            "what result array can hold.");
 
                     fclose(fileHandle);
@@ -66,7 +66,7 @@ size_t findFSBHeaderIndexes(
         readIndex++;
     }
 
-    fclose(fileHandle);
+    (void) fclose(fileHandle);
 
     return resultCount;
 }
@@ -87,7 +87,7 @@ struct FSB readFile(const char* fileName) {
         perror("ERROR: I/O error when reading");
     }
     if (numRead < count) {
-        printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
+        (void) printf("LOG: count was %lu, amount read was only %lu.\n", count, numRead);
     }
 
     fsb.fsb3Header = buffer[0];
@@ -97,7 +97,7 @@ struct FSB readFile(const char* fileName) {
     fsb.unknown2 = buffer[4];
     fsb.null1 = buffer[5];
 
-    fclose(fileHandle);
+    (void) fclose(fileHandle);
 
     return fsb;
 }
@@ -105,12 +105,12 @@ struct FSB readFile(const char* fileName) {
 int main(int argc, char* argv[]) {
     size_t* result = (size_t*) malloc(sizeof(size_t) * 100);
     if (result == NULL) {
-        fprintf(stderr, "ERROR: Failed to malloc result.\n");
+        (void) fprintf(stderr, "ERROR: Failed to malloc result.\n");
         exit(EXIT_FAILURE);
     }
     size_t numResults = findFSBHeaderIndexes(argv[1], result, 100);
     for (size_t i = 0; i < numResults; i++) {
-        printf("%lu: decimal=%lu, hex = 0x%lX \n",
+        (void) printf("%lu: decimal=%lu, hex = 0x%lX \n",
             i,
             result[i],
             result[i]
