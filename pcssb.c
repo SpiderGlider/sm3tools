@@ -119,7 +119,6 @@ void printFSBHeaderIndexes(const char *const fileName) {
             result[i],
             result[i]
         );
-        readDataSize(fileName, result[i]);
     }
     free(result);
 }
@@ -178,9 +177,6 @@ uint32_t readDataSize(
     if (numRead != 1) {
         (void) printf("LOG: count was 1, amount read was only %lu.\n", numRead);
     }
-
-    printf("DATA SIZE: %u\n", dataSize);
-
     return dataSize;
 }
 
