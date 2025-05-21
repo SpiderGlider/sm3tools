@@ -257,7 +257,10 @@ void outputAudioFiles(const char *const inputFileName) {
 
     const int HEADER_SIZE = 104;
 
-    for (size_t i = 0; i < numResults; i++) {
+    //we only look at the alternate found FSBs
+    //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
+    //the duplicate doesn't have all of the data, so isn't worth outputting
+    for (size_t i = 0; i < numResults; i += 2) {
         const uint32_t dataSize = readDataSize(inputFileName, fsbIndexes[i]);
         //apart from the last FSB, actual data size iis
         if (i < numResults - 1) {
@@ -265,7 +268,7 @@ void outputAudioFiles(const char *const inputFileName) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
             }
             char outputFileName[100] = {0};
-            (void) snprintf(outputFileName, 100, "%s-output%lu", inputFileName, i);
+            (void) snprintf(outputFileName, 100, "%s-output%lu.wav", inputFileName, i/2);
             outputAudioData(inputFileName, fsbIndexes[i], HEADER_SIZE, dataSize, outputFileName);
         }
     }
