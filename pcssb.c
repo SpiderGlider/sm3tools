@@ -230,7 +230,7 @@ void outputAudioData(
                         __FILE__, __LINE__ - 2);
     }
 
-    FILE *const outputFileHandle = fopen(inputFileName, "wb");
+    FILE *const outputFileHandle = fopen(outputFileName, "wb");
     if (!outputFileHandle) {
         perror("ERROR: Failed to open file");
         exit(EXIT_FAILURE);
@@ -264,13 +264,14 @@ void outputAudioFiles(const char *const inputFileName) {
             if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + HEADER_SIZE))) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
             }
+            char outputFileName[100] = {0};
+            (void) snprintf(outputFileName, 100, "%s-output%lu", inputFileName, i);
+            outputAudioData(inputFileName, fsbIndexes[i], HEADER_SIZE, dataSize, outputFileName);
         }
-
-
     }
 }
 
 int main(const int argc, const char *const argv[]) {
-    printFSBHeaderIndexes(argv[1]);
+    outputAudioFiles(argv[1]);
 }
 
