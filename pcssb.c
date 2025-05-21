@@ -185,11 +185,61 @@ uint32_t readDataSize(
 
 //Outputs the audio data in folder structure matching input file name.
 //e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
-void outputAudioData(const char *const inputFileName) {
-    const size_t HEADER_SIZE = 104;
+void outputAudioData(
+    const char *const inputFileName,
+    const size_t fsb3HeaderPosition,
+    const int headerSize,
+    const size_t dataSize) {
 
+    FILE *const fileHandle = fopen(inputFileName, "rb");
+    if (!fileHandle) {
+        perror("ERROR: Failed to open file");
+        exit(EXIT_FAILURE);
+    }
+
+    //set the file position indicator to start of FSB file
+    if (fseekSetUnsigned(fileHandle, fsb3HeaderPosition) != 0) {
+        fprintf(stderr, "fseek() failed in file %s at line # %d\n",
+                __FILE__, __LINE__ - 2);
+        (void) fclose(fileHandle);
+        exit(EXIT_FAILURE);
+    }
+    //move to start of audio data
+    if (fseek(fileHandle, headerSize, SEEK_CUR) != 0) {
+        fprintf(stderr, "fseek() failed in file %s at line # %d\n",
+                __FILE__, __LINE__ - 2);
+        (void) fclose(fileHandle);
+        exit(EXIT_FAILURE);
+    };
+
+    //read audio data
+    char *const audioData = malloc(dataSize * sizeof(char));
+    const size_t numRead = fread(audioData, 1, dataSize, fileHandle);
+    if (ferror(fileHandle)) {
+        perror("ERROR: I/O error when reading");
+        (void) fclose(fileHandle);
+        exit(EXIT_FAILURE);
+    }
+    if (numRead < dataSize) {
+        (void) printf("LOG: count was %lu, amount read was only %lu.\n", dataSize, numRead);
+    }
+    if (feof(fileHandle)) {
+        (void) printf("LOG: FEOF in file %s at line # %d\n",
+                        __FILE__, __LINE__ - 2);
+    }
+
+
+
+    free(audioData);
+}
+
+//Outputs the audio data in folder structure matching input file name.
+//e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
+void outputAudioFiles(const char *const inputFileName) {
     size_t fsbIndexes[100] = {0};
     const size_t numResults = findFSBHeaderIndexes(inputFileName, fsbIndexes, 100);
+
+    const int HEADER_SIZE = 104;
 
     for (size_t i = 0; i < numResults; i++) {
         const uint32_t dataSize = readDataSize(inputFileName, fsbIndexes[i]);
@@ -199,6 +249,8 @@ void outputAudioData(const char *const inputFileName) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
             }
         }
+
+
     }
 }
 

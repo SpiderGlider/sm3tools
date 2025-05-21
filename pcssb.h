@@ -53,9 +53,9 @@ void printFSBHeaderIndexes(const char *const fileName);
 
 //Outputs the audio data in folder structure matching input file name.
 //e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
-void outputAudioData(
-    const char *const inputFileName,
-    const size_t fsb3HeaderPosition);
+//TODO void outputAudioData(
+//     const char *const inputFileName,
+//     const size_t fsb3HeaderPosition);
 
 //Reads the data size field in the FSB file that starts at fsb3HeaderPosition.
 //fsb3HeaderPosition must be the location of the start of the "FSB3" header string.
