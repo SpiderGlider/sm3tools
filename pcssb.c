@@ -188,47 +188,58 @@ uint32_t readDataSize(
 void outputAudioData(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition,
+    //TODO should we use size_t for this?
     const int headerSize,
-    const size_t dataSize) {
+    const size_t dataSize,
+    const char *const outputFileName) {
 
-    FILE *const fileHandle = fopen(inputFileName, "rb");
-    if (!fileHandle) {
+    FILE *const inputFileHandle = fopen(inputFileName, "rb");
+    if (!inputFileHandle) {
         perror("ERROR: Failed to open file");
         exit(EXIT_FAILURE);
     }
 
     //set the file position indicator to start of FSB file
-    if (fseekSetUnsigned(fileHandle, fsb3HeaderPosition) != 0) {
+    if (fseekSetUnsigned(inputFileHandle, fsb3HeaderPosition) != 0) {
         fprintf(stderr, "fseek() failed in file %s at line # %d\n",
                 __FILE__, __LINE__ - 2);
-        (void) fclose(fileHandle);
+        (void) fclose(inputFileHandle);
         exit(EXIT_FAILURE);
     }
     //move to start of audio data
-    if (fseek(fileHandle, headerSize, SEEK_CUR) != 0) {
+    if (fseek(inputFileHandle, headerSize, SEEK_CUR) != 0) {
         fprintf(stderr, "fseek() failed in file %s at line # %d\n",
                 __FILE__, __LINE__ - 2);
-        (void) fclose(fileHandle);
+        (void) fclose(inputFileHandle);
         exit(EXIT_FAILURE);
     };
 
     //read audio data
     char *const audioData = malloc(dataSize * sizeof(char));
-    const size_t numRead = fread(audioData, 1, dataSize, fileHandle);
-    if (ferror(fileHandle)) {
+    const size_t numRead = fread(audioData, 1, dataSize, inputFileHandle);
+    if (ferror(inputFileHandle)) {
         perror("ERROR: I/O error when reading");
-        (void) fclose(fileHandle);
+        (void) fclose(inputFileHandle);
         exit(EXIT_FAILURE);
     }
     if (numRead < dataSize) {
         (void) printf("LOG: count was %lu, amount read was only %lu.\n", dataSize, numRead);
     }
-    if (feof(fileHandle)) {
+    if (feof(inputFileHandle)) {
         (void) printf("LOG: FEOF in file %s at line # %d\n",
                         __FILE__, __LINE__ - 2);
     }
 
-
+    FILE *const outputFileHandle = fopen(inputFileName, "wb");
+    if (!outputFileHandle) {
+        perror("ERROR: Failed to open file");
+        exit(EXIT_FAILURE);
+    }
+    size_t numWritten = fwrite(audioData, 1, dataSize, outputFileHandle);
+    if (numWritten < dataSize) {
+        (void) printf("LOG: count was %lu, amount written was only %lu.\n", dataSize, numWritten);
+    }
+    fclose(outputFileHandle);
 
     free(audioData);
 }
