@@ -46,6 +46,12 @@ size_t findFSBHeaderIndexes(
     const char *const inputFileName,
     size_t *const resultArr,
     const size_t resultArrLen) {
+
+    if (resultArr == NULL) {
+        (void) fprintf(stderr, "ERROR: Result Array is NULL!.\n");
+        exit(EXIT_FAILURE);
+    }
+
     //next index in resultArr to fill (0 indexed)
     //also happens to be the number of results currently found
     size_t resultCount = 0;
