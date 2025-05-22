@@ -5,13 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "myIO.h"
+
 struct FSB readFile(const char* fileName) {
     struct FSB fsb = {0};
-    FILE *const fileHandle = fopen(fileName, "rb");
-    if (!fileHandle) {
-        perror("ERROR: Failed to open file");
-        exit(EXIT_FAILURE);
-    }
+    FILE *const fileHandle = myfopen(fileName, "rb");
 
     const size_t BUFFER_SIZE = 100;
     uint32_t buffer[100] = {0};
@@ -56,11 +54,7 @@ size_t findFSBHeaderIndexes(
     //also happens to be the number of results currently found
     size_t resultCount = 0;
 
-    FILE *const fileHandle = fopen(inputFileName, "rb");
-    if (!fileHandle) {
-        perror("ERROR: Failed to open file");
-        exit(EXIT_FAILURE);
-    }
+    FILE *const fileHandle = myfopen(inputFileName, "rb");
 
     //how many buffers into the file
     size_t readIndex = 0;
@@ -144,11 +138,7 @@ uint32_t readDataSize(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition) {
 
-    FILE *const fileHandle = fopen(inputFileName, "rb");
-    if (!fileHandle) {
-        perror("ERROR: Failed to open file");
-        exit(EXIT_FAILURE);
-    }
+    FILE *const fileHandle = myfopen(inputFileName, "rb");
 
     //set the file position indicator to start of FSB file
     if (fseekSetUnsigned(fileHandle, fsb3HeaderPosition) != 0) {
@@ -193,11 +183,7 @@ void outputAudioData(
     const size_t dataSize,
     const char *const outputFileName) {
 
-    FILE *const inputFileHandle = fopen(inputFileName, "rb");
-    if (!inputFileHandle) {
-        perror("ERROR: Failed to open file");
-        exit(EXIT_FAILURE);
-    }
+    FILE *const inputFileHandle = myfopen(inputFileName, "rb");
 
     //set the file position indicator to start of FSB file
     if (fseekSetUnsigned(inputFileHandle, fsb3HeaderPosition) != 0) {
@@ -230,11 +216,7 @@ void outputAudioData(
                         __FILE__, __LINE__ - 2);
     }
 
-    FILE *const outputFileHandle = fopen(outputFileName, "wb");
-    if (!outputFileHandle) {
-        perror("ERROR: Failed to open file");
-        exit(EXIT_FAILURE);
-    }
+    FILE *const outputFileHandle = myfopen(outputFileName, "wb");
     size_t numWritten = fwrite(audioData, 1, dataSize, outputFileHandle);
     if (ferror(outputFileHandle)) {
         perror("ERROR: I/O error when writing");
