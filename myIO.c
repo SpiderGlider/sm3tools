@@ -14,6 +14,36 @@ FILE *myfopen(const char *fileName, const char *mode) {
     return fileHandle;
 }
 
+size_t myfread(
+    void *const buffer,
+    const size_t size,
+    const size_t count,
+    FILE *const stream) {
+
+    //TODO will want to silence these kinds of logs for production...
+    if (size == 0) {
+        (void) printf("LOG: size of 0 was passed to fread!\n");
+    }
+    if (count == 0) {
+        (void) printf("LOG: count of 0 was passed to fread!\n");
+    }
+
+    const size_t objsRead = fread(buffer, size, count, stream);
+    if (ferror(stream)) {
+        perror("ERROR: I/O error when reading");
+        (void) fclose(stream);
+        exit(EXIT_FAILURE);
+    }
+    if (feof(stream)) {
+        (void) printf("LOG: EOF encountered when reading file.\n");
+    }
+    if (objsRead < count) {
+        (void) printf("LOG: count was %lu, amount read was only %lu.\n", count, objsRead);
+    }
+
+    return objsRead;
+}
+
 void myfseek(FILE *const stream, const long int offset, const int origin) {
     const int returnValue = fseek(stream, offset, origin);
     if (returnValue != 0) {

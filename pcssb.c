@@ -13,19 +13,7 @@ struct FSB readFile(const char* fileName) {
     const size_t BUFFER_SIZE = 100;
     uint32_t buffer[100] = {0};
 
-    const size_t numRead = fread(buffer, 4, BUFFER_SIZE, fileHandle);
-    if (ferror(fileHandle)) {
-        perror("ERROR: I/O error when reading");
-        (void) fclose(fileHandle);
-        exit(EXIT_FAILURE);
-    }
-    if (numRead < BUFFER_SIZE) {
-        (void) printf("LOG: count was %lu, amount read was only %lu.\n", BUFFER_SIZE, numRead);
-    }
-    if (feof(fileHandle)) {
-        (void) printf("FEOF in file %s at line # %d\n",
-                        __FILE__, __LINE__ - 2);
-    }
+    (void) myfread(buffer, 4, BUFFER_SIZE, fileHandle);
 
     fsb.fsb3Header = buffer[0];
     fsb.numFiles = buffer[1];
@@ -64,16 +52,7 @@ size_t findFSBHeaderIndexes(
         uint32_t buffer[100] = {0};
         assert((sizeof(buffer) / sizeof(uint32_t)) == BUFFER_SIZE);
 
-        const size_t numRead = fread(buffer, sizeof(uint32_t), BUFFER_SIZE, fileHandle);
-        if (ferror(fileHandle)) {
-            perror("ERROR: I/O error when reading");
-            (void) fclose(fileHandle);
-            exit(EXIT_FAILURE);
-        }
-        assert(numRead <= BUFFER_SIZE);
-        // if (numRead < buffSize) {
-        //     (void) printf("LOG: buffSize is %lu, amount read was only %lu.\n", buffSize, numRead);
-        // }
+        const size_t numRead = myfread(buffer, sizeof(uint32_t), BUFFER_SIZE, fileHandle);
 
         for (size_t i = 0; i < numRead; i++) {
             //string to match in the file, represented as an unsigned long
@@ -129,19 +108,8 @@ uint32_t readDataSize(
 
     //read data size long
     uint32_t dataSize = 0;
-    const size_t numRead = fread(&dataSize, sizeof(uint32_t), 1, fileHandle);
-    if (ferror(fileHandle)) {
-        perror("ERROR: I/O error when reading");
-        (void) fclose(fileHandle);
-        exit(EXIT_FAILURE);
-    }
-    if (numRead != 1) {
-        (void) printf("LOG: count was 1, amount read was only %lu.\n", numRead);
-    }
-    if (feof(fileHandle)) {
-        (void) printf("LOG: FEOF in file %s at line # %d\n",
-                        __FILE__, __LINE__ - 2);
-    }
+    (void) myfread(&dataSize, sizeof(uint32_t), 1, fileHandle);
+
     return dataSize;
 }
 
@@ -164,19 +132,7 @@ void outputAudioData(
 
     //read audio data
     char *const audioData = malloc(dataSize * sizeof(char));
-    const size_t numRead = fread(audioData, 1, dataSize, inputFileHandle);
-    if (ferror(inputFileHandle)) {
-        perror("ERROR: I/O error when reading");
-        (void) fclose(inputFileHandle);
-        exit(EXIT_FAILURE);
-    }
-    if (numRead < dataSize) {
-        (void) printf("LOG: count was %lu, amount read was only %lu.\n", dataSize, numRead);
-    }
-    if (feof(inputFileHandle)) {
-        (void) printf("LOG: FEOF in file %s at line # %d\n",
-                        __FILE__, __LINE__ - 2);
-    }
+    (void) myfread(audioData, 1, dataSize, inputFileHandle);
 
     FILE *const outputFileHandle = myfopen(outputFileName, "wb");
     size_t numWritten = fwrite(audioData, 1, dataSize, outputFileHandle);
