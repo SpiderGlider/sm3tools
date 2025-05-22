@@ -101,7 +101,6 @@ uint32_t readDataSize(
 
     //set the file position indicator to start of FSB file
     myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
-
     //move to location where data size is written
     myfseek(fileHandle, 3 * sizeof(uint32_t), SEEK_CUR);
 
@@ -119,7 +118,6 @@ uint32_t readDataSize(
 void outputAudioData(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition,
-    //TODO should we use size_t for this?
     const size_t headerSize,
     const size_t dataSize,
     const char *const outputFileName) {
@@ -150,14 +148,14 @@ void outputAudioFiles(const char *const inputFileName) {
     size_t fsbIndexes[100] = {0};
     const size_t numResults = findFSBHeaderIndexes(inputFileName, fsbIndexes, 100);
 
-    const int HEADER_SIZE = 104;
+    const size_t HEADER_SIZE = 104;
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
     //the duplicate doesn't have all of the data, so isn't worth outputting
     for (size_t i = 0; i < numResults; i += 2) {
         const uint32_t dataSize = readDataSize(inputFileName, fsbIndexes[i]);
-        //apart from the last FSB, actual data size iis
+        //apart from the last FSB, actual data size is just from the data start until the next FSB
         if (i < numResults - 1) {
             if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + HEADER_SIZE))) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
@@ -170,6 +168,7 @@ void outputAudioFiles(const char *const inputFileName) {
 }
 
 int main(const int argc, const char *const argv[]) {
-    outputAudioFiles(argv[1]);
+    printFSBHeaderIndexes(argv[1]);
+    //outputAudioFiles(argv[1]);
 }
 

@@ -19,7 +19,7 @@ sm3tools: sm3tools.c
 	$(CC) $(DEFAULTFLAGS) $(EXTRAFLAGS) sm3tools.c -o $@
 
 pcssb: pcssb.c
-	$(CC) $(DEFAULTFLAGS) $(EXTRAFLAGS) pcssb.c -o $@
+	$(CC) $(DEFAULTFLAGS) $(EXTRAFLAGS) pcssb.c myIO.c -o $@
 
 %: %.c
 	$(CC) $(DEFAULTFLAGS) $(EXTRAFLAGS) $@.c -o $@ 

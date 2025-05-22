@@ -83,7 +83,7 @@ void myfseek_unsigned(FILE *const stream, const unsigned long int offset, const 
         myfseek(stream, LONG_MAX, origin);
         if (origin == SEEK_END) {
             //seeks backwards the remaining distance
-            myfseek(stream, -(offset - LONG_MAX), SEEK_CUR);
+            myfseek(stream, (long int) -(offset - LONG_MAX), SEEK_CUR);
         }
         else {
             //seeks forward the remaining distance
