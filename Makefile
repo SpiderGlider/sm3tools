@@ -1,7 +1,7 @@
 .PHONY: clean all
 
 default: sm3tools
-all: sm3tools
+all: sm3tools pcssb
 
 UARCH = $(shell uname -m)
 
@@ -18,8 +18,11 @@ EXTRAFLAGS = -Wextra -Wformat=2 -Wconversion -Wno-strict-prototypes -Wno-unused-
 sm3tools: sm3tools.c
 	$(CC) $(DEFAULTFLAGS) $(EXTRAFLAGS) sm3tools.c -o $@
 
+pcssb: pcssb.c
+	$(CC) $(DEFAULTFLAGS) $(EXTRAFLAGS) pcssb.c -o $@
+
 %: %.c
 	$(CC) $(DEFAULTFLAGS) $(EXTRAFLAGS) $@.c -o $@ 
 
 clean:
-	rm -f sm3tools
+	rm -f sm3tools pcssb
