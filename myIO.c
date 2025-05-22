@@ -29,6 +29,7 @@ size_t myfread(
     }
 
     const size_t objsRead = fread(buffer, size, count, stream);
+
     if (ferror(stream)) {
         perror("ERROR: I/O error when reading");
         (void) fclose(stream);
@@ -42,6 +43,26 @@ size_t myfread(
     }
 
     return objsRead;
+}
+
+size_t myfwrite(
+    void *const buffer,
+    const size_t size,
+    const size_t count,
+    FILE *const stream) {
+
+    const size_t objsWritten = fwrite(buffer, size, count, stream);
+
+    if (ferror(stream)) {
+        perror("ERROR: I/O error when writing");
+        (void) fclose(stream);
+        exit(EXIT_FAILURE);
+    }
+    if (objsWritten < count) {
+        (void) printf("LOG: count was %lu, amount written was only %lu.\n", count, objsWritten);
+    }
+
+    return objsWritten;
 }
 
 void myfseek(FILE *const stream, const long int offset, const int origin) {

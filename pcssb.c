@@ -8,12 +8,13 @@
 
 struct FSB readFile(const char* fileName) {
     struct FSB fsb = {0};
-    FILE *const fileHandle = myfopen(fileName, "rb");
 
     const size_t BUFFER_SIZE = 100;
     uint32_t buffer[100] = {0};
 
+    FILE *const fileHandle = myfopen(fileName, "rb");
     (void) myfread(buffer, 4, BUFFER_SIZE, fileHandle);
+    (void) fclose(fileHandle);
 
     fsb.fsb3Header = buffer[0];
     fsb.numFiles = buffer[1];
@@ -21,8 +22,6 @@ struct FSB readFile(const char* fileName) {
     fsb.dataSize = buffer[3];
     fsb.unknown2 = buffer[4];
     fsb.null1 = buffer[5];
-
-    (void) fclose(fileHandle);
 
     return fsb;
 }
@@ -110,6 +109,8 @@ uint32_t readDataSize(
     uint32_t dataSize = 0;
     (void) myfread(&dataSize, sizeof(uint32_t), 1, fileHandle);
 
+    (void) fclose(fileHandle);
+
     return dataSize;
 }
 
@@ -133,18 +134,12 @@ void outputAudioData(
     //read audio data
     char *const audioData = malloc(dataSize * sizeof(char));
     (void) myfread(audioData, 1, dataSize, inputFileHandle);
+    (void) fclose(inputFileHandle);
 
+    //write it to the output file
     FILE *const outputFileHandle = myfopen(outputFileName, "wb");
-    size_t numWritten = fwrite(audioData, 1, dataSize, outputFileHandle);
-    if (ferror(outputFileHandle)) {
-        perror("ERROR: I/O error when writing");
-        (void) fclose(outputFileHandle);
-        exit(EXIT_FAILURE);
-    }
-    if (numWritten < dataSize) {
-        (void) printf("LOG: count was %lu, amount written was only %lu.\n", dataSize, numWritten);
-    }
-    fclose(outputFileHandle);
+    (void) myfwrite(audioData, 1, dataSize, outputFileHandle);
+    (void) fclose(outputFileHandle);
 
     free(audioData);
 }
