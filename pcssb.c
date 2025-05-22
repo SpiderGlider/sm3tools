@@ -113,6 +113,26 @@ uint32_t readDataSize(
     return dataSize;
 }
 
+void readFileName(
+    const char *const inputFileName,
+    const size_t fsb3HeaderPosition,
+    char fileNameResult[32]) {
+
+    FILE *const fileHandle = myfopen(inputFileName, "rb");
+
+    //set the file position indicator to start of FSB file
+    myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
+    //move to location where data size is written
+    myfseek(fileHandle, 6 * sizeof(uint32_t), SEEK_CUR);
+
+    //read file name
+    (void) myfread(fileNameResult, sizeof(char), 32, fileHandle);
+
+    printf("%s\n", fileNameResult);
+
+    (void) fclose(fileHandle);
+}
+
 //Outputs the audio data in folder structure matching input file name.
 //e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
 void outputAudioData(
@@ -160,15 +180,17 @@ void outputAudioFiles(const char *const inputFileName) {
             if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + HEADER_SIZE))) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
             }
-            char outputFileName[100] = {0};
-            (void) snprintf(outputFileName, 100, "%s-output%lu.wav", inputFileName, i/2);
+            char fileNameResult[32];
+            readFileName(inputFileName, fsbIndexes[i], fileNameResult);
+            char outputFileName[200] = {0};
+            (void) snprintf(outputFileName, 200, "%s-output-%s", inputFileName, fileNameResult);
             outputAudioData(inputFileName, fsbIndexes[i], HEADER_SIZE, dataSize, outputFileName);
         }
     }
 }
 
 int main(const int argc, const char *const argv[]) {
-    printFSBHeaderIndexes(argv[1]);
-    //outputAudioFiles(argv[1]);
+    //printFSBHeaderIndexes(argv[1]);
+    outputAudioFiles(argv[1]);
 }
 
