@@ -1,7 +1,6 @@
 #include "pcssb.h"
 
 #include <assert.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -116,24 +115,6 @@ void printFSBHeaderIndexes(const char *const fileName) {
     }
 }
 
-// fseek set to unsigned long values. accounts for values over what signed longs support
-// by seeking twice.
-// returns what fseek does. if first fseek fails second isn't executed.
-// credit to Tyler Durden on SO for this code, which is used with minor modifications.
-// source: https://stackoverflow.com/a/47740105
-// licensed under CC BY-SA 3.0
-int fseekSetUnsigned(FILE *const fileHandle, const size_t offset) {
-    if (offset > LONG_MAX){
-        // check whether first seek fails
-        const int return1 = fseek(fileHandle, LONG_MAX, SEEK_SET);
-        if (return1 != 0) {
-            return return1;
-        }
-        return fseek(fileHandle, (long int)(offset - LONG_MAX), SEEK_CUR);
-    }
-    return fseek(fileHandle, (long int) offset, SEEK_SET);
-}
-
 uint32_t readDataSize(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition) {
@@ -141,19 +122,10 @@ uint32_t readDataSize(
     FILE *const fileHandle = myfopen(inputFileName, "rb");
 
     //set the file position indicator to start of FSB file
-    if (fseekSetUnsigned(fileHandle, fsb3HeaderPosition) != 0) {
-        fprintf(stderr, "fseek() failed in file %s at line # %d\n",
-                __FILE__, __LINE__ - 2);
-        (void) fclose(fileHandle);
-        exit(EXIT_FAILURE);
-    }
+    myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
+
     //move to location where data size is written
-    if (fseek(fileHandle, 3 * sizeof(uint32_t), SEEK_CUR) != 0) {
-        fprintf(stderr, "fseek() failed in file %s at line # %d\n",
-                __FILE__, __LINE__ - 2);
-        (void) fclose(fileHandle);
-        exit(EXIT_FAILURE);
-    };
+    myfseek(fileHandle, 3 * sizeof(uint32_t), SEEK_CUR);
 
     //read data size long
     uint32_t dataSize = 0;
@@ -179,26 +151,16 @@ void outputAudioData(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition,
     //TODO should we use size_t for this?
-    const int headerSize,
+    const size_t headerSize,
     const size_t dataSize,
     const char *const outputFileName) {
 
     FILE *const inputFileHandle = myfopen(inputFileName, "rb");
 
     //set the file position indicator to start of FSB file
-    if (fseekSetUnsigned(inputFileHandle, fsb3HeaderPosition) != 0) {
-        fprintf(stderr, "fseek() failed in file %s at line # %d\n",
-                __FILE__, __LINE__ - 2);
-        (void) fclose(inputFileHandle);
-        exit(EXIT_FAILURE);
-    }
+    myfseek_unsigned(inputFileHandle, fsb3HeaderPosition, SEEK_SET);
     //move to start of audio data
-    if (fseek(inputFileHandle, headerSize, SEEK_CUR) != 0) {
-        fprintf(stderr, "fseek() failed in file %s at line # %d\n",
-                __FILE__, __LINE__ - 2);
-        (void) fclose(inputFileHandle);
-        exit(EXIT_FAILURE);
-    };
+    myfseek_unsigned(inputFileHandle, headerSize, SEEK_CUR);
 
     //read audio data
     char *const audioData = malloc(dataSize * sizeof(char));
