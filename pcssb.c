@@ -116,19 +116,20 @@ uint32_t readDataSize(
 void readFileName(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition,
-    char fileNameResult[32]) {
+    char resultArr[32]) {
 
     FILE *const fileHandle = myfopen(inputFileName, "rb");
 
     //set the file position indicator to start of FSB file
     myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
-    //move to location where data size is written
-    myfseek(fileHandle, 6 * sizeof(uint32_t), SEEK_CUR);
+    //move to location where file name is written
+    //NOTE: Move 2 bytes further because it seems to begin with (P\0) which would
+    //null terminate the string which is annoying, and I'm not sure if that's supposed
+    //to be part of the file name anyway or if it's something else.
+    myfseek(fileHandle, 2 + (6 * sizeof(uint32_t)), SEEK_CUR);
 
     //read file name
-    (void) myfread(fileNameResult, sizeof(char), 32, fileHandle);
-
-    printf("%s\n", fileNameResult);
+    (void) myfread(resultArr, sizeof(char), 32, fileHandle);
 
     (void) fclose(fileHandle);
 }
@@ -180,7 +181,7 @@ void outputAudioFiles(const char *const inputFileName) {
             if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + HEADER_SIZE))) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
             }
-            char fileNameResult[32];
+            char fileNameResult[32] = {0};
             readFileName(inputFileName, fsbIndexes[i], fileNameResult);
             char outputFileName[200] = {0};
             (void) snprintf(outputFileName, 200, "%s-output-%s", inputFileName, fileNameResult);
