@@ -6,6 +6,10 @@
 
 #include "myIO.h"
 
+//number of bytes used to store the sample filename in FSB archives,
+//EXCLUDING the "P\0" at the start for simplicity
+#define FSB_FILENAME_SIZE 30
+
 struct FSB readFile(const char* fileName) {
     struct FSB fsb = {0};
 
@@ -116,7 +120,7 @@ uint32_t readDataSize(
 void readFileName(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition,
-    char resultArr[32]) {
+    char resultArr[FSB_FILENAME_SIZE]) {
 
     FILE *const fileHandle = myfopen(inputFileName, "rb");
 
@@ -129,7 +133,7 @@ void readFileName(
     myfseek(fileHandle, 2 + (6 * sizeof(uint32_t)), SEEK_CUR);
 
     //read file name
-    (void) myfread(resultArr, sizeof(char), 32, fileHandle);
+    (void) myfread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
 
     (void) fclose(fileHandle);
 }
@@ -181,7 +185,7 @@ void outputAudioFiles(const char *const inputFileName) {
             if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + HEADER_SIZE))) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
             }
-            char fileNameResult[32] = {0};
+            char fileNameResult[FSB_FILENAME_SIZE] = {0};
             readFileName(inputFileName, fsbIndexes[i], fileNameResult);
             char outputFileName[200] = {0};
             (void) snprintf(outputFileName, 200, "%s-output-%s", inputFileName, fileNameResult);
