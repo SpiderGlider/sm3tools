@@ -6,10 +6,6 @@
 
 #include "myIO.h"
 
-//number of bytes used to store the sample filename in FSB archives,
-//EXCLUDING the "P\0" at the start for simplicity
-#define FSB_FILENAME_SIZE 30
-
 struct FSB readFile(const char* fileName) {
     struct FSB fsb = {0};
 
@@ -143,8 +139,6 @@ void readFileName(
     (void) fclose(fileHandle);
 }
 
-//Outputs the audio data in folder structure matching input file name.
-//e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
 void outputAudioData(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition,
@@ -194,6 +188,7 @@ void outputAudioFiles(const char *const inputFileName) {
             char fsbFileName[FSB_FILENAME_SIZE] = {0};
             readFileName(inputFileName, fsbIndexes[i], fsbFileName);
             char outputFileName[200] = {0};
+            //TODO could output in a new folder corresponding to the PCSSB file
             (void) snprintf(outputFileName, 200, "%s-%s", inputFileName, fsbFileName);
             outputAudioData(
                 inputFileName,
