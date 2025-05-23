@@ -17,7 +17,7 @@ struct FSB readFile(const char* fileName) {
     uint32_t buffer[100] = {0};
 
     FILE *const fileHandle = myfopen(fileName, "rb");
-    (void) myfread(buffer, 4, BUFFER_SIZE, fileHandle);
+    (void) myfread(buffer, sizeof(uint32_t), BUFFER_SIZE, fileHandle);
     (void) fclose(fileHandle);
 
     fsb.fsb3Header = buffer[0];
@@ -161,12 +161,12 @@ void outputAudioData(
 
     //read audio data
     char *const audioData = malloc(dataSize * sizeof(char));
-    (void) myfread(audioData, 1, dataSize, inputFileHandle);
+    (void) myfread(audioData, sizeof(char), dataSize, inputFileHandle);
     (void) fclose(inputFileHandle);
 
     //write it to the output file
     FILE *const outputFileHandle = myfopen(outputFileName, "wb");
-    (void) myfwrite(audioData, 1, dataSize, outputFileHandle);
+    (void) myfwrite(audioData, sizeof(char), dataSize, outputFileHandle);
     (void) fclose(outputFileHandle);
 
     free(audioData);
