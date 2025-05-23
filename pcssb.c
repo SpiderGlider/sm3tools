@@ -103,10 +103,12 @@ uint32_t readDataSize(
 
     FILE *const fileHandle = myfopen(inputFileName, "rb");
 
+    const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
+
     //set the file position indicator to start of FSB file
     myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
     //move to location where data size is written
-    myfseek(fileHandle, 3 * sizeof(uint32_t), SEEK_CUR);
+    myfseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
 
     //read data size long
     uint32_t dataSize = 0;
@@ -124,13 +126,16 @@ void readFileName(
 
     FILE *const fileHandle = myfopen(inputFileName, "rb");
 
+    //NOTE: set 2 bytes ahead because otherwise
+    //it seems to begin with (P\0) which would null terminate the string
+    //which is annoying, and I'm not sure if that's supposed
+    //to be part of the file name anyway or if it's something else.
+    const int FILENAME_OFFSET = 2 + (6 * sizeof(uint32_t));
+
     //set the file position indicator to start of FSB file
     myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
     //move to location where file name is written
-    //NOTE: Move 2 bytes further because it seems to begin with (P\0) which would
-    //null terminate the string which is annoying, and I'm not sure if that's supposed
-    //to be part of the file name anyway or if it's something else.
-    myfseek(fileHandle, 2 + (6 * sizeof(uint32_t)), SEEK_CUR);
+    myfseek(fileHandle, FILENAME_OFFSET, SEEK_CUR);
 
     //read file name
     (void) myfread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
@@ -173,7 +178,7 @@ void outputAudioFiles(const char *const inputFileName) {
     size_t fsbIndexes[100] = {0};
     const size_t numResults = findFSBHeaderIndexes(inputFileName, fsbIndexes, 100);
 
-    const size_t HEADER_SIZE = 104;
+    const int FSB_HEADER_SIZE = 104;
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
@@ -182,14 +187,14 @@ void outputAudioFiles(const char *const inputFileName) {
         const uint32_t dataSize = readDataSize(inputFileName, fsbIndexes[i]);
         //apart from the last FSB, actual data size is just from the data start until the next FSB
         if (i < numResults - 1) {
-            if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + HEADER_SIZE))) {
+            if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + FSB_HEADER_SIZE))) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
             }
             char fileNameResult[FSB_FILENAME_SIZE] = {0};
             readFileName(inputFileName, fsbIndexes[i], fileNameResult);
             char outputFileName[200] = {0};
             (void) snprintf(outputFileName, 200, "%s-output-%s", inputFileName, fileNameResult);
-            outputAudioData(inputFileName, fsbIndexes[i], HEADER_SIZE, dataSize, outputFileName);
+            outputAudioData(inputFileName, fsbIndexes[i], FSB_HEADER_SIZE, dataSize, outputFileName);
         }
     }
 }
