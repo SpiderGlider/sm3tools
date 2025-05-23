@@ -183,7 +183,7 @@ void outputAudioFiles(const char *const inputFileName) {
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
     //the duplicate doesn't have all of the data, so isn't worth outputting
-    for (size_t i = 0; i < numResults; i += 2) {
+    for (size_t i = 0; i < numResults; i++) {
         const uint32_t fsbDataSize = readDataSize(inputFileName, fsbIndexes[i]);
         if (i < numResults - 1) {
             //apart from the last FSB, actual data size is just distance from the data start until the next FSB
@@ -194,12 +194,12 @@ void outputAudioFiles(const char *const inputFileName) {
             char fsbFileName[FSB_FILENAME_SIZE] = {0};
             readFileName(inputFileName, fsbIndexes[i], fsbFileName);
             char outputFileName[200] = {0};
-            (void) snprintf(outputFileName, 200, "%s-%s", inputFileName, fsbFileName);
+            (void) snprintf(outputFileName, 200, "%s-%lu-%s", inputFileName, i, fsbFileName);
             outputAudioData(
                 inputFileName,
                 fsbIndexes[i],
                 FSB_HEADER_SIZE,
-                fsbDataSize,
+                actualDataSize,
                 outputFileName);
         }
     }
