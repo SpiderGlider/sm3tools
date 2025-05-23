@@ -190,10 +190,10 @@ void outputAudioFiles(const char *const inputFileName) {
             if (dataSize != (fsbIndexes[i+1] - (fsbIndexes[i] + FSB_HEADER_SIZE))) {
                 (void) printf("LOG: Data size value doesn't match actual size!");
             }
-            char fileNameResult[FSB_FILENAME_SIZE] = {0};
-            readFileName(inputFileName, fsbIndexes[i], fileNameResult);
+            char fsbFileName[FSB_FILENAME_SIZE] = {0};
+            readFileName(inputFileName, fsbIndexes[i], fsbFileName);
             char outputFileName[200] = {0};
-            (void) snprintf(outputFileName, 200, "%s-output-%s", inputFileName, fileNameResult);
+            (void) snprintf(outputFileName, 200, "%s-%s", inputFileName, fsbFileName);
             outputAudioData(inputFileName, fsbIndexes[i], FSB_HEADER_SIZE, dataSize, outputFileName);
         }
     }
