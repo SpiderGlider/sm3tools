@@ -6,26 +6,6 @@
 
 #include "myIO.h"
 
-struct FSB readFile(const char* fileName) {
-    struct FSB fsb = {0};
-
-    const size_t BUFFER_SIZE = 100;
-    uint32_t buffer[100] = {0};
-
-    FILE *const fileHandle = myfopen(fileName, "rb");
-    (void) myfread(buffer, sizeof(uint32_t), BUFFER_SIZE, fileHandle);
-    (void) fclose(fileHandle);
-
-    fsb.fsb3Header = buffer[0];
-    fsb.numFiles = buffer[1];
-    fsb.unknown1 = buffer[2];
-    fsb.dataSize = buffer[3];
-    fsb.unknown2 = buffer[4];
-    fsb.null1 = buffer[5];
-
-    return fsb;
-}
-
 size_t findFSBHeaderIndexes(
     const char *const inputFileName,
     size_t *const resultArr,
@@ -166,8 +146,6 @@ void outputAudioData(
     free(audioData);
 }
 
-//Outputs the audio data in folder structure matching input file name.
-//e.g. for file "a.wav" in "b.PCSSB" the output will be in b/a.wav
 void outputAudioFiles(const char *const inputFileName) {
     size_t fsbIndexes[100] = {0};
     const size_t numResults = findFSBHeaderIndexes(inputFileName, fsbIndexes, 100);

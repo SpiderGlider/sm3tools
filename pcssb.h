@@ -33,8 +33,6 @@ struct FSB {
     char* data;
 };
 
-struct FSB readFile(const char* fileName);
-
 //finds every instance of "FSB3" header text in the sound file
 //puts the absolute position in bytes of those instances
 //into the given resultArr in the order they are found.
