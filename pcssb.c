@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "myIO.h"
 
@@ -165,9 +166,18 @@ void outputAudioFiles(const char *const inputFileName) {
             }
             char fsbFileName[FSB_FILENAME_SIZE] = {0};
             readFileName(inputFileName, fsbIndexes[i], fsbFileName);
+
+            const size_t fileExtensionIndex = strrchr(inputFileName, '.') - inputFileName;
+            char *const outputPathName = (char*) malloc(fileExtensionIndex + 2);
+            strncpy(outputPathName, inputFileName, fileExtensionIndex);
+            outputPathName[fileExtensionIndex] = '\0';
+            mymkdir(outputPathName);
+
+            mymkdir(inputFileName);
             char outputFileName[200] = {0};
             //TODO could output in a new folder corresponding to the PCSSB file
-            (void) snprintf(outputFileName, 200, "%s-%s", inputFileName, fsbFileName);
+            (void) snprintf(outputFileName, 200, "%s/%s", outputPathName, fsbFileName);
+            free(outputPathName);
             outputAudioData(
                 inputFileName,
                 fsbIndexes[i],
