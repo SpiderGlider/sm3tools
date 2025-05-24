@@ -2,6 +2,11 @@
 #define MYIO_H
 #include <stdio.h>
 
+//cross platform mkdir wrapper.
+//creates directory with mode 0777 on linux
+//logs the error if the directory failed to be created
+void mymkdir(const char *const path);
+
 //wrapper functions around the <stdio.h> I/O functions
 //with additional logging/checks
 
