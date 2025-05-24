@@ -167,17 +167,20 @@ void outputAudioFiles(const char *const inputFileName) {
             char fsbFileName[FSB_FILENAME_SIZE] = {0};
             readFileName(inputFileName, fsbIndexes[i], fsbFileName);
 
+            //get location of file extension start
             const size_t fileExtensionIndex = strrchr(inputFileName, '.') - inputFileName;
-            char *const outputPathName = (char*) malloc(fileExtensionIndex + 2);
-            strncpy(outputPathName, inputFileName, fileExtensionIndex);
-            outputPathName[fileExtensionIndex] = '\0';
-            mymkdir(outputPathName);
+            char *const outputPath = (char*) malloc(fileExtensionIndex + 1);
+            //copy the head of the string until and including the last '.'
+            (void) strncpy(outputPath, inputFileName, fileExtensionIndex + 1);
+            //replace '.' with null terminator
+            outputPath[fileExtensionIndex] = '\0';
+            //create the directory corresponding to that path
+            mymkdir(outputPath);
 
-            mymkdir(inputFileName);
             char outputFileName[200] = {0};
             //TODO could output in a new folder corresponding to the PCSSB file
-            (void) snprintf(outputFileName, 200, "%s/%s", outputPathName, fsbFileName);
-            free(outputPathName);
+            (void) snprintf(outputFileName, 200, "%s/%s", outputPath, fsbFileName);
+            free(outputPath);
             outputAudioData(
                 inputFileName,
                 fsbIndexes[i],
