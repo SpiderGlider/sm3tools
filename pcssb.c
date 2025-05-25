@@ -169,7 +169,7 @@ void outputAudioFiles(const char *const inputFileName) {
 
             //get location of file extension start
             const size_t fileExtensionIndex = strrchr(inputFileName, '.') - inputFileName;
-            char *const outputDir = (char*) malloc(fileExtensionIndex + 1);
+            char outputDir[200] = {0};
             //copy the head of the string until and including the last '.'
             (void) strncpy(outputDir, inputFileName, fileExtensionIndex + 1);
             //replace '.' with null terminator
@@ -178,9 +178,8 @@ void outputAudioFiles(const char *const inputFileName) {
             mymkdir(outputDir);
 
             //create path with file fsbFileName inside the output directory
-            char outputPath[200] = {0};
-            (void) snprintf(outputPath, 200, "%s/%s", outputDir, fsbFileName);
-            free(outputDir);
+            char outputPath[300] = {0};
+            (void) snprintf(outputPath, 300, "%s/%s", outputDir, fsbFileName);
             outputAudioData(
                 inputFileName,
                 fsbIndexes[i],
