@@ -5,6 +5,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
+
+void mymkdir(const char *const path) {
+#ifdef _WIN32
+    const int returnValue = _mkdir(path);
+#else
+    const int returnValue = mkdir(path, 0700);
+#endif
+    if (returnValue != 0) {
+        perror("ERROR: Failed to create directory");
+    }
+}
+
 FILE *myfopen(const char *fileName, const char *mode) {
     FILE *const fileHandle = fopen(fileName, mode);
     if (!fileHandle) {
