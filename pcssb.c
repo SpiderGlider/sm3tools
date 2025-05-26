@@ -214,30 +214,42 @@ void replaceAudioinPCSSB(
     //find filename in PCSSB file
     size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
 
-
     FILE *const pcssbFileHandle = myfopen(pcssbFileName, "rb");
-    //store all bytes up until start of audio data
-    //(plus one extra byte for the null terminator)
-    const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-    char *const pcssbHead = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
-    myfread(pcssbHead, sizeof(char), fsbAudioDataIndex, pcssbFileHandle);
-    //null terminate string for safety reasons
-    pcssbHead[fsbAudioDataIndex] = '\0';
+    {
+        //store all bytes up until start of audio data
+        //(plus one extra byte for the null terminator)
+        const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
+        char *const pcssbHead = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
+        myfread(pcssbHead, sizeof(char), fsbAudioDataIndex, pcssbFileHandle);
+        //null terminate string for safety reasons
+        pcssbHead[fsbAudioDataIndex] = '\0';
 
-    //write into new file
-    //TODO use an output filename based on the pcssb file name with "-mod" at the end
-    FILE *const outputFileHandle = myfopen("test-out.pcssb", "wb");
-    myfwrite(pcssbHead, sizeof(char), fsbAudioDataIndex, outputFileHandle);
+        //write into new file
+        //TODO use an output filename based on the pcssb file name with "-mod" at the end
+        FILE *const outputFileHandle = myfopen("test-out.pcssb", "wb");
+        {
+            myfwrite(pcssbHead, sizeof(char), fsbAudioDataIndex, outputFileHandle);
 
-    const intmax_t replaceSize = getfilesize(replaceFileName);
-    char *const replaceData = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
-    free(replaceData);
+            FILE* replaceFileHandle = myfopen(replaceFileName, "rb");
+            {
+                //read replacement audio
+                const intmax_t replaceSize = getfilesize(replaceFileName);
+                char *const replaceData = (char*) malloc((replaceSize + 1) * sizeof(char));
 
-    fclose(outputFileHandle);
+                myfread(replaceData, sizeof(char), replaceSize, replaceFileHandle);
+                replaceData[replaceSize] = '\0';
 
-    free(pcssbHead);
+                //append to new file
+                fwrite(replaceData, sizeof(char), replaceSize, outputFileHandle);
 
-    fclose(pcssbFileHandle);
+                free(replaceData);
+            }
+            (void) fclose(replaceFileHandle);
+        }
+        free(pcssbHead);
+        (void) fclose(outputFileHandle);
+    }
+    (void) fclose(pcssbFileHandle);
 
 
     //TODO go to audio data part of that fsb
