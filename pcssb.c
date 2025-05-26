@@ -190,6 +190,35 @@ void outputAudioFiles(const char *const inputFileName) {
     }
 }
 
+void replaceAudio(
+    const char *const pcssbFileName,
+    const char *const replaceFileName) {
+
+    size_t fsbIndexes[100] = {0};
+    const size_t numResults = findFSBHeaderIndexes(pcssbFileName, fsbIndexes, 100);
+
+    //TODO read PCSSB file into memory
+
+    //find filename in PCSSB file
+    const char *const locPtr = strstr(pcssbFileName, replaceFileName);
+    if (locPtr == NULL) {
+        fprintf(stderr, "ERROR: File not found in PCSSB!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    const size_t index = locPtr - pcssbFileName;
+
+    //TODO find closest fsb header
+
+    //TODO go to audio data part of that fsb
+
+    //TODO replace audio data there with the data of replaceFileName
+
+    //TODO change data size field to match size of replaceFileName
+
+    //TODO write to a new file
+}
+
 int main(const int argc, const char *const argv[]) {
     //printFSBHeaderIndexes(argv[1]);
     outputAudioFiles(argv[1]);
