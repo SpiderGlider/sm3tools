@@ -224,34 +224,36 @@ void replaceAudioinPCSSB(
         //(plus one extra byte for the null terminator)
         const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
         char *const pcssbHead = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
-        myfread(pcssbHead, sizeof(char), fsbAudioDataIndex, pcssbFileHandle);
-        //null terminate string for safety reasons
-        pcssbHead[fsbAudioDataIndex] = '\0';
-
-        //write into new file
-        //TODO use an output filename based on the pcssb file name with "-mod" at the end
-        FILE *const outputFileHandle = myfopen("test-out.pcssb", "wb");
         {
-            myfwrite(pcssbHead, sizeof(char), fsbAudioDataIndex, outputFileHandle);
+            myfread(pcssbHead, sizeof(char), fsbAudioDataIndex, pcssbFileHandle);
+            //null terminate string for safety reasons
+            pcssbHead[fsbAudioDataIndex] = '\0';
 
-            FILE* replaceFileHandle = myfopen(replaceFileName, "rb");
+            //write into new file
+            //TODO use an output filename based on the pcssb file name with "-mod" at the end
+            FILE *const outputFileHandle = myfopen("test-out.pcssb", "wb");
             {
-                //read replacement audio
-                const intmax_t replaceSize = getfilesize(replaceFileName);
-                char *const replaceData = (char*) malloc((replaceSize + 1) * sizeof(char));
-                {
-                    myfread(replaceData, sizeof(char), replaceSize, replaceFileHandle);
-                    replaceData[replaceSize] = '\0';
+                myfwrite(pcssbHead, sizeof(char), fsbAudioDataIndex, outputFileHandle);
 
-                    //append to new file
-                    fwrite(replaceData, sizeof(char), replaceSize, outputFileHandle);
+                FILE* replaceFileHandle = myfopen(replaceFileName, "rb");
+                {
+                    //read replacement audio
+                    const intmax_t replaceSize = getfilesize(replaceFileName);
+                    char *const replaceData = (char*) malloc((replaceSize + 1) * sizeof(char));
+                    {
+                        myfread(replaceData, sizeof(char), replaceSize, replaceFileHandle);
+                        replaceData[replaceSize] = '\0';
+
+                        //append to new file
+                        fwrite(replaceData, sizeof(char), replaceSize, outputFileHandle);
+                    }
+                    free(replaceData);
                 }
-                free(replaceData);
+                (void) fclose(replaceFileHandle);
             }
-            (void) fclose(replaceFileHandle);
+            (void) fclose(outputFileHandle);
         }
         free(pcssbHead);
-        (void) fclose(outputFileHandle);
     }
     (void) fclose(pcssbFileHandle);
 

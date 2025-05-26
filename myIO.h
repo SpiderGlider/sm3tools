@@ -17,6 +17,8 @@ intmax_t getfilesize(const char *const path);
 
 //wrapper around fopen that checks if the returned
 //pointer is NULL, in which case it prints the error to stderr and exits.
+//NOTE: this does not close the file handle so you have to call fclose
+//after you're done using it, like with normal fopen.
 FILE *myfopen(const char *fileName, const char *mode);
 
 //wrapper around fread that checks feof and ferror
