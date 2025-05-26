@@ -23,6 +23,20 @@ void mymkdir(const char *const path) {
     }
 }
 
+size_t getfilesize(const char *const path) {
+#ifdef _WIN32
+    //TODO;
+    (void) fprintf(stderr, "ERROR: getfilesize is not yet implemented on Windows.\n");
+    exit(EXIT_FAILURE);
+#else
+    struct stat sb;
+    if (stat(path, &sb) != 0) {
+        perror("ERROR: Failed to get file size");
+    }
+    return (size_t) sb.st_size;
+#endif
+}
+
 FILE *myfopen(const char *fileName, const char *mode) {
     FILE *const fileHandle = fopen(fileName, mode);
     if (!fileHandle) {
