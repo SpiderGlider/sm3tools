@@ -22,41 +22,40 @@ size_t findFSBHeaderIndexes(
     size_t resultCount = 0;
 
     FILE *const fileHandle = myfopen(inputFileName, "rb");
+    {
+        //how many buffers into the file
+        size_t readIndex = 0;
 
-    //how many buffers into the file
-    size_t readIndex = 0;
+        while (!feof(fileHandle)) {
+            const size_t BUFFER_SIZE = 100;
+            //magic number needs to be reused to avoid Variable Length Array
+            uint32_t buffer[100] = {0};
+            assert((sizeof(buffer) / sizeof(uint32_t)) == BUFFER_SIZE);
 
-    while (!feof(fileHandle)) {
-        const size_t BUFFER_SIZE = 100;
-        //magic number needs to be reused to avoid Variable Length Array
-        uint32_t buffer[100] = {0};
-        assert((sizeof(buffer) / sizeof(uint32_t)) == BUFFER_SIZE);
+            const size_t numRead = myfread(buffer, sizeof(uint32_t), BUFFER_SIZE, fileHandle);
 
-        const size_t numRead = myfread(buffer, sizeof(uint32_t), BUFFER_SIZE, fileHandle);
+            for (size_t i = 0; i < numRead; i++) {
+                //string to match in the file, represented as an unsigned long
+                const uint32_t FSB_HEADER = 859984710; // = "FSB3"
+                if (buffer[i] == FSB_HEADER) {
+                    if (resultCount >= resultArrLen) {
+                        (void) printf("LOG: More results were found than "
+                               "what result array can hold.\n");
 
-        for (size_t i = 0; i < numRead; i++) {
-            //string to match in the file, represented as an unsigned long
-            const uint32_t FSB_HEADER = 859984710; // = "FSB3"
-            if (buffer[i] == FSB_HEADER) {
-                if (resultCount >= resultArrLen) {
-                    (void) printf("LOG: More results were found than "
-                           "what result array can hold.\n");
+                        (void) fclose(fileHandle);
 
-                    (void) fclose(fileHandle);
-
-                    return resultCount;
+                        return resultCount;
+                    }
+                    //position (in terms of how many longs into the file it is)
+                    const size_t uint32Pos = i + (readIndex * BUFFER_SIZE);
+                    //get how many bytes into the file it is
+                    resultArr[resultCount] = uint32Pos * sizeof(uint32_t);
+                    resultCount++;
                 }
-                //position (in terms of how many longs into the file it is)
-                const size_t uint32Pos = i + (readIndex * BUFFER_SIZE);
-                //get how many bytes into the file it is
-                resultArr[resultCount] = uint32Pos * sizeof(uint32_t);
-                resultCount++;
             }
+            readIndex++;
         }
-
-        readIndex++;
     }
-
     (void) fclose(fileHandle);
 
     return resultCount;
@@ -78,19 +77,20 @@ uint32_t readDataSize(
     const char *const inputFileName,
     const size_t fsb3HeaderPosition) {
 
-    FILE *const fileHandle = myfopen(inputFileName, "rb");
+    uint32_t dataSize = 0;
 
     const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
 
-    //set the file position indicator to start of FSB file
-    myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
-    //move to location where data size is written
-    myfseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
+    FILE *const fileHandle = myfopen(inputFileName, "rb");
+    {
+        //set the file position indicator to start of FSB file
+        myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
+        //move to location where data size is written
+        myfseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
 
-    //read data size long
-    uint32_t dataSize = 0;
-    (void) myfread(&dataSize, sizeof(uint32_t), 1, fileHandle);
-
+        //read data size long
+        (void) myfread(&dataSize, sizeof(uint32_t), 1, fileHandle);
+    }
     (void) fclose(fileHandle);
 
     return dataSize;
@@ -102,21 +102,21 @@ void readFileName(
     char resultArr[FSB_FILENAME_SIZE]) {
 
     FILE *const fileHandle = myfopen(inputFileName, "rb");
+    {
+        //NOTE: set 2 bytes ahead because otherwise
+        //it seems to begin with (P\0) which would null terminate the string
+        //which is annoying, and I'm not sure if that's supposed
+        //to be part of the file name anyway or if it's something else.
+        const int FILENAME_OFFSET = 2 + (6 * sizeof(uint32_t));
 
-    //NOTE: set 2 bytes ahead because otherwise
-    //it seems to begin with (P\0) which would null terminate the string
-    //which is annoying, and I'm not sure if that's supposed
-    //to be part of the file name anyway or if it's something else.
-    const int FILENAME_OFFSET = 2 + (6 * sizeof(uint32_t));
+        //set the file position indicator to start of FSB file
+        myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
+        //move to location where file name is written
+        myfseek(fileHandle, FILENAME_OFFSET, SEEK_CUR);
 
-    //set the file position indicator to start of FSB file
-    myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
-    //move to location where file name is written
-    myfseek(fileHandle, FILENAME_OFFSET, SEEK_CUR);
-
-    //read file name
-    (void) myfread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
-
+        //read file name
+        (void) myfread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
+    }
     (void) fclose(fileHandle);
 }
 
@@ -127,23 +127,27 @@ void outputAudioData(
     const size_t dataSize,
     const char *const outputFileName) {
 
-    FILE *const inputFileHandle = myfopen(inputFileName, "rb");
-
-    //set the file position indicator to start of FSB file
-    myfseek_unsigned(inputFileHandle, fsb3HeaderPosition, SEEK_SET);
-    //move to start of audio data
-    myfseek_unsigned(inputFileHandle, headerSize, SEEK_CUR);
-
-    //read audio data
     char *const audioData = malloc(dataSize * sizeof(char));
-    (void) myfread(audioData, sizeof(char), dataSize, inputFileHandle);
-    (void) fclose(inputFileHandle);
+    {
+        FILE *const inputFileHandle = myfopen(inputFileName, "rb");
+        {
+            //set the file position indicator to start of FSB file
+            myfseek_unsigned(inputFileHandle, fsb3HeaderPosition, SEEK_SET);
+            //move to start of audio data
+            myfseek_unsigned(inputFileHandle, headerSize, SEEK_CUR);
 
-    //write it to the output file
-    FILE *const outputFileHandle = myfopen(outputFileName, "wb");
-    (void) myfwrite(audioData, sizeof(char), dataSize, outputFileHandle);
-    (void) fclose(outputFileHandle);
+            //read audio data
+            (void) myfread(audioData, sizeof(char), dataSize, inputFileHandle);
+        }
+        (void) fclose(inputFileHandle);
 
+        //write it to the output file
+        FILE *const outputFileHandle = myfopen(outputFileName, "wb");
+        {
+            (void) myfwrite(audioData, sizeof(char), dataSize, outputFileHandle);
+        }
+        (void) fclose(outputFileHandle);
+    }
     free(audioData);
 }
 
@@ -235,13 +239,13 @@ void replaceAudioinPCSSB(
                 //read replacement audio
                 const intmax_t replaceSize = getfilesize(replaceFileName);
                 char *const replaceData = (char*) malloc((replaceSize + 1) * sizeof(char));
+                {
+                    myfread(replaceData, sizeof(char), replaceSize, replaceFileHandle);
+                    replaceData[replaceSize] = '\0';
 
-                myfread(replaceData, sizeof(char), replaceSize, replaceFileHandle);
-                replaceData[replaceSize] = '\0';
-
-                //append to new file
-                fwrite(replaceData, sizeof(char), replaceSize, outputFileHandle);
-
+                    //append to new file
+                    fwrite(replaceData, sizeof(char), replaceSize, outputFileHandle);
+                }
                 free(replaceData);
             }
             (void) fclose(replaceFileHandle);
