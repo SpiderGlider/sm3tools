@@ -223,6 +223,17 @@ void replaceAudio(
     myfread(pcssbHead, sizeof(char), fsbAudioDataIndex, pcssbFileHandle);
     //null terminate string for safety reasons
     pcssbHead[fsbAudioDataIndex] = '\0';
+
+    //write into new file
+    //TODO use an output filename based on the pcssb file name with "-mod" at the end
+    FILE *const outputFileHandle = myfopen("test-out.pcssb", "wb");
+    myfwrite(pcssbHead, sizeof(char), fsbAudioDataIndex, outputFileHandle);
+
+    // const intmax_t replaceSize =
+    // char *const replaceData = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
+
+    fclose(outputFileHandle);
+
     free(pcssbHead);
 
     fclose(pcssbFileHandle);
