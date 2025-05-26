@@ -70,6 +70,8 @@ void readFileName(
     const size_t fsb3HeaderPosition,
     char resultArr[FSB_FILENAME_SIZE]);
 
+const int FSB_HEADER_SIZE = 104;
+
 //Writes the audio data from an FSB file into a file with file name = outputFileName
 //NOTE: overwrites file if it already exists.
 void outputAudioData(

@@ -151,8 +151,6 @@ void outputAudioFiles(const char *const inputFileName) {
     size_t fsbIndexes[100] = {0};
     const size_t numResults = findFSBHeaderIndexes(inputFileName, fsbIndexes, 100);
 
-    const int FSB_HEADER_SIZE = 104;
-
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
     //the duplicate doesn't have all of the data, so isn't worth outputting
@@ -190,7 +188,7 @@ void outputAudioFiles(const char *const inputFileName) {
     }
 }
 
-size_t findFSBMatchingFileName(
+size_t findFirstFSBMatchingFileName(
     const char *const pcssbFileName,
     const char *const fileNameString) {
 
@@ -214,7 +212,21 @@ void replaceAudio(
     const char *const replaceFileName) {
 
     //find filename in PCSSB file
-    size_t fsbHeader = findFSBMatchingFileName(pcssbFileName, replaceFileName);
+    size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
+
+
+    FILE *const pcssbFileHandle = myfopen(pcssbFileName, "rb");
+    //store all bytes up until start of audio data
+    //(plus one extra byte for the null terminator)
+    const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
+    char *const pcssbHead = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
+    myfread(pcssbHead, sizeof(char), fsbAudioDataIndex, pcssbFileHandle);
+    //null terminate string for safety reasons
+    pcssbHead[fsbAudioDataIndex] = '\0';
+    free(pcssbHead);
+
+    fclose(pcssbFileHandle);
+
 
     //TODO go to audio data part of that fsb
 
