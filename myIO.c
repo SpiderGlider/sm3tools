@@ -7,10 +7,9 @@
 
 #ifdef _WIN32
 #include <direct.h>
-#else
-#include <sys/stat.h>
-#include <sys/types.h>
 #endif
+#include <sys/types.h>
+#include <sys/stat.h>
 
 void mymkdir(const char *const path) {
 #ifdef _WIN32
@@ -23,18 +22,21 @@ void mymkdir(const char *const path) {
     }
 }
 
-size_t getfilesize(const char *const path) {
+size_t getfilesize(const char *const filePath) {
 #ifdef _WIN32
-    //TODO;
-    (void) fprintf(stderr, "ERROR: getfilesize is not yet implemented on Windows.\n");
-    exit(EXIT_FAILURE);
+    _stat64 sb;
+    const int returnValue = _wstat64(filePath, &sb);
+    const size_t size = (size_t) sb.st_size;
 #else
     struct stat sb;
-    if (stat(path, &sb) != 0) {
-        perror("ERROR: Failed to get file size");
-    }
-    return (size_t) sb.st_size;
+    const int returnValue = stat(filePath, &sb);
+    const size_t size = (size_t) sb.st_size;
 #endif
+    if (returnValue != 0) {
+        perror("ERROR: Failed to get file size");
+        exit(EXIT_FAILURE);
+    }
+    return size;
 }
 
 FILE *myfopen(const char *fileName, const char *mode) {
