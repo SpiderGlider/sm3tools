@@ -190,25 +190,31 @@ void outputAudioFiles(const char *const inputFileName) {
     }
 }
 
+size_t findFSBMatchingFileName(
+    const char *const pcssbFileName,
+    const char *const fileNameString) {
+
+    size_t fsbIndexes[100] = {0};
+    const size_t numResults = findFSBHeaderIndexes(pcssbFileName, fsbIndexes, 100);
+    for (size_t i = 0; i < numResults; i++) {
+        char fsbFileName[FSB_FILENAME_SIZE] = {0};
+        readFileName(pcssbFileName, fsbIndexes[i], fsbFileName);
+
+        if (strcmp(fsbFileName, fileNameString) == 0) {
+            return fsbIndexes[i];
+        }
+    }
+
+    fprintf(stderr, "ERROR: File not found in PCSSB!\n");
+    exit(EXIT_FAILURE);
+}
+
 void replaceAudio(
     const char *const pcssbFileName,
     const char *const replaceFileName) {
 
-    size_t fsbIndexes[100] = {0};
-    const size_t numResults = findFSBHeaderIndexes(pcssbFileName, fsbIndexes, 100);
-
-    //TODO read PCSSB file into memory
-
     //find filename in PCSSB file
-    const char *const locPtr = strstr(pcssbFileName, replaceFileName);
-    if (locPtr == NULL) {
-        fprintf(stderr, "ERROR: File not found in PCSSB!\n");
-        exit(EXIT_FAILURE);
-    }
-
-    const size_t index = locPtr - pcssbFileName;
-
-    //TODO find closest fsb header
+    size_t fsbHeader = findFSBMatchingFileName(pcssbFileName, replaceFileName);
 
     //TODO go to audio data part of that fsb
 
