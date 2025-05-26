@@ -1,11 +1,16 @@
 #ifndef MYIO_H
 #define MYIO_H
+#include <stdint.h>
 #include <stdio.h>
 
-//cross platform mkdir wrapper.
+//cross-platform mkdir wrapper.
 //creates directory with mode 0777 on linux
 //logs the error if the directory failed to be created
 void mymkdir(const char *const path);
+
+//cross-platform stat wrapper.
+//logs the error and exits if performing stat fails
+intmax_t getfilesize(const char *const path);
 
 //wrapper functions around the <stdio.h> I/O functions
 //with additional logging/checks

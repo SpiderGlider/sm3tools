@@ -70,7 +70,22 @@ void readFileName(
     const size_t fsb3HeaderPosition,
     char resultArr[FSB_FILENAME_SIZE]);
 
+//find the first FSB in the PCSSB that has a filename field
+//matching fileNameString. Returns the fsb header index of that FSB.
+size_t findFirstFSBMatchingFileName(
+    const char *const pcssbFileName,
+    const char *const fileNameString);
+
 const int FSB_HEADER_SIZE = 104;
+
+//uses the filename of replaceFileName to find the relevant
+//FSB that has a matching filename field. then replaces the audio data
+//in that FSB with the contents of the file that has filename replaceFileName
+//into a new file that has the filename in pcssbFileName but with "-mod" appended
+//to the end.
+void replaceAudioinPCSSB(
+    const char *const pcssbFileName,
+    const char *const replaceFileName);
 
 //Writes the audio data from an FSB file into a file with file name = outputFileName
 //NOTE: overwrites file if it already exists.

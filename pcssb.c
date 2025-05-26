@@ -207,7 +207,7 @@ size_t findFirstFSBMatchingFileName(
     exit(EXIT_FAILURE);
 }
 
-void replaceAudio(
+void replaceAudioinPCSSB(
     const char *const pcssbFileName,
     const char *const replaceFileName) {
 
@@ -229,8 +229,9 @@ void replaceAudio(
     FILE *const outputFileHandle = myfopen("test-out.pcssb", "wb");
     myfwrite(pcssbHead, sizeof(char), fsbAudioDataIndex, outputFileHandle);
 
-    // const intmax_t replaceSize =
-    // char *const replaceData = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
+    const intmax_t replaceSize = getfilesize(replaceFileName);
+    char *const replaceData = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
+    free(replaceData);
 
     fclose(outputFileHandle);
 
