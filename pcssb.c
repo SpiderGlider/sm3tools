@@ -218,11 +218,13 @@ void replaceAudio(
 
     //TODO go to audio data part of that fsb
 
-    //TODO replace audio data there with the data of replaceFileName
+    //TODO write all the bytes from the file up till that point into a new file
+
+    //TODO append all the data in replaceFileName at the end of that new file
+
+    //TODO append all the bytes after the audio data end from the original into the new file
 
     //TODO change data size field to match size of replaceFileName
-
-    //TODO write to a new file
 }
 
 int main(const int argc, const char *const argv[]) {
