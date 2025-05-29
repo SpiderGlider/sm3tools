@@ -234,22 +234,6 @@ void replaceAudioinPCSSB(
             FILE *const outputFileHandle = myfopen("test-out.pcssb", "wb");
             {
                 myfwrite(pcssbHead, sizeof(char), fsbAudioDataIndex, outputFileHandle);
-
-                FILE* replaceFileHandle = myfopen(replaceFileName, "rb");
-                {
-                    //read replacement audio
-                    const intmax_t replaceSize = getfilesize(replaceFileName);
-                    char *const replaceData = (char*) malloc((replaceSize + 1) * sizeof(char));
-                    {
-                        myfread(replaceData, sizeof(char), replaceSize, replaceFileHandle);
-                        replaceData[replaceSize] = '\0';
-
-                        //append to new file
-                        fwrite(replaceData, sizeof(char), replaceSize, outputFileHandle);
-                    }
-                    free(replaceData);
-                }
-                (void) fclose(replaceFileHandle);
             }
             (void) fclose(outputFileHandle);
         }
@@ -257,12 +241,25 @@ void replaceAudioinPCSSB(
     }
     (void) fclose(pcssbFileHandle);
 
+    FILE *const outputFileHandle = myfopen("test-out.pcssb", "ab");
+    {
+        FILE* const replaceFileHandle = myfopen(replaceFileName, "rb");
+        {
+            //read replacement audio
+            const intmax_t replaceSize = getfilesize(replaceFileName);
+            char *const replaceData = (char*) malloc((replaceSize + 1) * sizeof(char));
+            {
+                myfread(replaceData, sizeof(char), replaceSize, replaceFileHandle);
+                replaceData[replaceSize] = '\0';
 
-    //TODO go to audio data part of that fsb
-
-    //TODO write all the bytes from the file up till that point into a new file
-
-    //TODO append all the data in replaceFileName at the end of that new file
+                //append to new file
+                fwrite(replaceData, sizeof(char), replaceSize, outputFileHandle);
+            }
+            free(replaceData);
+        }
+        (void) fclose(replaceFileHandle);
+    }
+    (void) fclose(outputFileHandle);
 
     //TODO append all the bytes after the audio data end from the original into the new file
 
