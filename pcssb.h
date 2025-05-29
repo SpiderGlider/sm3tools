@@ -59,8 +59,10 @@ uint32_t readDataSize(
     const size_t fsb3HeaderPosition);
 
 //number of bytes used to store the sample filename in FSB archives,
-//EXCLUDING the "P\0" at the start for simplicity
-#define FSB_FILENAME_SIZE 30
+//EXCLUDING the "P\0" at the start for simplicity (-2)
+//BUT INCLUDING an extra byte (+1) for adding a null terminator at the end when
+//read to a string, also for simplicity. 32 - 2 + 1 = 31
+#define FSB_FILENAME_SIZE 31
 
 //Reads the file name field in the FSB file that starts at fsb3HeaderPosition.
 //fsb3HeaderPosition must be the location of the start of the "FSB3" header string.

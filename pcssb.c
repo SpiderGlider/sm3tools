@@ -118,6 +118,7 @@ void readFileName(
         (void) myfread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
     }
     (void) fclose(fileHandle);
+    resultArr[FSB_FILENAME_SIZE - 1] = '\0';
 }
 
 void outputAudioData(
