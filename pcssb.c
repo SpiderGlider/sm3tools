@@ -330,8 +330,24 @@ void replaceAudioinPCSSB(
 }
 
 int main(const int argc, const char *const argv[]) {
-    //printFSBHeaderIndexes(argv[1]);
-    //outputAudioFiles(argv[1]);
-    replaceAudioinPCSSB(argv[1], argv[2]);
+    if (argc < 2) {
+        (void) fprintf(stderr, "ERROR: This program needs "
+                               "at least one input argument.");
+        return EXIT_FAILURE;
+    }
+    if (argc == 2) {
+        (void) printf("INFO: Extracting audio from %s\n", argv[1]);
+        //printFSBHeaderIndexes(argv[1]);
+        outputAudioFiles(argv[1]);
+    }
+    if (argc > 3) {
+        (void) fprintf(stderr, "WARNING: Arguments after the 2nd"
+                        " argument are currently ignored.\n");
+    }
+    if (argc >= 3) {
+        (void) printf("Replacing %s in %s\n", argv[2], argv[1]);
+        replaceAudioinPCSSB(argv[1], argv[2]);
+    }
+    return EXIT_SUCCESS;
 }
 
