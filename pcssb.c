@@ -181,16 +181,23 @@ void outputAudioFiles(const char *const inputFileName) {
             assert(fileExtensionIndex > 0);
 
             char outputDir[200] = {0};
-            //copy the head of the string until and including the last '.'
-            (void) strncpy(outputDir, inputFileName, (size_t) fileExtensionIndex + 1);
-            //replace '.' with null terminator
-            outputDir[fileExtensionIndex] = '\0';
+            //copy the head of the string until (excluding) the last '.'
+            (void) snprintf(
+                outputDir,
+                (size_t) fileExtensionIndex + 1,
+                "%s",
+                inputFileName);
             //create the directory corresponding to that path
             mymkdir(outputDir);
 
             //create path with file fsbFileName inside the output directory
             char outputPath[300] = {0};
-            (void) snprintf(outputPath, 300, "%s/%s", outputDir, fsbFileName);
+            (void) snprintf(
+                outputPath,
+                300,
+                "%s/%s",
+                outputDir,
+                fsbFileName);
             outputAudioData(
                 inputFileName,
                 fsbIndexes[i],
@@ -284,7 +291,7 @@ void replaceAudioinPCSSB(
     //- byte for null terminator is included in sizeof("-mod")
     const size_t outputFileNameSize = (strlen(pcssbFileName) + sizeof("-mod"))
         * sizeof(char);
-    char *const outputFileName = (char *) malloc(outputFileNameSize);
+    char *const outputFileName = (char*) malloc(outputFileNameSize);
     {
         //generate output file name
         (void) snprintf(outputFileName, outputFileNameSize, "%s-mod", pcssbFileName);
@@ -325,7 +332,7 @@ void replaceAudioinPCSSB(
         //NOTE: this warning is unlikely to be reachable on most platforms
         //but is just there for portability. The data size can't be more than 4 bits
         if (replaceDataSize > UINT32_MAX) {
-            fprintf(stderr, "WARNING: Replacement audio data size is too large"
+            (void) fprintf(stderr, "WARNING: Replacement audio data size is too large"
                             ", replacement may not work properly!\n");
         }
         //change data size field to match size of replaceFileName
