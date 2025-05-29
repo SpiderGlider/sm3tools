@@ -280,53 +280,61 @@ void replaceAudioinPCSSB(
     const char *const pcssbFileName,
     const char *const replaceFileName) {
 
-    //TODO use an output filename based on the pcssb file name with "-mod" at the end
-    const char *const outputFileName = "./test-out.pcssb";
+    //length of output path including null terminator
+    //- byte for null terminator is included in sizeof("-mod")
+    const size_t outputFileNameSize = (strlen(pcssbFileName) + sizeof("-mod"))
+        * sizeof(char);
+    char *const outputFileName = (char *) malloc(outputFileNameSize);
+    {
+        //generate output file name
+        (void) snprintf(outputFileName, outputFileNameSize, "%s-mod", pcssbFileName);
 
-    //find filename in PCSSB file
-    const size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
-    const uint32_t originalDataSize = readDataSize(pcssbFileName, fsbHeaderIndex);
-    const intmax_t replaceDataSize = getfilesize(replaceFileName);
-    const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-    //append everything up to the existing audio data into the output file
-    readAndAppend(
-        pcssbFileName,
-        outputFileName,
-        fsbAudioDataIndex,
-        0);
+        //find audio file in PCSSB
+        const size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
+        const uint32_t originalDataSize = readDataSize(pcssbFileName, fsbHeaderIndex);
+        const intmax_t replaceDataSize = getfilesize(replaceFileName);
+        const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
+        //append everything up to the existing audio data into the output file
+        readAndAppend(
+            pcssbFileName,
+            outputFileName,
+            fsbAudioDataIndex,
+            0);
 
-    //append the replacement audio data into the output file
-    readAndAppend(
-        replaceFileName,
-        outputFileName,
-        //NOTE: case where the data size is negative is logged in myIO.c.
-        //apparently negative values for it are supposed to wrap around
-        //to positive ones anyway so this should work. but it is not guaranteed to.
-        (size_t) replaceDataSize,
-        0);
+        //append the replacement audio data into the output file
+        readAndAppend(
+            replaceFileName,
+            outputFileName,
+            //NOTE: case where the data size is negative is logged in myIO.c.
+            //apparently negative values for it are supposed to wrap around
+            //to positive ones anyway so this should work. but it is not guaranteed to.
+            (size_t) replaceDataSize,
+            0);
 
-    //append the rest of the original file after the audio data
-    readAndAppend(
-        pcssbFileName,
-        outputFileName,
-        //NOTE: this will overflow but it shouldn't matter
-        //ensures all the bytes after from original file is read
-        (size_t) getfilesize(pcssbFileName),
-        fsbAudioDataIndex + originalDataSize);
+        //append the rest of the original file after the audio data
+        readAndAppend(
+            pcssbFileName,
+            outputFileName,
+            //NOTE: this will overflow but it shouldn't matter
+            //ensures all the bytes after from original file is read
+            (size_t) getfilesize(pcssbFileName),
+            fsbAudioDataIndex + originalDataSize);
 
-    const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
+        const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
 
-    //NOTE: this warning is unlikely to be reachable on most platforms
-    //but is just there for portability. The data size can't be more than 4 bits
-    if (replaceDataSize > UINT32_MAX) {
-        fprintf(stderr, "WARNING: Replacement audio data size is too large"
-                        ", replacement may not work properly!\n");
+        //NOTE: this warning is unlikely to be reachable on most platforms
+        //but is just there for portability. The data size can't be more than 4 bits
+        if (replaceDataSize > UINT32_MAX) {
+            fprintf(stderr, "WARNING: Replacement audio data size is too large"
+                            ", replacement may not work properly!\n");
+        }
+        //change data size field to match size of replaceFileName
+        replaceLongInFile(
+            outputFileName,
+            (fsbHeaderIndex + DATA_SIZE_OFFSET),
+            (uint32_t) replaceDataSize);
     }
-    //change data size field to match size of replaceFileName
-    replaceLongInFile(
-        outputFileName,
-        (fsbHeaderIndex + DATA_SIZE_OFFSET),
-        (uint32_t) replaceDataSize);
+    free(outputFileName);
 }
 
 int main(const int argc, const char *const argv[]) {
