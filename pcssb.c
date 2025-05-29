@@ -211,55 +211,61 @@ size_t findFirstFSBMatchingFileName(
     exit(EXIT_FAILURE);
 }
 
+//reads readCount bytes from input (starting from readPosition)
+//and appends what's read to the output file.
+//creates output file if it does not exist.
+void readAndAppend(
+    const char *const inputFileName,
+    const char *const outputFileName,
+    const size_t readCount,
+    const size_t readPosition) {
+
+    //store bytes from input in intermediate buffer
+    //(plus one extra byte for null terminator)
+    char *const buffer = (char*) malloc((readCount + 1) * sizeof(char));
+    {
+        FILE *const inputFileHandle = myfopen(inputFileName, "rb");
+        {
+            myfseek_unsigned(inputFileHandle, readPosition, SEEK_SET);
+
+            myfread(buffer, sizeof(char), readCount, inputFileHandle);
+            //null terminate buffer string for safety
+            buffer[readCount] = '\0';
+        }
+        (void) fclose(inputFileHandle);
+
+        FILE *const outputFileHandle = myfopen(outputFileName, "ab");
+        {
+            myfwrite(buffer, sizeof(char), readCount, outputFileHandle);
+        }
+        (void) fclose(outputFileHandle);
+    }
+    free(buffer);
+}
+
 void replaceAudioinPCSSB(
     const char *const pcssbFileName,
     const char *const replaceFileName) {
 
+    //TODO use an output filename based on the pcssb file name with "-mod" at the end
+    const char *const outputFileName = "./test-out.pcssb";
+
     //find filename in PCSSB file
-    size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
+    const size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
+    const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
+    //append everything up to the existing audio data into the output file
+    readAndAppend(
+        pcssbFileName,
+        outputFileName,
+        fsbAudioDataIndex,
+        0);
 
-    FILE *const pcssbFileHandle = myfopen(pcssbFileName, "rb");
-    {
-        //store all bytes up until start of audio data
-        //(plus one extra byte for the null terminator)
-        const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-        char *const pcssbHead = (char*) malloc((fsbAudioDataIndex + 1) * sizeof(char));
-        {
-            myfread(pcssbHead, sizeof(char), fsbAudioDataIndex, pcssbFileHandle);
-            //null terminate string for safety reasons
-            pcssbHead[fsbAudioDataIndex] = '\0';
-
-            //write into new file
-            //TODO use an output filename based on the pcssb file name with "-mod" at the end
-            FILE *const outputFileHandle = myfopen("test-out.pcssb", "wb");
-            {
-                myfwrite(pcssbHead, sizeof(char), fsbAudioDataIndex, outputFileHandle);
-            }
-            (void) fclose(outputFileHandle);
-        }
-        free(pcssbHead);
-    }
-    (void) fclose(pcssbFileHandle);
-
-    FILE *const outputFileHandle = myfopen("test-out.pcssb", "ab");
-    {
-        FILE* const replaceFileHandle = myfopen(replaceFileName, "rb");
-        {
-            //read replacement audio
-            const intmax_t replaceSize = getfilesize(replaceFileName);
-            char *const replaceData = (char*) malloc((replaceSize + 1) * sizeof(char));
-            {
-                myfread(replaceData, sizeof(char), replaceSize, replaceFileHandle);
-                replaceData[replaceSize] = '\0';
-
-                //append to new file
-                fwrite(replaceData, sizeof(char), replaceSize, outputFileHandle);
-            }
-            free(replaceData);
-        }
-        (void) fclose(replaceFileHandle);
-    }
-    (void) fclose(outputFileHandle);
+    //append the replacement audio data into the output file
+    readAndAppend(
+        replaceFileName,
+        outputFileName,
+        getfilesize(replaceFileName),
+        0);
 
     //TODO append all the bytes after the audio data end from the original into the new file
 
