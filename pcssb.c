@@ -282,7 +282,7 @@ void replaceAudioinPCSSB(
     //find filename in PCSSB file
     const size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
     const size_t originalDataSize = readDataSize(pcssbFileName, fsbHeaderIndex);
-    const size_t replaceDataSize = getfilesize(replaceFileName);
+    const intmax_t replaceDataSize = getfilesize(replaceFileName);
     const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
     //append everything up to the existing audio data into the output file
     readAndAppend(
@@ -308,11 +308,18 @@ void replaceAudioinPCSSB(
         fsbAudioDataIndex + originalDataSize);
 
     const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
+
+    //NOTE: this warning is unlikely to be reachable on most platforms
+    //but is just there for portability. The data size can't be more than 4 bits
+    if (replaceDataSize > UINT32_MAX) {
+        fprintf(stderr, "WARNING: Replacement audio data size is too large"
+                        ", replacement may not work properly!\n");
+    }
     //change data size field to match size of replaceFileName
     replaceLongInFile(
         outputFileName,
         (fsbHeaderIndex + DATA_SIZE_OFFSET),
-        replaceDataSize);
+        (uint32_t) replaceDataSize);
 }
 
 int main(const int argc, const char *const argv[]) {
