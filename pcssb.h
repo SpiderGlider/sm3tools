@@ -102,4 +102,21 @@ void outputAudioData(
 //PC .PCSSB files. For example, each FSB file is partly duplicated so we don't output the duplicate.
 void outputAudioFiles(const char *const inputFileName);
 
+//reads readCount bytes from input (starting from readPosition)
+//and appends what's read to the output file.
+//creates output file if it does not exist.
+void readAndAppend(
+    const char *const inputFileName,
+    const char *const outputFileName,
+    const size_t readCount,
+    const size_t readPosition);
+
+//replace a uint32_t field in a file.
+//the field has to be exactly sizeof(uint32_t) bytes, any less or more
+//and the write will not work as expected.
+void replaceLongInFile(
+    const char *const fileName,
+    const size_t longPosition,
+    const uint32_t newValue);
+
 #endif
