@@ -253,6 +253,7 @@ void replaceAudioinPCSSB(
     //find filename in PCSSB file
     const size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
     const size_t originalDataSize = readDataSize(pcssbFileName, fsbHeaderIndex);
+    const size_t replaceDataSize = getfilesize(replaceFileName);
     const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
     //append everything up to the existing audio data into the output file
     readAndAppend(
@@ -265,7 +266,7 @@ void replaceAudioinPCSSB(
     readAndAppend(
         replaceFileName,
         outputFileName,
-        getfilesize(replaceFileName),
+        replaceDataSize,
         0);
 
     //append the rest of the original file after the audio data
@@ -277,11 +278,25 @@ void replaceAudioinPCSSB(
         getfilesize(pcssbFileName),
         fsbAudioDataIndex + originalDataSize);
 
-    //TODO change data size field to match size of replaceFileName
+    //change data size field to match size of replaceFileName
+    const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
+    FILE *const fileHandle = myfopen(outputFileName, "wb");
+    {
+        //set the file position indicator to start of FSB file
+        myfseek_unsigned(fileHandle, fsbHeaderIndex, SEEK_SET);
+        //move to location where data size is written
+        myfseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
+
+        //write data size long
+        (void) myfwrite(&replaceDataSize, sizeof(uint32_t), 1, fileHandle);
+    }
+    (void) fclose(fileHandle);
 }
 
 int main(const int argc, const char *const argv[]) {
     //printFSBHeaderIndexes(argv[1]);
-    outputAudioFiles(argv[1]);
+    //outputAudioFiles(argv[1]);
+
+
 }
 
