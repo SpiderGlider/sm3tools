@@ -228,17 +228,17 @@ void readAndAppend(
         {
             myfseek_unsigned(inputFileHandle, readPosition, SEEK_SET);
 
-            myfread(buffer, sizeof(char), readCount, inputFileHandle);
+            const size_t numRead = myfread(buffer, sizeof(char), readCount, inputFileHandle);
             //null terminate buffer string for safety
-            buffer[readCount] = '\0';
+            buffer[numRead] = '\0';
+
+            FILE *const outputFileHandle = myfopen(outputFileName, "ab");
+            {
+                (void) myfwrite(buffer, sizeof(char), numRead, outputFileHandle);
+            }
+            (void) fclose(outputFileHandle);
         }
         (void) fclose(inputFileHandle);
-
-        FILE *const outputFileHandle = myfopen(outputFileName, "ab");
-        {
-            myfwrite(buffer, sizeof(char), readCount, outputFileHandle);
-        }
-        (void) fclose(outputFileHandle);
     }
     free(buffer);
 }
@@ -278,25 +278,24 @@ void replaceAudioinPCSSB(
         getfilesize(pcssbFileName),
         fsbAudioDataIndex + originalDataSize);
 
-    //change data size field to match size of replaceFileName
-    const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
-    FILE *const fileHandle = myfopen(outputFileName, "wb");
-    {
-        //set the file position indicator to start of FSB file
-        myfseek_unsigned(fileHandle, fsbHeaderIndex, SEEK_SET);
-        //move to location where data size is written
-        myfseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
-
-        //write data size long
-        (void) myfwrite(&replaceDataSize, sizeof(uint32_t), 1, fileHandle);
-    }
-    (void) fclose(fileHandle);
+    // //change data size field to match size of replaceFileName
+    // const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
+    // FILE *const fileHandle = myfopen(outputFileName, "wb");
+    // {
+    //     //set the file position indicator to start of FSB file
+    //     myfseek_unsigned(fileHandle, fsbHeaderIndex, SEEK_SET);
+    //     //move to location where data size is written
+    //     myfseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
+    //
+    //     //write data size long
+    //     (void) myfwrite(&replaceDataSize, sizeof(uint32_t), 1, fileHandle);
+    // }
+    // (void) fclose(fileHandle);
 }
 
 int main(const int argc, const char *const argv[]) {
     //printFSBHeaderIndexes(argv[1]);
     //outputAudioFiles(argv[1]);
-
-
+    replaceAudioinPCSSB(argv[1], argv[2]);
 }
 
