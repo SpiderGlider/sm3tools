@@ -164,17 +164,25 @@ void outputAudioFiles(const char *const inputFileName) {
             //apart from the last FSB, actual data size is just distance from the data start until the next FSB
             const size_t actualDataSize = fsbIndexes[i+1] - (fsbIndexes[i] + FSB_HEADER_SIZE);
             if (fsbDataSize != actualDataSize) {
-                (void) printf("LOG: Data size value doesn't match actual size!");
+                (void) printf("LOG: Data size value doesn't match actual size!\n");
             }
             char fsbFileName[FSB_FILENAME_SIZE] = {0};
             readFileName(inputFileName, fsbIndexes[i], fsbFileName);
 
             //get location of file extension start
-            const ptrdiff_t fileExtensionIndex = strrchr(inputFileName, '.') - inputFileName;
+            /*TODO: should this be an assert? depends if this will be called from sm3tools.c
+                which already has file extension validation*/
+            const char* const fileExtensionPtr = strrchr(inputFileName, '.');
+            if (fileExtensionPtr == NULL) {
+                fprintf(stderr, "ERROR: Input file doesn't have a file extension!\n");
+                exit(EXIT_FAILURE);
+            }
+            const ptrdiff_t fileExtensionIndex = fileExtensionPtr - inputFileName;
             assert(fileExtensionIndex > 0);
+
             char outputDir[200] = {0};
             //copy the head of the string until and including the last '.'
-            (void) strncpy(outputDir, inputFileName, fileExtensionIndex + 1);
+            (void) strncpy(outputDir, inputFileName, (size_t) fileExtensionIndex + 1);
             //replace '.' with null terminator
             outputDir[fileExtensionIndex] = '\0';
             //create the directory corresponding to that path
@@ -265,8 +273,9 @@ void replaceLongInFile(
             fileHandle);
 
         if (numWritten != 1) {
-            (void) fprintf(stderr, "LOG: Error replacing long"
+            (void) fprintf(stderr, "ERROR: Error replacing long"
                             " at position %lu in %s!\n", longPosition, fileName);
+            (void) fclose(fileHandle);
             exit(EXIT_FAILURE);
         }
     }
