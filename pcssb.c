@@ -305,7 +305,10 @@ void replaceAudioinPCSSB(
     readAndAppend(
         replaceFileName,
         outputFileName,
-        replaceDataSize,
+        //NOTE: case where the data size is negative is logged in myIO.c.
+        //apparently negative values for it are supposed to wrap around
+        //to positive ones anyway so this should work. but it is not guaranteed to.
+        (size_t) replaceDataSize,
         0);
 
     //append the rest of the original file after the audio data
@@ -314,7 +317,7 @@ void replaceAudioinPCSSB(
         outputFileName,
         //NOTE: this will overflow but it shouldn't matter
         //ensures all the bytes after from original file is read
-        getfilesize(pcssbFileName),
+        (size_t) getfilesize(pcssbFileName),
         fsbAudioDataIndex + originalDataSize);
 
     const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);

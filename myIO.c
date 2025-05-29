@@ -36,6 +36,10 @@ intmax_t getfilesize(const char *const filePath) {
         perror("ERROR: Failed to get file size");
         exit(EXIT_FAILURE);
     }
+    if (size < 0) {
+        fprintf(stderr, "WARNING: File size is negative,"
+                        "it may or may not be handled correctly.\n");
+    }
     return size;
 }
 
