@@ -70,6 +70,23 @@ void readFileName(
     const size_t fsb3HeaderPosition,
     char resultArr[FSB_FILENAME_SIZE]);
 
+//find the first FSB in the PCSSB that has a filename field
+//matching fileNameString. Returns the fsb header index of that FSB.
+size_t findFirstFSBMatchingFileName(
+    const char *const pcssbFileName,
+    const char *const fileNameString);
+
+const int FSB_HEADER_SIZE = 104;
+
+//uses the filename of replaceFileName to find the relevant
+//FSB that has a matching filename field. then replaces the audio data
+//in that FSB with the contents of the file that has filename replaceFileName
+//into a new file that has the filename in pcssbFileName but with "-mod" appended
+//to the end.
+void replaceAudioinPCSSB(
+    const char *const pcssbFileName,
+    const char *const replaceFileName);
+
 //Writes the audio data from an FSB file into a file with file name = outputFileName
 //NOTE: overwrites file if it already exists.
 void outputAudioData(
@@ -84,5 +101,22 @@ void outputAudioData(
 //Assumes various things about the file that are likely only true for the Spider-Man 3
 //PC .PCSSB files. For example, each FSB file is partly duplicated so we don't output the duplicate.
 void outputAudioFiles(const char *const inputFileName);
+
+//reads readCount bytes from input (starting from readPosition)
+//and appends what's read to the output file.
+//creates output file if it does not exist.
+void readAndAppend(
+    const char *const inputFileName,
+    const char *const outputFileName,
+    const size_t readCount,
+    const size_t readPosition);
+
+//replace a uint32_t field in a file.
+//the field has to be exactly sizeof(uint32_t) bytes, any less or more
+//and the write will not work as expected.
+void replaceLongInFile(
+    const char *const fileName,
+    const size_t longPosition,
+    const uint32_t newValue);
 
 #endif

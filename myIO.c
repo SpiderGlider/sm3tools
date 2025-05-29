@@ -7,10 +7,9 @@
 
 #ifdef _WIN32
 #include <direct.h>
-#else
-#include <sys/stat.h>
-#include <sys/types.h>
 #endif
+#include <sys/types.h>
+#include <sys/stat.h>
 
 void mymkdir(const char *const path) {
 #ifdef _WIN32
@@ -21,6 +20,27 @@ void mymkdir(const char *const path) {
     if (returnValue != 0) {
         perror("ERROR: Failed to create directory");
     }
+}
+
+intmax_t getfilesize(const char *const filePath) {
+#ifdef _WIN32
+    _stat64 sb;
+    const int returnValue = _wstat64(filePath, &sb);
+    const intmax_t size = (intmax_t) sb.st_size;
+#else
+    struct stat sb;
+    const int returnValue = stat(filePath, &sb);
+    const intmax_t size = (intmax_t) sb.st_size;
+#endif
+    if (returnValue != 0) {
+        perror("ERROR: Failed to get file size");
+        exit(EXIT_FAILURE);
+    }
+    if (size < 0) {
+        fprintf(stderr, "WARNING: File size is negative,"
+                        "it may or may not be handled correctly.\n");
+    }
+    return size;
 }
 
 FILE *myfopen(const char *fileName, const char *mode) {

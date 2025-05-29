@@ -1,17 +1,24 @@
 #ifndef MYIO_H
 #define MYIO_H
+#include <stdint.h>
 #include <stdio.h>
 
-//cross platform mkdir wrapper.
+//cross-platform mkdir wrapper.
 //creates directory with mode 0777 on linux
 //logs the error if the directory failed to be created
 void mymkdir(const char *const path);
+
+//cross-platform stat wrapper.
+//logs the error and exits if performing stat fails
+intmax_t getfilesize(const char *const path);
 
 //wrapper functions around the <stdio.h> I/O functions
 //with additional logging/checks
 
 //wrapper around fopen that checks if the returned
 //pointer is NULL, in which case it prints the error to stderr and exits.
+//NOTE: this does not close the file handle so you have to call fclose
+//after you're done using it, like with normal fopen.
 FILE *myfopen(const char *fileName, const char *mode);
 
 //wrapper around fread that checks feof and ferror
