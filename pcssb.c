@@ -170,7 +170,8 @@ void outputAudioFiles(const char *const inputFileName) {
             readFileName(inputFileName, fsbIndexes[i], fsbFileName);
 
             //get location of file extension start
-            const size_t fileExtensionIndex = strrchr(inputFileName, '.') - inputFileName;
+            const ptrdiff_t fileExtensionIndex = strrchr(inputFileName, '.') - inputFileName;
+            assert(fileExtensionIndex > 0);
             char outputDir[200] = {0};
             //copy the head of the string until and including the last '.'
             (void) strncpy(outputDir, inputFileName, fileExtensionIndex + 1);
