@@ -291,7 +291,7 @@ void replaceAudioinPCSSB(
 
     //find filename in PCSSB file
     const size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
-    const size_t originalDataSize = readDataSize(pcssbFileName, fsbHeaderIndex);
+    const uint32_t originalDataSize = readDataSize(pcssbFileName, fsbHeaderIndex);
     const intmax_t replaceDataSize = getfilesize(replaceFileName);
     const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
     //append everything up to the existing audio data into the output file
