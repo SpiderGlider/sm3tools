@@ -252,6 +252,7 @@ void replaceAudioinPCSSB(
 
     //find filename in PCSSB file
     const size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
+    const size_t originalDataSize = readDataSize(pcssbFileName, fsbHeaderIndex);
     const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
     //append everything up to the existing audio data into the output file
     readAndAppend(
@@ -267,7 +268,14 @@ void replaceAudioinPCSSB(
         getfilesize(replaceFileName),
         0);
 
-    //TODO append all the bytes after the audio data end from the original into the new file
+    //append the rest of the original file after the audio data
+    readAndAppend(
+        pcssbFileName,
+        outputFileName,
+        //NOTE: this will overflow but it shouldn't matter
+        //ensures all the bytes after from original file is read
+        getfilesize(pcssbFileName),
+        fsbAudioDataIndex + originalDataSize);
 
     //TODO change data size field to match size of replaceFileName
 }
