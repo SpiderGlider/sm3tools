@@ -105,13 +105,16 @@ void outputAudioData(
 void outputAudioFiles(const char *const inputFileName);
 
 //reads readCount bytes from input (starting from readPosition)
-//and appends what's read to the output file.
+//and writes what's read to the output file
+//(destroying the file if it exists) if append is false.
+//otherwise it appends to the output file.
 //creates output file if it does not exist.
-void readAndAppend(
+void readAndWriteToNewFile(
     const char *const inputFileName,
     const char *const outputFileName,
     const size_t readCount,
-    const size_t readPosition);
+    const size_t readPosition,
+    const bool append);
 
 //replace a uint32_t field in a file.
 //the field has to be exactly sizeof(uint32_t) bytes, any less or more
