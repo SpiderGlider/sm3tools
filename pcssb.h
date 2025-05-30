@@ -2,6 +2,7 @@
 #define PCSSB_H
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 struct FSB {
     uint32_t fsb3Header; // FSB3
