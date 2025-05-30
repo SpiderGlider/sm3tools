@@ -228,11 +228,14 @@ size_t findFirstFSBMatchingFileName(
     exit(EXIT_FAILURE);
 }
 
-void readAndAppend(
+void readAndWriteToNewFile(
     const char *const inputFileName,
     const char *const outputFileName,
     const size_t readCount,
-    const size_t readPosition) {
+    const size_t readPosition,
+    const bool append) {
+
+    assert(append == false || append == true);
 
     //store bytes from input in intermediate buffer
     //(plus one extra byte for null terminator)
@@ -246,7 +249,11 @@ void readAndAppend(
             //null terminate buffer string for safety
             buffer[numRead] = '\0';
 
-            FILE *const outputFileHandle = myfopen(outputFileName, "ab");
+            //either append or write depending on append argument
+            //NOTE: we create an outputMode variable this way so that
+            //we can keep outputFileHandle const
+            const char *const outputMode = append ? "ab" : "wb";
+            FILE *const outputFileHandle = myfopen(outputFileName, outputMode);
             {
                 (void) myfwrite(buffer, sizeof(char), numRead, outputFileHandle);
             }
@@ -303,30 +310,33 @@ void replaceAudioinPCSSB(
         const intmax_t replaceDataSize = getfilesize(replaceFileName);
         const size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
         //append everything up to the existing audio data into the output file
-        readAndAppend(
+        readAndWriteToNewFile(
             pcssbFileName,
             outputFileName,
             fsbAudioDataIndex,
-            0);
+            0,
+            false);
 
         //append the replacement audio data into the output file
-        readAndAppend(
+        readAndWriteToNewFile(
             replaceFileName,
             outputFileName,
             //NOTE: case where the data size is negative is logged in myIO.c.
             //apparently negative values for it are supposed to wrap around
             //to positive ones anyway so this should work. but it is not guaranteed to.
             (size_t) replaceDataSize,
-            0);
+            0,
+            true);
 
         //append the rest of the original file after the audio data
-        readAndAppend(
+        readAndWriteToNewFile(
             pcssbFileName,
             outputFileName,
             //NOTE: this will overflow but it shouldn't matter
             //ensures all the bytes after from original file is read
             (size_t) getfilesize(pcssbFileName),
-            fsbAudioDataIndex + originalDataSize);
+            fsbAudioDataIndex + originalDataSize,
+            true);
 
         const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
 
