@@ -26,11 +26,11 @@ void mymkdir(const char *const path) {
 
 intmax_t getfilesize(const char *const filePath) {
 #ifdef _WIN32
-    _stat64 sb;
+    _stat64 sb = {0};
     const int returnValue = _wstat64(filePath, &sb);
     const intmax_t size = (intmax_t) sb.st_size;
 #else
-    struct stat sb;
+    struct stat sb = {0};
     const int returnValue = stat(filePath, &sb);
     const intmax_t size = (intmax_t) sb.st_size;
 #endif
