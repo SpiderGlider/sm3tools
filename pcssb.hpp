@@ -4,33 +4,33 @@
 #include <cstdint>
 
 struct FSB {
-    std::uint32_t fsb3Header; // FSB3
+    std::uint32_t fsb3Header {}; // "FSB3"
 
-    std::uint32_t numFiles; // = 1
+    std::uint32_t numFiles {}; // = 1
 
-    std::uint32_t unknown1; // = 80
+    std::uint32_t unknown1 {}; // = 80
 
-    std::uint32_t dataSize;
+    std::uint32_t dataSize {};
 
-    std::uint32_t unknown2; // = 196609
-    std::uint32_t null1;
+    std::uint32_t unknown2 {}; // = 196609
+    std::uint32_t null1 {};
 
-    char* fileName; // 32 bytes
+    char* fileName {}; // 32 bytes
 
-    std::uint32_t unknown3;
-    std::uint32_t unknown4;
-    std::uint32_t null2;
-    std::uint32_t unknown5;
-    std::uint32_t unknown6; // = 8768
-    std::uint32_t unknown7; // = 48000
-    std::uint32_t unknown8; // = 1
-    std::uint32_t unknown9; // = 131200
-    std::uint32_t unknown10; // = 1065353216
-    std::uint32_t unknown11; // = 1176256512
-    std::uint32_t null3;
-    std::uint32_t null4;
+    std::uint32_t unknown3 {};
+    std::uint32_t unknown4 {};
+    std::uint32_t null2 {};
+    std::uint32_t unknown5 {};
+    std::uint32_t unknown6 {}; // = 8768
+    std::uint32_t unknown7 {}; // = 48000
+    std::uint32_t unknown8 {}; // = 1
+    std::uint32_t unknown9 {}; // = 131200
+    std::uint32_t unknown10 {}; // = 1065353216
+    std::uint32_t unknown11 {}; // = 1176256512
+    std::uint32_t null3 {};
+    std::uint32_t null4 {};
 
-    char* data;
+    char* data {};
 };
 
 //finds every instance of "FSB3" header text in the sound file
@@ -78,7 +78,7 @@ std::size_t findFirstFSBMatchingFileName(
     const char *const pcssbFileName,
     const char *const fileNameString);
 
-constexpr int FSB_HEADER_SIZE = 104;
+constexpr int FSB_HEADER_SIZE { 104 };
 
 //uses the filename of replaceFileName to find the relevant
 //FSB that has a matching filename field. then replaces the audio data

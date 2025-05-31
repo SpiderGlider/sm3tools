@@ -14,7 +14,7 @@ typedef enum FILE_TYPE {
 FileType getFileType(const char *const fileName) {
     assert(fileName != nullptr);
 
-    const char *const fileExtension = strrchr(fileName, '.');
+    const char *const fileExtension { std::strrchr(fileName, '.') };
 
     if (fileExtension == nullptr) {
         std::cerr << "ERROR: Argument doesn't have a file extension."
@@ -24,8 +24,8 @@ FileType getFileType(const char *const fileName) {
 
     // TODO could check magic numbers as well
     // FIXME case sensitive currently
-    if (strcmp(fileExtension, ".PCPACK") == 0) return PCPACK;
-    if (strcmp(fileExtension, ".pcssb") == 0) return PCSSB;
+    if (std::strcmp(fileExtension, ".PCPACK") == 0) return PCPACK;
+    if (std::strcmp(fileExtension, ".pcssb") == 0) return PCSSB;
 
     std::cerr << "ERROR: File extension not recognised.\n";
     std::exit(EXIT_FAILURE);
@@ -45,7 +45,7 @@ int main(const int argc, const char *const argv[]) {
                         " argument are currently ignored.\n";
     }
 
-    const FileType fileType = getFileType(argv[1]);
+    const FileType fileType { getFileType(argv[1]) };
     if (fileType == PCPACK) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
         std::exit(EXIT_FAILURE);
