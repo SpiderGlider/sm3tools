@@ -1,9 +1,9 @@
-#include "myIO.h"
+#include "myIO.hpp"
 
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <climits>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -106,7 +106,7 @@ size_t myfwrite(
 void myfseek(FILE *const stream, const long int offset, const int origin) {
     const int returnValue = fseek(stream, offset, origin);
     if (returnValue != 0) {
-        fprintf(stderr, "ERROR: fseek() failed!\n");
+        (void) fprintf(stderr, "ERROR: fseek() failed!\n");
         (void) fclose(stream);
         exit(EXIT_FAILURE);
     };
@@ -121,15 +121,15 @@ void myfseek_unsigned(FILE *const stream, const unsigned long int offset, const 
         myfseek(stream, LONG_MAX, origin);
         if (origin == SEEK_END) {
             //seeks backwards the remaining distance
-            myfseek(stream, (long int) -(offset - LONG_MAX), SEEK_CUR);
+            myfseek(stream, static_cast<long int>(-(offset - LONG_MAX)), SEEK_CUR);
         }
         else {
             //seeks forward the remaining distance
-            myfseek(stream, (long int)(offset - LONG_MAX), SEEK_CUR);
+            myfseek(stream, static_cast<long int>(offset - LONG_MAX), SEEK_CUR);
         }
     }
     else {
         //fseek normally if below max supported value
-        myfseek(stream, (long int) offset, origin);
+        myfseek(stream, static_cast<long int>(offset), origin);
     }
 }

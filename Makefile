@@ -1,6 +1,6 @@
 .PHONY: clean all
 
-default: sm3tools
+default: pcssb
 all: sm3tools pcssb
 
 UARCH = $(shell uname -m)
@@ -23,10 +23,10 @@ sm3tools: sm3tools.cpp
 	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) sm3tools.cpp -o $@
 
 pcssb: pcssb.cpp
-	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) pcssb.cpp myIO.c -o $@
+	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) pcssb.cpp myIO.cpp -o $@
 
-%: %.c
-	$(CC) $(DEFAULTFLAGS) $(EXTRAFLAGS) $@.c -o $@ 
+%: %.cpp
+	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) $@.cpp -o $@
 
 clean:
 	rm -f sm3tools pcssb

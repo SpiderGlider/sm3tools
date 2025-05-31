@@ -1,10 +1,7 @@
 #ifndef MYIO_H
 #define MYIO_H
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include <stdint.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
 
 //cross-platform mkdir wrapper.
 //creates directory with mode 0777 on linux
@@ -54,7 +51,4 @@ void myfseek(FILE *const stream, const long int offset, const int origin);
 //signed longs support by seeking twice.
 //if first fseek fails second isn't executed.
 void myfseek_unsigned(FILE *const stream, const unsigned long int offset, const int origin);
-#ifdef __cplusplus
-}
-#endif
 #endif

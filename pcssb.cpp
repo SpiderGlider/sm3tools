@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "myIO.h"
+#include "myIO.hpp"
 
 size_t findFSBHeaderIndexes(
     const char *const inputFileName,
