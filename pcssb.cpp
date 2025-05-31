@@ -290,7 +290,7 @@ void replaceAudioinPCSSB(
     const char *const pcssbFilePath,
     const char *const replaceFilePath) {
 
-    const char *const audioFileName = std::filesystem::path(replaceFilePath).filename().c_str();
+    auto audioFileName = std::filesystem::path(replaceFilePath).filename();
 
     //length of output path including null terminator
     //- byte for null terminator is included in sizeof("-mod")
@@ -302,7 +302,7 @@ void replaceAudioinPCSSB(
         (void) std::snprintf(outputFilePath, outputFilePathSize, "%s-mod", pcssbFilePath);
 
         //find audio file in PCSSB
-        const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName);
+        const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName.c_str());
         const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
         const std::intmax_t replaceDataSize = getfilesize(replaceFilePath);
         const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
