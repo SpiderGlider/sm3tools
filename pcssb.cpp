@@ -1,5 +1,7 @@
 #include "pcssb.hpp"
 
+#include <iostream>
+
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -12,10 +14,7 @@ size_t findFSBHeaderIndexes(
     size_t *const resultArr,
     const size_t resultArrLen) {
 
-    if (resultArr == nullptr) {
-        (void) fprintf(stderr, "ERROR: Result Array is NULL!.\n");
-        std::exit(EXIT_FAILURE);
-    }
+    assert(resultArr != nullptr);
 
     //next index in resultArr to fill (0 indexed)
     //also happens to be the number of results currently found
@@ -39,8 +38,8 @@ size_t findFSBHeaderIndexes(
                 constexpr uint32_t FSB_HEADER = 859984710; // = "FSB3"
                 if (buffer[i] == FSB_HEADER) {
                     if (resultCount >= resultArrLen) {
-                        (void) printf("LOG: More results were found than "
-                               "what result array can hold.\n");
+                        std::cout << "LOG: More results were found than "
+                               "what result array can hold.\n";
 
                         (void) fclose(fileHandle);
 
@@ -65,7 +64,7 @@ void printFSBHeaderIndexes(const char *const fileName) {
     size_t fsbHeaderIndexes[100] = {0};
     const size_t numResults = findFSBHeaderIndexes(fileName, fsbHeaderIndexes, 100);
     for (size_t i = 0; i < numResults; i++) {
-        (void) printf("%lu: decimal = %lu, hex = 0x%lX \n",
+        (void) std::printf("%lu: decimal = %lu, hex = 0x%lX \n",
             i+1,
             fsbHeaderIndexes[i],
             fsbHeaderIndexes[i]
@@ -165,7 +164,7 @@ void outputAudioFiles(const char *const inputFileName) {
             //apart from the last FSB, actual data size is just distance from the data start until the next FSB
             const size_t actualDataSize = fsbIndexes[i+1] - (fsbIndexes[i] + FSB_HEADER_SIZE);
             if (fsbDataSize != actualDataSize) {
-                (void) printf("LOG: Data size value doesn't match actual size!\n");
+                std::cout << "LOG: Data size value doesn't match actual size!\n";
             }
             char fsbFileName[FSB_FILENAME_SIZE] = {0};
             readFileName(inputFileName, fsbIndexes[i], fsbFileName);
@@ -175,7 +174,7 @@ void outputAudioFiles(const char *const inputFileName) {
                 which already has file extension validation*/
             const char* const fileExtensionPtr = strrchr(inputFileName, '.');
             if (fileExtensionPtr == nullptr) {
-                fprintf(stderr, "ERROR: Input file doesn't have a file extension!\n");
+                std::cerr << "ERROR: Input file doesn't have a file extension!\n";
                 std::exit(EXIT_FAILURE);
             }
             const ptrdiff_t fileExtensionIndex = fileExtensionPtr - inputFileName;
@@ -183,7 +182,7 @@ void outputAudioFiles(const char *const inputFileName) {
 
             char outputDir[200] = {0};
             //copy the head of the string until (excluding) the last '.'
-            (void) snprintf(
+            (void) std::snprintf(
                 outputDir,
                 static_cast<size_t>(fileExtensionIndex + 1),
                 "%s",
@@ -193,7 +192,7 @@ void outputAudioFiles(const char *const inputFileName) {
 
             //create path with file fsbFileName inside the output directory
             char outputPath[300] = {0};
-            (void) snprintf(
+            (void) std::snprintf(
                 outputPath,
                 300,
                 "%s/%s",
@@ -224,7 +223,7 @@ size_t findFirstFSBMatchingFileName(
         }
     }
 
-    fprintf(stderr, "ERROR: File not found in PCSSB!\n");
+    std::cerr << "ERROR: File not found in PCSSB!\n";
     std::exit(EXIT_FAILURE);
 }
 
@@ -282,7 +281,7 @@ void replaceLongInFile(
             fileHandle);
 
         if (numWritten != 1) {
-            (void) fprintf(stderr, "ERROR: Error replacing long"
+            (void) std::fprintf(stderr, "ERROR: Error replacing long"
                             " at position %lu in %s!\n", longPosition, fileName);
             (void) fclose(fileHandle);
             std::exit(EXIT_FAILURE);
@@ -302,7 +301,7 @@ void replaceAudioinPCSSB(
     char *const outputFileName = static_cast<char *>(malloc(outputFileNameSize));
     {
         //generate output file name
-        (void) snprintf(outputFileName, outputFileNameSize, "%s-mod", pcssbFileName);
+        (void) std::snprintf(outputFileName, outputFileNameSize, "%s-mod", pcssbFileName);
 
         //find audio file in PCSSB
         const size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
@@ -343,7 +342,7 @@ void replaceAudioinPCSSB(
         //NOTE: this warning is unlikely to be reachable on most platforms
         //but is just there for portability. The data size can't be more than 4 bits
         if (replaceDataSize > UINT32_MAX) {
-            (void) fprintf(stderr, "WARNING: Replacement audio data size is too large"
+            (void) std::fprintf(stderr, "WARNING: Replacement audio data size is too large"
                             ", replacement may not work properly!\n");
         }
         //change data size field to match size of replaceFileName
@@ -357,21 +356,21 @@ void replaceAudioinPCSSB(
 
 int main(const int argc, const char *const argv[]) {
     if (argc < 2) {
-        (void) fprintf(stderr, "ERROR: This program needs "
-                               "at least one input argument.");
+        std::cerr << "ERROR: This program needs "
+                               "at least one input argument.";
         return EXIT_FAILURE;
     }
     if (argc == 2) {
-        (void) printf("INFO: Extracting audio from %s\n", argv[1]);
+        (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
         //printFSBHeaderIndexes(argv[1]);
         outputAudioFiles(argv[1]);
     }
     if (argc > 3) {
-        (void) fprintf(stderr, "WARNING: Arguments after the 2nd"
-                        " argument are currently ignored.\n");
+        std::cerr << "WARNING: Arguments after the 2nd"
+                        " argument are currently ignored.\n";
     }
     if (argc >= 3) {
-        (void) printf("Replacing %s in %s\n", argv[2], argv[1]);
+        (void) std::printf("Replacing %s in %s\n", argv[2], argv[1]);
         replaceAudioinPCSSB(argv[1], argv[2]);
     }
     return EXIT_SUCCESS;

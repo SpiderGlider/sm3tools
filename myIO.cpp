@@ -1,5 +1,7 @@
 #include "myIO.hpp"
 
+#include <iostream>
+
 #include <climits>
 #include <cstdint>
 #include <cstdio>
@@ -37,8 +39,8 @@ intmax_t getfilesize(const char *const filePath) {
         std::exit(EXIT_FAILURE);
     }
     if (size < 0) {
-        fprintf(stderr, "WARNING: File size is negative,"
-                        "it may or may not be handled correctly.\n");
+        std::cerr << "WARNING: File size is negative,"
+                        "it may or may not be handled correctly.\n";
     }
     return size;
 }
@@ -60,10 +62,10 @@ size_t myfread(
 
     //TODO will want to silence these kinds of logs for production...
     if (size == 0) {
-        (void) printf("LOG: size of 0 was passed to fread!\n");
+        std::cout << "LOG: size of 0 was passed to fread!\n";
     }
     if (count == 0) {
-        (void) printf("LOG: count of 0 was passed to fread!\n");
+        std::cout << "LOG: count of 0 was passed to fread!\n";
     }
 
     const size_t objsRead = fread(buffer, size, count, stream);
@@ -74,10 +76,10 @@ size_t myfread(
         std::exit(EXIT_FAILURE);
     }
     if (feof(stream)) {
-        (void) printf("LOG: EOF encountered when reading file.\n");
+        std::cout << "LOG: EOF encountered when reading file.\n";
     }
     if (objsRead < count) {
-        (void) printf("LOG: count was %lu, amount read was only %lu.\n", count, objsRead);
+        (void) std::printf("LOG: count was %lu, amount read was only %lu.\n", count, objsRead);
     }
 
     return objsRead;
@@ -97,7 +99,7 @@ size_t myfwrite(
         std::exit(EXIT_FAILURE);
     }
     if (objsWritten < count) {
-        (void) printf("LOG: count was %lu, amount written was only %lu.\n", count, objsWritten);
+        (void) std::printf("LOG: count was %lu, amount written was only %lu.\n", count, objsWritten);
     }
 
     return objsWritten;
@@ -106,7 +108,7 @@ size_t myfwrite(
 void myfseek(FILE *const stream, const long int offset, const int origin) {
     const int returnValue = fseek(stream, offset, origin);
     if (returnValue != 0) {
-        (void) fprintf(stderr, "ERROR: fseek() failed!\n");
+        std::cerr << "ERROR: fseek() failed!\n";
         (void) fclose(stream);
         std::exit(EXIT_FAILURE);
     }
