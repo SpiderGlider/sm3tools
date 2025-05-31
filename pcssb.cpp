@@ -38,8 +38,8 @@ std::size_t findFSBHeaderIndexes(
 
             for (std::size_t i = 0; i < numRead; i++) {
                 //string to match in the file, represented as an unsigned long
-                constexpr std::uint32_t FSB_HEADER { 859984710 }; // = "FSB3"
-                if (buffer[i] == FSB_HEADER) {
+                constexpr std::uint32_t FSB_HEADER_VALUE { 859984710 }; // = "FSB3"
+                if (buffer[i] == FSB_HEADER_VALUE) {
                     if (resultCount >= resultArrLen) {
                         std::cout << "LOG: More results were found than "
                                "what result array can hold.\n";
