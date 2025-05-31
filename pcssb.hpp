@@ -67,7 +67,7 @@ std::uint32_t readDataSize(
 //EXCLUDING the "P\0" at the start for simplicity (-2)
 //BUT INCLUDING an extra byte (+1) for adding a null terminator at the end when
 //read to a string, also for simplicity. 32 - 2 + 1 = 31
-#define FSB_FILENAME_SIZE 31
+constexpr int FSB_FILENAME_SIZE { 31 };
 
 //NOTE: set 2 bytes ahead because otherwise
 //it seems to begin with (P\0) which would null terminate the string
