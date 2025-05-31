@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <cassert>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -14,6 +15,8 @@
 #include <sys/stat.h>
 
 void mymkdir(const char *const path) {
+    assert(path != nullptr);
+
 #ifdef _WIN32
     const int returnValue = _mkdir(path);
 #else
@@ -25,6 +28,8 @@ void mymkdir(const char *const path) {
 }
 
 std::intmax_t getfilesize(const char *const filePath) {
+    assert(filePath != nullptr);
+
 #ifdef _WIN32
     _stat64 sb {};
     const int returnValue = _wstat64(filePath, &sb);
@@ -46,6 +51,9 @@ std::intmax_t getfilesize(const char *const filePath) {
 }
 
 std::FILE *myfopen(const char *fileName, const char *mode) {
+    assert(fileName != nullptr);
+    assert(mode != nullptr);
+
     std::FILE *const fileHandle = fopen(fileName, mode);
     if (!fileHandle) {
         std::perror("ERROR: Failed to open file");
@@ -60,13 +68,10 @@ std::size_t myfread(
     const std::size_t count,
     std::FILE *const stream) {
 
-    //TODO will want to silence these kinds of logs for production...
-    if (size == 0) {
-        std::cout << "LOG: size of 0 was passed to fread!\n";
-    }
-    if (count == 0) {
-        std::cout << "LOG: count of 0 was passed to fread!\n";
-    }
+    assert(buffer != nullptr);
+    assert(stream != nullptr);
+    assert(size > 0);
+    assert(count > 0);
 
     const std::size_t objsRead = std::fread(buffer, size, count, stream);
 
@@ -91,6 +96,11 @@ std::size_t myfwrite(
     const std::size_t count,
     std::FILE *const stream) {
 
+    assert(buffer != nullptr);
+    assert(stream != nullptr);
+    assert(size > 0);
+    assert(count > 0);
+
     const std::size_t objsWritten = std::fwrite(buffer, size, count, stream);
 
     if (std::ferror(stream)) {
@@ -106,6 +116,8 @@ std::size_t myfwrite(
 }
 
 void myfseek(std::FILE *const stream, const long int offset, const int origin) {
+    assert(stream != nullptr);
+
     const int returnValue = std::fseek(stream, offset, origin);
     if (returnValue != 0) {
         std::cerr << "ERROR: fseek() failed!\n";
