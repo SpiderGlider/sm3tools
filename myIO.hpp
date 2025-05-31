@@ -38,7 +38,7 @@ size_t myfread(
 //it matches count, but it is still returned in case the caller wants to use it
 //for e.g. loop conditions
 size_t myfwrite(
-    void *const buffer,
+    const void *const buffer,
     const size_t size,
     const size_t count,
     FILE *const stream);

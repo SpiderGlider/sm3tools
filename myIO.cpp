@@ -84,7 +84,7 @@ size_t myfread(
 }
 
 size_t myfwrite(
-    void *const buffer,
+    const void *const buffer,
     const size_t size,
     const size_t count,
     FILE *const stream) {

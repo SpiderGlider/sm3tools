@@ -276,9 +276,7 @@ void replaceLongInFile(
 
         //replace long
         const size_t numWritten = myfwrite(
-            //technically we have to remove the const but fwrite
-            //won't modify it anyway
-            const_cast<uint32_t *>(&newValue),
+            &newValue,
             sizeof(uint32_t),
             1,
             fileHandle);
