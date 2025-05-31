@@ -26,8 +26,7 @@ std::size_t findFSBHeaderIndexes(
 
         while (!std::feof(fileHandle)) {
             constexpr std::size_t BUFFER_SIZE { 100 };
-            //magic number needs to be reused to avoid Variable Length Array
-            std::uint32_t buffer[100] {};
+            std::uint32_t buffer[BUFFER_SIZE] {};
             static_assert((sizeof(buffer) / sizeof(std::uint32_t)) == BUFFER_SIZE);
 
             const std::size_t numRead = myfread(
