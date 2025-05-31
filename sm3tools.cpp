@@ -19,7 +19,7 @@ FileType getFileType(const char *const fileName) {
     if (fileExtension == nullptr) {
         std::cerr << "ERROR: Argument doesn't have a file extension."
                         " Are you sure this is a path to a file?\n";
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
 
     // TODO could check magic numbers as well
@@ -28,7 +28,7 @@ FileType getFileType(const char *const fileName) {
     if (strcmp(fileExtension, ".pcssb") == 0) return PCSSB;
 
     std::cerr << "ERROR: File extension not recognised.\n";
-    exit(EXIT_FAILURE);
+    std::exit(EXIT_FAILURE);
 }
 
 // Program takes one argument, that being the path to a file to parse.
@@ -38,7 +38,7 @@ int main(const int argc, const char *const argv[]) {
     if (argc < 2) {
         std::cerr << "ERROR: Must have 1 argument"
                         " (the path to a file to parse).\n";
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
     if (argc > 2) {
         std::cerr << "WARNING: Arguments after the 1st"
@@ -48,7 +48,7 @@ int main(const int argc, const char *const argv[]) {
     const FileType fileType = getFileType(argv[1]);
     if (fileType == PCPACK) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
     // currently getFileType should never return a value outside of these two
     assert(fileType == PCSSB);

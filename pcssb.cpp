@@ -14,7 +14,7 @@ size_t findFSBHeaderIndexes(
 
     if (resultArr == nullptr) {
         (void) fprintf(stderr, "ERROR: Result Array is NULL!.\n");
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
 
     //next index in resultArr to fill (0 indexed)
@@ -176,7 +176,7 @@ void outputAudioFiles(const char *const inputFileName) {
             const char* const fileExtensionPtr = strrchr(inputFileName, '.');
             if (fileExtensionPtr == nullptr) {
                 fprintf(stderr, "ERROR: Input file doesn't have a file extension!\n");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
             const ptrdiff_t fileExtensionIndex = fileExtensionPtr - inputFileName;
             assert(fileExtensionIndex > 0);
@@ -225,7 +225,7 @@ size_t findFirstFSBMatchingFileName(
     }
 
     fprintf(stderr, "ERROR: File not found in PCSSB!\n");
-    exit(EXIT_FAILURE);
+    std::exit(EXIT_FAILURE);
 }
 
 void readAndWriteToNewFile(
@@ -285,7 +285,7 @@ void replaceLongInFile(
             (void) fprintf(stderr, "ERROR: Error replacing long"
                             " at position %lu in %s!\n", longPosition, fileName);
             (void) fclose(fileHandle);
-            exit(EXIT_FAILURE);
+            std::exit(EXIT_FAILURE);
         }
     }
     (void) fclose(fileHandle);

@@ -34,7 +34,7 @@ intmax_t getfilesize(const char *const filePath) {
 #endif
     if (returnValue != 0) {
         perror("ERROR: Failed to get file size");
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
     if (size < 0) {
         fprintf(stderr, "WARNING: File size is negative,"
@@ -47,7 +47,7 @@ FILE *myfopen(const char *fileName, const char *mode) {
     FILE *const fileHandle = fopen(fileName, mode);
     if (!fileHandle) {
         perror("ERROR: Failed to open file");
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
     return fileHandle;
 }
@@ -71,7 +71,7 @@ size_t myfread(
     if (ferror(stream)) {
         perror("ERROR: I/O error when reading");
         (void) fclose(stream);
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
     if (feof(stream)) {
         (void) printf("LOG: EOF encountered when reading file.\n");
@@ -94,7 +94,7 @@ size_t myfwrite(
     if (ferror(stream)) {
         perror("ERROR: I/O error when writing");
         (void) fclose(stream);
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
     if (objsWritten < count) {
         (void) printf("LOG: count was %lu, amount written was only %lu.\n", count, objsWritten);
@@ -108,8 +108,8 @@ void myfseek(FILE *const stream, const long int offset, const int origin) {
     if (returnValue != 0) {
         (void) fprintf(stderr, "ERROR: fseek() failed!\n");
         (void) fclose(stream);
-        exit(EXIT_FAILURE);
-    };
+        std::exit(EXIT_FAILURE);
+    }
 }
 
 // credit to Tyler Durden on SO for this code, which is used with modifications.
