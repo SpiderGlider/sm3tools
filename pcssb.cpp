@@ -1,9 +1,9 @@
-#include "pcssb.h"
+#include "pcssb.hpp"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "myIO.h"
 
@@ -12,7 +12,7 @@ size_t findFSBHeaderIndexes(
     size_t *const resultArr,
     const size_t resultArrLen) {
 
-    if (resultArr == NULL) {
+    if (resultArr == nullptr) {
         (void) fprintf(stderr, "ERROR: Result Array is NULL!.\n");
         exit(EXIT_FAILURE);
     }
@@ -27,7 +27,7 @@ size_t findFSBHeaderIndexes(
         size_t readIndex = 0;
 
         while (!feof(fileHandle)) {
-            const size_t BUFFER_SIZE = 100;
+            constexpr size_t BUFFER_SIZE = 100;
             //magic number needs to be reused to avoid Variable Length Array
             uint32_t buffer[100] = {0};
             assert((sizeof(buffer) / sizeof(uint32_t)) == BUFFER_SIZE);
@@ -36,7 +36,7 @@ size_t findFSBHeaderIndexes(
 
             for (size_t i = 0; i < numRead; i++) {
                 //string to match in the file, represented as an unsigned long
-                const uint32_t FSB_HEADER = 859984710; // = "FSB3"
+                constexpr uint32_t FSB_HEADER = 859984710; // = "FSB3"
                 if (buffer[i] == FSB_HEADER) {
                     if (resultCount >= resultArrLen) {
                         (void) printf("LOG: More results were found than "
@@ -79,7 +79,7 @@ uint32_t readDataSize(
 
     uint32_t dataSize = 0;
 
-    const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
+    constexpr int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
 
     FILE *const fileHandle = myfopen(inputFileName, "rb");
     {
@@ -107,7 +107,7 @@ void readFileName(
         //it seems to begin with (P\0) which would null terminate the string
         //which is annoying, and I'm not sure if that's supposed
         //to be part of the file name anyway or if it's something else.
-        const int FILENAME_OFFSET = 2 + (6 * sizeof(uint32_t));
+        constexpr int FILENAME_OFFSET = 2 + (6 * sizeof(uint32_t));
 
         //set the file position indicator to start of FSB file
         myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
@@ -128,7 +128,7 @@ void outputAudioData(
     const size_t dataSize,
     const char *const outputFileName) {
 
-    char *const audioData = malloc(dataSize * sizeof(char));
+    char *const audioData = static_cast<char *>(malloc(dataSize * sizeof(char)));
     {
         FILE *const inputFileHandle = myfopen(inputFileName, "rb");
         {
@@ -174,7 +174,7 @@ void outputAudioFiles(const char *const inputFileName) {
             /*TODO: should this be an assert? depends if this will be called from sm3tools.c
                 which already has file extension validation*/
             const char* const fileExtensionPtr = strrchr(inputFileName, '.');
-            if (fileExtensionPtr == NULL) {
+            if (fileExtensionPtr == nullptr) {
                 fprintf(stderr, "ERROR: Input file doesn't have a file extension!\n");
                 exit(EXIT_FAILURE);
             }
@@ -185,7 +185,7 @@ void outputAudioFiles(const char *const inputFileName) {
             //copy the head of the string until (excluding) the last '.'
             (void) snprintf(
                 outputDir,
-                (size_t) fileExtensionIndex + 1,
+                static_cast<size_t>(fileExtensionIndex + 1),
                 "%s",
                 inputFileName);
             //create the directory corresponding to that path
@@ -239,7 +239,7 @@ void readAndWriteToNewFile(
 
     //store bytes from input in intermediate buffer
     //(plus one extra byte for null terminator)
-    char *const buffer = (char*) malloc((readCount + 1) * sizeof(char));
+    char *const buffer = static_cast<char *>(malloc((readCount + 1) * sizeof(char)));
     {
         FILE *const inputFileHandle = myfopen(inputFileName, "rb");
         {
@@ -276,7 +276,9 @@ void replaceLongInFile(
 
         //replace long
         const size_t numWritten = myfwrite(
-            (void*) &newValue,
+            //technically we have to remove the const but fwrite
+            //won't modify it anyway
+            const_cast<uint32_t *>(&newValue),
             sizeof(uint32_t),
             1,
             fileHandle);
@@ -299,7 +301,7 @@ void replaceAudioinPCSSB(
     //- byte for null terminator is included in sizeof("-mod")
     const size_t outputFileNameSize = (strlen(pcssbFileName) + sizeof("-mod"))
         * sizeof(char);
-    char *const outputFileName = (char*) malloc(outputFileNameSize);
+    char *const outputFileName = static_cast<char *>(malloc(outputFileNameSize));
     {
         //generate output file name
         (void) snprintf(outputFileName, outputFileNameSize, "%s-mod", pcssbFileName);
@@ -324,7 +326,7 @@ void replaceAudioinPCSSB(
             //NOTE: case where the data size is negative is logged in myIO.c.
             //apparently negative values for it are supposed to wrap around
             //to positive ones anyway so this should work. but it is not guaranteed to.
-            (size_t) replaceDataSize,
+            static_cast<size_t>(replaceDataSize),
             0,
             true);
 
@@ -334,11 +336,11 @@ void replaceAudioinPCSSB(
             outputFileName,
             //NOTE: this will overflow but it shouldn't matter
             //ensures all the bytes after from original file is read
-            (size_t) getfilesize(pcssbFileName),
+            static_cast<size_t>(getfilesize(pcssbFileName)),
             fsbAudioDataIndex + originalDataSize,
             true);
 
-        const int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
+        constexpr int DATA_SIZE_OFFSET = 3 * sizeof(uint32_t);
 
         //NOTE: this warning is unlikely to be reachable on most platforms
         //but is just there for portability. The data size can't be more than 4 bits
@@ -350,7 +352,7 @@ void replaceAudioinPCSSB(
         replaceLongInFile(
             outputFileName,
             (fsbHeaderIndex + DATA_SIZE_OFFSET),
-            (uint32_t) replaceDataSize);
+            static_cast<uint32_t>(replaceDataSize));
     }
     free(outputFileName);
 }
