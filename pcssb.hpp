@@ -33,6 +33,9 @@ struct FSB {
     char* data {};
 };
 
+// "FSB3" text represented as an unsigned long
+constexpr std::uint32_t FSB_HEADER_VALUE { 859984710 };
+
 //finds every instance of "FSB3" header text in the sound file
 //puts the absolute position in bytes of those instances
 //into the given resultArr in the order they are found.
@@ -49,6 +52,8 @@ std::size_t findFSBHeaderIndexes(
 //in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
 void printFSBHeaderIndexes(const char *const fileName);
 
+constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
+
 //Reads the data size field in the FSB file that starts at fsb3HeaderPosition.
 //fsb3HeaderPosition must be the location of the start of the "FSB3" header string.
 //This data size field is supposed to represent the length of the audio data embedded in
@@ -63,6 +68,12 @@ std::uint32_t readDataSize(
 //BUT INCLUDING an extra byte (+1) for adding a null terminator at the end when
 //read to a string, also for simplicity. 32 - 2 + 1 = 31
 #define FSB_FILENAME_SIZE 31
+
+//NOTE: set 2 bytes ahead because otherwise
+//it seems to begin with (P\0) which would null terminate the string
+//which is annoying, and I'm not sure if that's supposed
+//to be part of the file name anyway or if it's something else.
+constexpr int FILENAME_OFFSET { 2 + (6 * sizeof(uint32_t)) };
 
 //Reads the file name field in the FSB file that starts at fsb3HeaderPosition.
 //fsb3HeaderPosition must be the location of the start of the "FSB3" header string.

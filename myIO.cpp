@@ -109,7 +109,7 @@ void myfseek(std::FILE *const stream, const long int offset, const int origin) {
     const int returnValue = std::fseek(stream, offset, origin);
     if (returnValue != 0) {
         std::cerr << "ERROR: fseek() failed!\n";
-        (void) fclose(stream);
+        (void) std::fclose(stream);
         std::exit(EXIT_FAILURE);
     }
 }

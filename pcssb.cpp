@@ -37,8 +37,6 @@ std::size_t findFSBHeaderIndexes(
                 fileHandle);
 
             for (std::size_t i = 0; i < numRead; i++) {
-                //string to match in the file, represented as an unsigned long
-                constexpr std::uint32_t FSB_HEADER_VALUE { 859984710 }; // = "FSB3"
                 if (buffer[i] == FSB_HEADER_VALUE) {
                     if (resultCount >= resultArrLen) {
                         std::cout << "LOG: More results were found than "
@@ -81,8 +79,6 @@ std::uint32_t readDataSize(
 
     std::uint32_t dataSize { 0 };
 
-    constexpr int DATA_SIZE_OFFSET { 3 * sizeof(uint32_t) };
-
     std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
     {
         //set the file position indicator to start of FSB file
@@ -105,12 +101,6 @@ void readFileName(
 
     std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
     {
-        //NOTE: set 2 bytes ahead because otherwise
-        //it seems to begin with (P\0) which would null terminate the string
-        //which is annoying, and I'm not sure if that's supposed
-        //to be part of the file name anyway or if it's something else.
-        constexpr int FILENAME_OFFSET { 2 + (6 * sizeof(uint32_t)) };
-
         //set the file position indicator to start of FSB file
         myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
         //move to location where file name is written
@@ -337,8 +327,6 @@ void replaceAudioinPCSSB(
             static_cast<std::size_t>(getfilesize(pcssbFileName)),
             fsbAudioDataIndex + originalDataSize,
             true);
-
-        constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
 
         //NOTE: this warning is unlikely to be reachable on most platforms
         //but is just there for portability. The data size can't be more than 4 bits
