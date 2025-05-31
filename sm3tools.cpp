@@ -1,7 +1,7 @@
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 typedef enum FILE_TYPE {
     PCPACK,
@@ -11,11 +11,11 @@ typedef enum FILE_TYPE {
 // Checks the file extension of the file name, and returns the relevant
 // file type if one is matched. Otherwise it exits with an error message
 FileType getFileType(const char *const fileName) {
-    assert(fileName != NULL);
+    assert(fileName != nullptr);
 
     const char *const fileExtension = strrchr(fileName, '.');
 
-    if (fileExtension == NULL) {
+    if (fileExtension == nullptr) {
         (void) fprintf(stderr, "ERROR: Argument doesn't have a file extension."
                         " Are you sure this is a path to a file?\n");
         exit(EXIT_FAILURE);
