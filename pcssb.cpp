@@ -61,8 +61,9 @@ std::size_t findFSBHeaderIndexes(
 }
 
 void printFSBHeaderIndexes(const char *const fileName) {
-    std::size_t fsbHeaderIndexes[100] {};
-    const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, 100) };
+    constexpr int BUFFER_SIZE { 100 };
+    std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
+    const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
     for (std::size_t i = 0; i < numResults; i++) {
         (void) std::printf("%lu: decimal = %lu, hex = 0x%lX \n",
             i+1,
@@ -144,8 +145,9 @@ void outputAudioData(
 }
 
 void outputAudioFiles(const char *const inputFileName) {
-    std::size_t fsbIndexes[100] {};
-    const std::size_t numResults { findFSBHeaderIndexes(inputFileName, fsbIndexes, 100) };
+    constexpr int BUFFER_SIZE { 100 };
+    std::size_t fsbIndexes[BUFFER_SIZE] {};
+    const std::size_t numResults { findFSBHeaderIndexes(inputFileName, fsbIndexes, BUFFER_SIZE) };
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
@@ -172,7 +174,8 @@ void outputAudioFiles(const char *const inputFileName) {
             const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
             assert(fileExtensionIndex > 0);
 
-            char outputDir[200] {};
+            constexpr int OUTPUT_DIR_SIZE { 200 };
+            char outputDir[OUTPUT_DIR_SIZE] {};
             //copy the head of the string until (excluding) the last '.'
             (void) std::snprintf(
                 outputDir,
@@ -183,10 +186,11 @@ void outputAudioFiles(const char *const inputFileName) {
             mymkdir(outputDir);
 
             //create path with file fsbFileName inside the output directory
-            char outputPath[300] {};
+            constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
+            char outputPath[OUTPUT_PATH_SIZE] {};
             (void) std::snprintf(
                 outputPath,
-                300,
+                OUTPUT_PATH_SIZE,
                 "%s/%s",
                 outputDir,
                 fsbFileName);
@@ -204,8 +208,9 @@ std::size_t findFirstFSBMatchingFileName(
     const char *const pcssbFileName,
     const char *const fileNameString) {
 
-    std::size_t fsbIndexes[100] {};
-    const std::size_t numResults { findFSBHeaderIndexes(pcssbFileName, fsbIndexes, 100) };
+    constexpr int BUFFER_SIZE { 100 };
+    std::size_t fsbIndexes[BUFFER_SIZE] {};
+    const std::size_t numResults { findFSBHeaderIndexes(pcssbFileName, fsbIndexes, BUFFER_SIZE) };
     for (std::size_t i = 0; i < numResults; i++) {
         char fsbFileName[FSB_FILENAME_SIZE] {};
         readFileName(pcssbFileName, fsbIndexes[i], fsbFileName);
