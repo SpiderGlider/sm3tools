@@ -73,13 +73,7 @@ void printFSBHeaderIndexes(const char *const fileName) {
         // std::size_t actualDataSize { 0 };
         // std::size_t fsbSize { 0 };
         if (i < numResults - 2) {
-            std::printf("%lu: "
-                        "hex address = 0x%lX, "
-                        "fsb size = %lu, "
-                        "total size including duplicate = %lu\n",
-                        i+1,
-                        fsbHeaderIndexes[i],
-                        fsbHeaderIndexes[i+1]-fsbHeaderIndexes[i],
+            std::printf("%lu\n",
                         fsbHeaderIndexes[i+2]-fsbHeaderIndexes[i]);
         }
         // if (i < numResults - 1) {
