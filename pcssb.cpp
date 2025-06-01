@@ -69,24 +69,34 @@ void printFSBHeaderIndexes(const char *const fileName) {
     constexpr int BUFFER_SIZE { 100 };
     std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
     const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
-    for (std::size_t i = 0; i < numResults; i++) {
-        std::size_t actualDataSize { 0 };
-        std::size_t fsbSize { 0 };
-        if (i < numResults - 1) {
-            actualDataSize = fsbHeaderIndexes[i+1] - (fsbHeaderIndexes[i] + FSB_HEADER_SIZE);
-            fsbSize = fsbHeaderIndexes[i+1] - fsbHeaderIndexes[i];
+    for (std::size_t i = 0; i < numResults; i+=2) {
+        // std::size_t actualDataSize { 0 };
+        // std::size_t fsbSize { 0 };
+        if (i < numResults - 2) {
+            std::printf("%lu: "
+                        "hex address = 0x%lX, "
+                        "fsb size = %lu, "
+                        "total size including duplicate = %lu\n",
+                        i+1,
+                        fsbHeaderIndexes[i],
+                        fsbHeaderIndexes[i+1]-fsbHeaderIndexes[i],
+                        fsbHeaderIndexes[i+2]-fsbHeaderIndexes[i]);
         }
-        (void) std::printf("%lu: "
-                           "hex address = 0x%lX, "
-                           "actual data size = %lu, "
-                           "data size field = %u,"
-                           "total size = %lu \n",
-            i+1,
-            fsbHeaderIndexes[i],
-            actualDataSize,
-            readDataSize(fileName, fsbHeaderIndexes[i]),
-            fsbSize
-        );
+        // if (i < numResults - 1) {
+        //     actualDataSize = fsbHeaderIndexes[i+1] - (fsbHeaderIndexes[i] + FSB_HEADER_SIZE);
+        //     fsbSize = fsbHeaderIndexes[i+1] - fsbHeaderIndexes[i];
+        // }
+        // (void) std::printf("%lu: "
+        //                    "hex address = 0x%lX, "
+        //                    "actual data size = %lu, "
+        //                    "data size field = %u,"
+        //                    "total size = %lu \n",
+        //     i+1,
+        //     fsbHeaderIndexes[i],
+        //     actualDataSize,
+        //     readDataSize(fileName, fsbHeaderIndexes[i]),
+        //     fsbSize
+        // );
     }
 }
 
