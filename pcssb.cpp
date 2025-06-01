@@ -337,7 +337,7 @@ void replaceAudioinPCSSB(
             //NOTE: case where the data size is negative is logged in myIO.c.
             //apparently negative values for it are supposed to wrap around
             //to positive ones anyway so this should work. but it is not guaranteed to.
-            static_cast<std::size_t>(replaceDataSize),
+            originalDataSize,
             0,
             true);
 
@@ -350,18 +350,6 @@ void replaceAudioinPCSSB(
             static_cast<std::size_t>(getfilesize(pcssbFilePath)),
             fsbAudioDataIndex + originalDataSize,
             true);
-
-        //NOTE: this warning is unlikely to be reachable on most platforms
-        //but is just there for portability. The data size can't be more than 4 bits
-        if (replaceDataSize > UINT32_MAX) {
-            std::cerr << "WARNING: Replacement audio data size is too large"
-                            ", replacement may not work properly!\n";
-        }
-        //change data size field to match size of replaceFilePath
-        replaceLongInFile(
-            outputFilePath,
-            (fsbHeaderIndex + DATA_SIZE_OFFSET),
-            static_cast<std::uint32_t>(replaceDataSize));
     }
     std::free(outputFilePath);
 }
