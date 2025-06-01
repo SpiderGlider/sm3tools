@@ -15,7 +15,9 @@ struct FSB {
     std::uint32_t unknown2 {}; // = 196609
     std::uint32_t null1 {};
 
-    char* fileName {}; // 32 bytes
+    std::uint16_t entrySize {}; // = 80 ("P\0")
+
+    char* fileName {}; // 30 bytes
 
     std::uint32_t unknown3 {};
     std::uint32_t unknown4 {};
@@ -64,15 +66,12 @@ std::uint32_t readDataSize(
     const std::size_t fsb3HeaderPosition);
 
 //number of bytes used to store the sample filename in FSB archives,
-//EXCLUDING the "P\0" at the start for simplicity (-2)
-//BUT INCLUDING an extra byte (+1) for adding a null terminator at the end when
-//read to a string, also for simplicity. 32 - 2 + 1 = 31
+//INCLUDING an extra byte (+1) for adding a null terminator at the end when
+//read to a string, for simplicity. 30 + 1 = 31
 constexpr int FSB_FILENAME_SIZE { 31 };
 
-//NOTE: set 2 bytes ahead because otherwise
-//it seems to begin with (P\0) which would null terminate the string
-//which is annoying, and I'm not sure if that's supposed
-//to be part of the file name anyway or if it's something else.
+//NOTE: skips 6 longs which are the other header information including "FSB3" text
+//before the entry starts, and then skips 2 bytes which is the entry size (which =80)
 constexpr int FILENAME_OFFSET { 2 + (6 * sizeof(uint32_t)) };
 
 //Reads the file name field in the FSB file that starts at fsb3HeaderPosition.

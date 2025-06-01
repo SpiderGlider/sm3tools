@@ -322,7 +322,7 @@ void replaceAudioinPCSSB(
         const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
         const std::intmax_t replaceDataSize = getfilesize(replaceFilePath);
         const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-        //append everything up to the existing audio data into the output file
+        //write everything up to the existing audio data into the output file
         readAndWriteToNewFile(
             pcssbFilePath,
             outputFilePath,
