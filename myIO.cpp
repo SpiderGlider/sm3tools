@@ -50,7 +50,7 @@ std::intmax_t getfilesize(const char *const filePath) {
     return size;
 }
 
-std::FILE *myfopen(const char *fileName, const char *mode) {
+std::FILE *myfopen(const char *const fileName, const char *const mode) {
     assert(fileName != nullptr);
     assert(mode != nullptr);
 

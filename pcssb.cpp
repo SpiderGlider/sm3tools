@@ -1,6 +1,7 @@
 #include "pcssb.hpp"
 
 #include <iostream>
+#include <filesystem>
 
 #include <cassert>
 #include <cstdio>
@@ -61,8 +62,9 @@ std::size_t findFSBHeaderIndexes(
 }
 
 void printFSBHeaderIndexes(const char *const fileName) {
-    std::size_t fsbHeaderIndexes[100] {};
-    const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, 100) };
+    constexpr int BUFFER_SIZE { 100 };
+    std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
+    const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
     for (std::size_t i = 0; i < numResults; i++) {
         (void) std::printf("%lu: decimal = %lu, hex = 0x%lX \n",
             i+1,
@@ -144,8 +146,9 @@ void outputAudioData(
 }
 
 void outputAudioFiles(const char *const inputFileName) {
-    std::size_t fsbIndexes[100] {};
-    const std::size_t numResults { findFSBHeaderIndexes(inputFileName, fsbIndexes, 100) };
+    constexpr int BUFFER_SIZE { 100 };
+    std::size_t fsbIndexes[BUFFER_SIZE] {};
+    const std::size_t numResults { findFSBHeaderIndexes(inputFileName, fsbIndexes, BUFFER_SIZE) };
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
@@ -172,7 +175,8 @@ void outputAudioFiles(const char *const inputFileName) {
             const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
             assert(fileExtensionIndex > 0);
 
-            char outputDir[200] {};
+            constexpr int OUTPUT_DIR_SIZE { 200 };
+            char outputDir[OUTPUT_DIR_SIZE] {};
             //copy the head of the string until (excluding) the last '.'
             (void) std::snprintf(
                 outputDir,
@@ -183,10 +187,11 @@ void outputAudioFiles(const char *const inputFileName) {
             mymkdir(outputDir);
 
             //create path with file fsbFileName inside the output directory
-            char outputPath[300] {};
+            constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
+            char outputPath[OUTPUT_PATH_SIZE] {};
             (void) std::snprintf(
                 outputPath,
-                300,
+                OUTPUT_PATH_SIZE,
                 "%s/%s",
                 outputDir,
                 fsbFileName);
@@ -204,8 +209,9 @@ std::size_t findFirstFSBMatchingFileName(
     const char *const pcssbFileName,
     const char *const fileNameString) {
 
-    std::size_t fsbIndexes[100] {};
-    const std::size_t numResults { findFSBHeaderIndexes(pcssbFileName, fsbIndexes, 100) };
+    constexpr int BUFFER_SIZE { 100 };
+    std::size_t fsbIndexes[BUFFER_SIZE] {};
+    const std::size_t numResults { findFSBHeaderIndexes(pcssbFileName, fsbIndexes, BUFFER_SIZE) };
     for (std::size_t i = 0; i < numResults; i++) {
         char fsbFileName[FSB_FILENAME_SIZE] {};
         readFileName(pcssbFileName, fsbIndexes[i], fsbFileName);
@@ -281,35 +287,37 @@ void replaceLongInFile(
 }
 
 void replaceAudioinPCSSB(
-    const char *const pcssbFileName,
-    const char *const replaceFileName) {
+    const char *const pcssbFilePath,
+    const char *const replaceFilePath) {
 
     //length of output path including null terminator
     //- byte for null terminator is included in sizeof("-mod")
-    const std::size_t outputFileNameSize { (std::strlen(pcssbFileName) + sizeof("-mod"))
+    const std::size_t outputFilePathSize { (std::strlen(pcssbFilePath) + sizeof("-mod"))
         * sizeof(char) };
-    char *const outputFileName { static_cast<char *>(std::malloc(outputFileNameSize)) };
+    char *const outputFilePath { static_cast<char *>(std::malloc(outputFilePathSize)) };
     {
         //generate output file name
-        (void) std::snprintf(outputFileName, outputFileNameSize, "%s-mod", pcssbFileName);
+        (void) std::snprintf(outputFilePath, outputFilePathSize, "%s-mod", pcssbFilePath);
 
-        //find audio file in PCSSB
-        const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFileName, replaceFileName);
-        const std::uint32_t originalDataSize = readDataSize(pcssbFileName, fsbHeaderIndex);
-        const std::intmax_t replaceDataSize = getfilesize(replaceFileName);
+        //find audio file in PCSSB using its filename (including file extension but excluding path)
+        const std::filesystem::path audioFileName { std::filesystem::path{replaceFilePath}.filename() };
+
+        const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName.c_str());
+        const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
+        const std::intmax_t replaceDataSize = getfilesize(replaceFilePath);
         const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
         //append everything up to the existing audio data into the output file
         readAndWriteToNewFile(
-            pcssbFileName,
-            outputFileName,
+            pcssbFilePath,
+            outputFilePath,
             fsbAudioDataIndex,
             0,
             false);
 
         //append the replacement audio data into the output file
         readAndWriteToNewFile(
-            replaceFileName,
-            outputFileName,
+            replaceFilePath,
+            outputFilePath,
             //NOTE: case where the data size is negative is logged in myIO.c.
             //apparently negative values for it are supposed to wrap around
             //to positive ones anyway so this should work. but it is not guaranteed to.
@@ -319,11 +327,11 @@ void replaceAudioinPCSSB(
 
         //append the rest of the original file after the audio data
         readAndWriteToNewFile(
-            pcssbFileName,
-            outputFileName,
+            pcssbFilePath,
+            outputFilePath,
             //NOTE: this will overflow but it shouldn't matter
             //ensures all the bytes after from original file is read
-            static_cast<std::size_t>(getfilesize(pcssbFileName)),
+            static_cast<std::size_t>(getfilesize(pcssbFilePath)),
             fsbAudioDataIndex + originalDataSize,
             true);
 
@@ -333,13 +341,13 @@ void replaceAudioinPCSSB(
             std::cerr << "WARNING: Replacement audio data size is too large"
                             ", replacement may not work properly!\n";
         }
-        //change data size field to match size of replaceFileName
+        //change data size field to match size of replaceFilePath
         replaceLongInFile(
-            outputFileName,
+            outputFilePath,
             (fsbHeaderIndex + DATA_SIZE_OFFSET),
             static_cast<std::uint32_t>(replaceDataSize));
     }
-    std::free(outputFileName);
+    std::free(outputFilePath);
 }
 
 int main(const int argc, const char *const argv[]) {
