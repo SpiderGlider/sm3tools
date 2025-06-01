@@ -91,10 +91,11 @@ std::size_t findFirstFSBMatchingFileName(
 
 constexpr int FSB_HEADER_SIZE { 104 };
 
-//uses the filename of replaceFilePath to find the relevant
+//uses the filename of the file pointed to by replaceFilePath to find the relevant
 //FSB that has a matching filename field. then replaces the audio data
-//in that FSB with the contents of the file that has filename replaceFilePath
-//into a new file that has the filename in pcssbFilePath but with "-mod" appended
+//in that FSB with the contents of the file at replaceFilePath
+//into a new file that has the filename of the file
+//pointed to by pcssbFilePath but with "-mod" appended
 //to the end.
 void replaceAudioinPCSSB(
     const char *const pcssbFilePath,
