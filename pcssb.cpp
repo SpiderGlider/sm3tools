@@ -70,10 +70,15 @@ void printFSBHeaderIndexes(const char *const fileName) {
     std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
     const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
     for (std::size_t i = 0; i < numResults; i++) {
-        (void) std::printf("%lu: decimal = %lu, hex = 0x%lX \n",
+        std::size_t actualDataSize { 0 };
+        if (i < numResults - 1) {
+            actualDataSize = fsbHeaderIndexes[i+1] - (fsbHeaderIndexes[i] + FSB_HEADER_SIZE);
+        }
+        (void) std::printf("%lu: hex address = 0x%lX, actual data size = %lu, data size field = %u \n",
             i+1,
             fsbHeaderIndexes[i],
-            fsbHeaderIndexes[i]
+            actualDataSize,
+            readDataSize(fileName, fsbHeaderIndexes[i])
         );
     }
 }
@@ -374,8 +379,8 @@ int main(const int argc, const char *const argv[]) {
     }
     if (argc == 2) {
         (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
-        //printFSBHeaderIndexes(argv[1]);
-        outputAudioFiles(argv[1]);
+        printFSBHeaderIndexes(argv[1]);
+        //outputAudioFiles(argv[1]);
     }
     if (argc > 3) {
         std::cerr << "WARNING: Arguments after the 2nd"
