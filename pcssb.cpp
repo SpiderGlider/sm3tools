@@ -14,7 +14,9 @@ std::size_t findFSBHeaderIndexes(
     const char *const inputFileName,
     std::size_t *const resultArr,
     const std::size_t resultArrLen) {
+    assert(inputFileName != nullptr);
     assert(resultArr != nullptr);
+    assert(resultArrLen > 0);
 
     //next index in resultArr to fill (0 indexed)
     //also happens to be the number of results currently found
@@ -62,6 +64,8 @@ std::size_t findFSBHeaderIndexes(
 }
 
 void printFSBHeaderIndexes(const char *const fileName) {
+    assert(fileName != nullptr);
+
     constexpr int BUFFER_SIZE { 100 };
     std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
     const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
@@ -77,6 +81,7 @@ void printFSBHeaderIndexes(const char *const fileName) {
 std::uint32_t readDataSize(
     const char *const inputFileName,
     const std::size_t fsb3HeaderPosition) {
+    assert(inputFileName != nullptr);
 
     std::uint32_t dataSize { 0 };
 
@@ -99,6 +104,8 @@ void readFileName(
     const char *const inputFileName,
     const std::size_t fsb3HeaderPosition,
     char resultArr[FSB_FILENAME_SIZE]) {
+    assert(inputFileName != nullptr);
+    assert(resultArr != nullptr);
 
     std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
     {
@@ -120,6 +127,8 @@ void outputAudioData(
     const std::size_t headerSize,
     const std::size_t dataSize,
     const char *const outputFileName) {
+    assert(inputFileName != nullptr);
+    assert(outputFileName != nullptr);
 
     char *const audioData { static_cast<char *>(std::malloc(dataSize * sizeof(char))) };
     {
@@ -146,6 +155,8 @@ void outputAudioData(
 }
 
 void outputAudioFiles(const char *const inputFileName) {
+    assert(inputFileName != nullptr);
+
     constexpr int BUFFER_SIZE { 100 };
     std::size_t fsbIndexes[BUFFER_SIZE] {};
     const std::size_t numResults { findFSBHeaderIndexes(inputFileName, fsbIndexes, BUFFER_SIZE) };
@@ -208,6 +219,8 @@ void outputAudioFiles(const char *const inputFileName) {
 std::size_t findFirstFSBMatchingFileName(
     const char *const pcssbFileName,
     const char *const fileNameString) {
+    assert(pcssbFileName != nullptr);
+    assert(fileNameString != nullptr);
 
     constexpr int BUFFER_SIZE { 100 };
     std::size_t fsbIndexes[BUFFER_SIZE] {};
@@ -231,6 +244,9 @@ void readAndWriteToNewFile(
     const size_t readCount,
     const size_t readPosition,
     const bool append) {
+    assert(inputFileName != nullptr);
+    assert(outputFileName != nullptr);
+    assert(readCount > 0);
 
     //store bytes from input in intermediate buffer
     //(plus one extra byte for null terminator)
