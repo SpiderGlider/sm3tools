@@ -71,14 +71,21 @@ void printFSBHeaderIndexes(const char *const fileName) {
     const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
     for (std::size_t i = 0; i < numResults; i++) {
         std::size_t actualDataSize { 0 };
+        std::size_t fsbSize { 0 };
         if (i < numResults - 1) {
             actualDataSize = fsbHeaderIndexes[i+1] - (fsbHeaderIndexes[i] + FSB_HEADER_SIZE);
+            fsbSize = fsbHeaderIndexes[i+1] - fsbHeaderIndexes[i];
         }
-        (void) std::printf("%lu: hex address = 0x%lX, actual data size = %lu, data size field = %u \n",
+        (void) std::printf("%lu: "
+                           "hex address = 0x%lX, "
+                           "actual data size = %lu, "
+                           "data size field = %u,"
+                           "total size = %lu \n",
             i+1,
             fsbHeaderIndexes[i],
             actualDataSize,
-            readDataSize(fileName, fsbHeaderIndexes[i])
+            readDataSize(fileName, fsbHeaderIndexes[i]),
+            fsbSize
         );
     }
 }
