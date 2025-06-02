@@ -177,47 +177,47 @@ void outputAudioFiles(const char *const inputFileName) {
             if (fsbDataSize != actualDataSize) {
                 std::cout << "LOG: Data size value doesn't match actual size!\n";
             }
-            char fsbFileName[FSB_FILENAME_SIZE] {};
-            readFileName(inputFileName, fsbIndexes[i], fsbFileName);
-
-            //get location of file extension start
-            /*TODO: should this be an assert? depends if this will be called from sm3tools.c
-                which already has file extension validation*/
-            const char* const fileExtensionPtr { std::strrchr(inputFileName, '.') };
-            if (fileExtensionPtr == nullptr) {
-                std::cerr << "ERROR: Input file doesn't have a file extension!\n";
-                std::exit(EXIT_FAILURE);
-            }
-            const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
-            assert(fileExtensionIndex > 0);
-
-            constexpr int OUTPUT_DIR_SIZE { 200 };
-            char outputDir[OUTPUT_DIR_SIZE] {};
-            //copy the head of the string until (excluding) the last '.'
-            (void) std::snprintf(
-                outputDir,
-                static_cast<std::size_t>(fileExtensionIndex + 1),
-                "%s",
-                inputFileName);
-            //create the directory corresponding to that path
-            mymkdir(outputDir);
-
-            //create path with file fsbFileName inside the output directory
-            constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
-            char outputPath[OUTPUT_PATH_SIZE] {};
-            (void) std::snprintf(
-                outputPath,
-                OUTPUT_PATH_SIZE,
-                "%s/%s",
-                outputDir,
-                fsbFileName);
-            outputAudioData(
-                inputFileName,
-                fsbIndexes[i],
-                FSB_HEADER_SIZE,
-                fsbDataSize,
-                outputPath);
         }
+        char fsbFileName[FSB_FILENAME_SIZE] {};
+        readFileName(inputFileName, fsbIndexes[i], fsbFileName);
+
+        //get location of file extension start
+        /*TODO: should this be an assert? depends if this will be called from sm3tools.c
+            which already has file extension validation*/
+        const char* const fileExtensionPtr { std::strrchr(inputFileName, '.') };
+        if (fileExtensionPtr == nullptr) {
+            std::cerr << "ERROR: Input file doesn't have a file extension!\n";
+            std::exit(EXIT_FAILURE);
+        }
+        const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
+        assert(fileExtensionIndex > 0);
+
+        constexpr int OUTPUT_DIR_SIZE { 200 };
+        char outputDir[OUTPUT_DIR_SIZE] {};
+        //copy the head of the string until (excluding) the last '.'
+        (void) std::snprintf(
+            outputDir,
+            static_cast<std::size_t>(fileExtensionIndex + 1),
+            "%s",
+            inputFileName);
+        //create the directory corresponding to that path
+        mymkdir(outputDir);
+
+        //create path with file fsbFileName inside the output directory
+        constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
+        char outputPath[OUTPUT_PATH_SIZE] {};
+        (void) std::snprintf(
+            outputPath,
+            OUTPUT_PATH_SIZE,
+            "%s/%s",
+            outputDir,
+            fsbFileName);
+        outputAudioData(
+            inputFileName,
+            fsbIndexes[i],
+            FSB_HEADER_SIZE,
+            fsbDataSize,
+            outputPath);
     }
 }
 
@@ -378,8 +378,8 @@ int main(const int argc, const char *const argv[]) {
     }
     if (argc == 2) {
         (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
-        printFSBHeaderIndexes(argv[1]);
-        //outputAudioFiles(argv[1]);
+        // printFSBHeaderIndexes(argv[1]);
+        outputAudioFiles(argv[1]);
     }
     if (argc > 3) {
         std::cerr << "WARNING: Arguments after the 2nd"
