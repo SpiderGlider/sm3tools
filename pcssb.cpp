@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <filesystem>
+#include <vector>
 
 #include <cassert>
 #include <cstdio>
@@ -9,6 +10,53 @@
 #include <cstring>
 
 #include "myIO.hpp"
+
+std::vector<size_t> findFSBHeaderIndexes(const char *const inputFileName) {
+    //next index in resultArr to fill (0 indexed)
+    //also happens to be the number of results currently found
+    std::size_t resultCount { 0 };
+
+    std::vector<size_t> indexes {};
+
+    std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
+    {
+        //how many buffers into the file
+        std::size_t readIndex { 0 };
+
+        while (!std::feof(fileHandle)) {
+            constexpr std::size_t BUFFER_SIZE = getfilesize(inputFileName);
+            char *const buffer = new char[BUFFER_SIZE];
+
+            const std::size_t numRead = myfread(
+                buffer,
+                sizeof(char),
+                BUFFER_SIZE,
+                fileHandle);
+
+            for (std::size_t i = 0; i < numRead; i++) {
+                if (buffer[i] == FSB_HEADER_VALUE) {
+                    if (resultCount >= resultArrLen) {
+                        std::cout << "LOG: More results were found than "
+                               "what result array can hold.\n";
+
+                        (void) std::fclose(fileHandle);
+
+                        return resultCount;
+                    }
+                    //position (in terms of how many longs into the file it is)
+                    const size_t uint32Pos { i + (readIndex * BUFFER_SIZE) };
+                    //get how many bytes into the file it is
+                    resultArr[resultCount] = uint32Pos * sizeof(uint32_t);
+                    resultCount++;
+                }
+            }
+            readIndex++;
+        }
+    }
+    (void) std::fclose(fileHandle);
+
+    std::vector<size_t> indexes;
+}
 
 std::size_t findFSBHeaderIndexes(
     const char *const inputFileName,
