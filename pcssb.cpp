@@ -33,23 +33,16 @@ std::vector<size_t> findFSBIndexes(const char *const inputFileName) {
             assert(numRead == BUFFER_SIZE);
 
             const std::string_view bufferSV { buffer, numRead };
-            auto svIterator = bufferSV.begin();
+            size_t searchStartPos = 0;
             bool isFullySearched { false };
             while (!isFullySearched) {
-                //check for next occurence of the substring "FSB3"
-                //which denotes the start of an FSB file
-                auto foundOccurrence = std::search(
-                    svIterator,
-                    bufferSV.end(),
-                    FSB_MAGIC_STRING.begin(),
-                    FSB_MAGIC_STRING.end());
-                //std::search returns end if it couldn't find the substring
-                if (foundOccurrence != bufferSV.end()) {
-                    const ptrdiff_t index = foundOccurrence - bufferSV.begin();
-                    fsbIndexes.push_back(index);
-                    //move the start index for the next search to the current instance
-                    //(incremented so that the search doesn't just return the same instance)
-                    svIterator = ++foundOccurrence;
+                //look for next occurrence of "FSB3" substring
+                const size_t fsbIndex = bufferSV.find(FSB_MAGIC_STRING, searchStartPos);
+                //if an occurrence of the substring was found
+                if (fsbIndex != std::string_view::npos) {
+                    fsbIndexes.push_back(fsbIndex);
+                    //move the start index for the next search to after the found occurrence
+                    searchStartPos = fsbIndex + FSB_MAGIC_STRING.length();
                 }
                 else {
                     isFullySearched = true;
