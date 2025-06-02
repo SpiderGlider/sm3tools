@@ -13,6 +13,8 @@
 #include "myIO.hpp"
 
 std::vector<size_t> findFSBIndexes(const char *const filePath) {
+    assert(filePath != nullptr);
+
     std::vector<size_t> fsbIndexes {};
     //PCSSBs can have a lot more FSBs than this (though seldom more than 50),
     //but this expands in a way that should minimise the number of reallocations
@@ -33,11 +35,15 @@ std::vector<size_t> findFSBIndexes(const char *const filePath) {
             assert(numRead == BUFFER_SIZE);
 
             const std::string_view bufferSV { buffer, numRead };
+            assert(bufferSV.size() == BUFFER_SIZE);
+
             size_t searchStartPos = 0;
             bool isFullySearched { false };
             while (!isFullySearched) {
+                assert(searchStartPos < bufferSV.size());
                 //look for next occurrence of "FSB3" substring
                 const size_t fsbIndex = bufferSV.find(FSB_MAGIC_STRING, searchStartPos);
+                assert(fsbIndex >= searchStartPos);
                 //if an occurrence of the substring was found
                 if (fsbIndex != std::string_view::npos) {
                     fsbIndexes.push_back(fsbIndex);
