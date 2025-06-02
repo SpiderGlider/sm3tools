@@ -12,9 +12,11 @@
 
 #include "myIO.hpp"
 
-std::vector<size_t> findFSBHeaderIndexes(const char *const inputFileName) {
-    //result container
-    std::vector<size_t> indexes {};
+std::vector<size_t> findFSBIndexes(const char *const inputFileName) {
+    std::vector<size_t> fsbIndexes {};
+    //PCSSBs can have a lot more FSBs than this (though seldom more than 50),
+    //but this expands in a way that should minimise the number of reallocations
+    fsbIndexes.reserve(12);
 
     const std::size_t BUFFER_SIZE = getfilesize(inputFileName);
     char *const buffer = new char[BUFFER_SIZE];
