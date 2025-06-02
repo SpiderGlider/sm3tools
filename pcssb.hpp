@@ -40,10 +40,6 @@ struct FSB {
 // "FSB3" text that is at the start of each FSB file
 constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 
-// "FSB3" text that is at the start of each FSB file, represented as
-// an unsigned long.
-constexpr std::uint32_t FSB_MAGIC_NUMBER { 859984710 }; // "FSB3"
-
 //finds every instance of "FSB3" header text in the file given by the filePath,
 //and puts the absolute position in bytes of the start of those instances
 //(in order from the start of the file) into the vector that is returned.
