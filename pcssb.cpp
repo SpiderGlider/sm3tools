@@ -20,8 +20,8 @@ std::vector<size_t> findFSBIndexes(const char *const filePath) {
     //but this expands in a way that should minimise the number of reallocations
     fsbIndexes.reserve(12);
 
-    const auto BUFFER_SIZE = static_cast<size_t>(getfilesize(filePath));
-    char *const buffer = new char[BUFFER_SIZE];
+    const auto fileSize = static_cast<size_t>(getfilesize(filePath));
+    char *const buffer = new char[fileSize];
     {
         //NOTE: we assume that result of getfilesize is the actual file size
         std::FILE *const fileHandle { myfopen(filePath, "rb") };
@@ -30,13 +30,15 @@ std::vector<size_t> findFSBIndexes(const char *const filePath) {
             const std::size_t numRead = myfread(
                 buffer,
                 sizeof(char),
-                BUFFER_SIZE,
+                fileSize,
                 fileHandle);
-            assert(numRead == BUFFER_SIZE);
+            assert(numRead == fileSize);
 
+            //build a string view with length added in for safety
             const std::string_view bufferSV { buffer, numRead };
-            assert(bufferSV.size() == BUFFER_SIZE);
+            assert(bufferSV.size() == fileSize);
 
+            //search from start of the file
             size_t searchStartPos = 0;
             bool isFullySearched { false };
             while (!isFullySearched) {
