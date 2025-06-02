@@ -39,6 +39,10 @@ struct FSB {
 // "FSB3" text that is at the start of each FSB file
 constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 
+// "FSB3" text that is at the start of each FSB file, represented as
+// an unsigned long.
+constexpr std::uint32_t FSB_MAGIC_NUMBER { 859984710 }; // "FSB3"
+
 //finds every instance of "FSB3" header text in the sound file
 //puts the absolute position in bytes of those instances
 //into the given resultArr in the order they are found.

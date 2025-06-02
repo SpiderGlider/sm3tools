@@ -92,7 +92,7 @@ std::size_t findFSBHeaderIndexes(
                 fileHandle);
 
             for (std::size_t i = 0; i < numRead; i++) {
-                if (buffer[i] == FSB_MAGIC_STRING) {
+                if (buffer[i] == FSB_MAGIC_NUMBER) {
                     if (resultCount >= resultArrLen) {
                         std::cout << "LOG: More results were found than "
                                "what result array can hold.\n";
@@ -122,6 +122,7 @@ void printFSBHeaderIndexes(const char *const fileName) {
     constexpr int BUFFER_SIZE { 100 };
     std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
     const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
+    const std::vector<size_t> indexes { findFSBHeaderIndexes(fileName)};
     for (std::size_t i = 0; i < numResults; i+=2) {
         // std::size_t actualDataSize { 0 };
         // std::size_t fsbSize { 0 };
@@ -131,12 +132,14 @@ void printFSBHeaderIndexes(const char *const fileName) {
             std::printf("%lu: "
                         "file name %s"
                         "hex address = 0x%lX, "
+                        "hex address 2 = 0x%lX, "
                         "fsb size = %lu, "
                         "duplicate size = %lu, "
                         "total size including duplicate = %lu\n",
                         i+1,
                         buffer,
                         fsbHeaderIndexes[i],
+                        indexes[i],
                         fsbHeaderIndexes[i+1]-fsbHeaderIndexes[i],
                         fsbHeaderIndexes[i+2]-fsbHeaderIndexes[i+1],
                         fsbHeaderIndexes[i+2]-fsbHeaderIndexes[i]);
