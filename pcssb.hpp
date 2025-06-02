@@ -2,6 +2,7 @@
 #define PCSSB_H
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 struct FSB {
     std::uint32_t fsb3Header {}; // "FSB3"
@@ -36,7 +37,7 @@ struct FSB {
 };
 
 // "FSB3" text that is at the start of each FSB file
-constexpr const char *const FSB_MAGIC_STRING { "FSB3" };
+constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 
 //finds every instance of "FSB3" header text in the sound file
 //puts the absolute position in bytes of those instances

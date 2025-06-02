@@ -3,6 +3,7 @@
 #include <iostream>
 #include <filesystem>
 #include <vector>
+#include <algorithm>
 
 #include <cassert>
 #include <cstdio>
@@ -31,7 +32,12 @@ std::vector<size_t> findFSBHeaderIndexes(const char *const inputFileName) {
             fileHandle);
         assert(numRead == BUFFER_SIZE);
 
-
+        std::string_view sv { buffer, numRead };
+        std::search(
+            sv.begin(),
+            sv.end(),
+            FSB_MAGIC_STRING.begin(),
+            FSB_MAGIC_STRING.end());
     }
     (void) std::fclose(fileHandle);
     return indexes;
