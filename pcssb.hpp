@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
+#include <vector>
 
 struct FSB {
     std::uint32_t fsb3Header {}; // "FSB3"
@@ -54,6 +55,13 @@ std::size_t findFSBHeaderIndexes(
     const char *const inputFileName,
     std::size_t *const resultArr,
     const std::size_t resultArrLen);
+
+//finds every instance of "FSB3" header text in the file given by the filePath,
+//and puts the absolute position in bytes of the start of those instances
+//(in order from the start of the file) into the vector that is returned.
+//The size of the vector is the number of instances that were found.
+std::vector<size_t> findFSBIndexes(
+    const char *const filePath);
 
 //prints out location of each instance of the text "FSB3" in the file.
 //in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
