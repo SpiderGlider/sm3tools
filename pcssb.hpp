@@ -44,18 +44,6 @@ constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 // an unsigned long.
 constexpr std::uint32_t FSB_MAGIC_NUMBER { 859984710 }; // "FSB3"
 
-//finds every instance of "FSB3" header text in the sound file
-//puts the absolute position in bytes of those instances
-//into the given resultArr in the order they are found.
-//return value is number of results found. if it returns a value greater than resultArrLen,
-//that means resultArr was too small and there may have been more results that couldn't fit.
-//NOTE: we assume that the file is aligned in terms of longs (i.e. position of header in file
-//is divisible by 4). In the case of Spider-Man 3 PCSSB files this seems to be the case.
-std::size_t findFSBHeaderIndexes(
-    const char *const inputFileName,
-    std::size_t *const resultArr,
-    const std::size_t resultArrLen);
-
 //finds every instance of "FSB3" header text in the file given by the filePath,
 //and puts the absolute position in bytes of the start of those instances
 //(in order from the start of the file) into the vector that is returned.

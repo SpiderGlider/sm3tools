@@ -61,59 +61,6 @@ std::vector<size_t> findFSBIndexes(const char *const filePath) {
     return fsbIndexes;
 }
 
-std::size_t findFSBHeaderIndexes(
-    const char *const inputFileName,
-    std::size_t *const resultArr,
-    const std::size_t resultArrLen) {
-    assert(inputFileName != nullptr);
-    assert(resultArr != nullptr);
-    assert(resultArrLen > 0);
-
-    //next index in resultArr to fill (0 indexed)
-    //also happens to be the number of results currently found
-    std::size_t resultCount { 0 };
-
-    std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
-    {
-        //how many buffers into the file
-        std::size_t readIndex { 0 };
-
-        while (!std::feof(fileHandle)) {
-            constexpr std::size_t BUFFER_SIZE { 100 };
-            std::uint32_t buffer[BUFFER_SIZE] {};
-            static_assert((sizeof(buffer) / sizeof(std::uint32_t)) == BUFFER_SIZE);
-
-            const std::size_t numRead = myfread(
-                buffer,
-                sizeof(std::uint32_t),
-                BUFFER_SIZE,
-                fileHandle);
-
-            for (std::size_t i = 0; i < numRead; i++) {
-                if (buffer[i] == FSB_MAGIC_NUMBER) {
-                    if (resultCount >= resultArrLen) {
-                        std::cout << "LOG: More results were found than "
-                               "what result array can hold.\n";
-
-                        (void) std::fclose(fileHandle);
-
-                        return resultCount;
-                    }
-                    //position (in terms of how many longs into the file it is)
-                    const size_t uint32Pos { i + (readIndex * BUFFER_SIZE) };
-                    //get how many bytes into the file it is
-                    resultArr[resultCount] = uint32Pos * sizeof(uint32_t);
-                    resultCount++;
-                }
-            }
-            readIndex++;
-        }
-    }
-    (void) std::fclose(fileHandle);
-
-    return resultCount;
-}
-
 void printFSBHeaderIndexes(const char *const filePath) {
     assert(filePath != nullptr);
 
