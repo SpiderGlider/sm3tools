@@ -35,8 +35,8 @@ struct FSB {
     char* data {};
 };
 
-// "FSB3" text represented as an unsigned long
-constexpr std::uint32_t FSB_HEADER_VALUE { 859984710 };
+// "FSB3" text that is at the start of each FSB file
+constexpr const char *const FSB_MAGIC_STRING { "FSB3" };
 
 //finds every instance of "FSB3" header text in the sound file
 //puts the absolute position in bytes of those instances

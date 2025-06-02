@@ -21,7 +21,7 @@ std::vector<size_t> findFSBHeaderIndexes(const char *const inputFileName) {
     std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
     {
         std::size_t resultCount { 0 };
-        constexpr std::size_t BUFFER_SIZE = getfilesize(inputFileName);
+        const std::size_t BUFFER_SIZE = getfilesize(inputFileName);
         char *const buffer = new char[BUFFER_SIZE];
 
         const std::size_t numRead = myfread(
@@ -31,12 +31,7 @@ std::vector<size_t> findFSBHeaderIndexes(const char *const inputFileName) {
             fileHandle);
         assert(numRead == BUFFER_SIZE);
 
-        for (std::size_t i = 0; i < numRead; i++) {
-            if (buffer[i] == FSB_HEADER_VALUE) {
-                indexes[resultCount] = i;
-                resultCount++;
-            }
-        }
+
     }
     (void) std::fclose(fileHandle);
     return indexes;
@@ -71,7 +66,7 @@ std::size_t findFSBHeaderIndexes(
                 fileHandle);
 
             for (std::size_t i = 0; i < numRead; i++) {
-                if (buffer[i] == FSB_HEADER_VALUE) {
+                if (buffer[i] == FSB_MAGIC_STRING) {
                     if (resultCount >= resultArrLen) {
                         std::cout << "LOG: More results were found than "
                                "what result array can hold.\n";
