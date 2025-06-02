@@ -117,8 +117,8 @@ std::size_t findFSBHeaderIndexes(
 void printFSBHeaderIndexes(const char *const filePath) {
     assert(filePath != nullptr);
 
-    const std::vector<size_t> indexes { findFSBIndexes(filePath)};
-    for (std::size_t i = 0; i < indexes.size(); i+=2) {
+    const std::vector<size_t> indexes { findFSBIndexes(filePath) };
+    for (std::size_t i = 0; i < indexes.size(); i += 2) {
         char buffer[FSB_FILENAME_SIZE];
         readFileName(filePath, indexes.at(i), buffer);
         if (i < indexes.size() - 2) {
@@ -217,16 +217,14 @@ void outputAudioData(
 void outputAudioFiles(const char *const inputFileName) {
     assert(inputFileName != nullptr);
 
-    constexpr int BUFFER_SIZE { 100 };
-    std::size_t fsbIndexes[BUFFER_SIZE] {};
-    const std::size_t numResults { findFSBHeaderIndexes(inputFileName, fsbIndexes, BUFFER_SIZE) };
+    const std::vector<std::size_t> fsbIndexes { findFSBIndexes(inputFileName) };
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
     //the duplicate doesn't have all of the data, so isn't worth outputting
-    for (std::size_t i = 0; i < numResults; i += 2) {
+    for (std::size_t i = 0; i < fsbIndexes.size(); i += 2) {
         const std::uint32_t fsbDataSize { readDataSize(inputFileName, fsbIndexes[i]) };
-        if (i < numResults - 1) {
+        if (i < (fsbIndexes.size() - 1)) {
             //apart from the last FSB, actual data size is just distance from the data start until the next FSB
             const std::size_t actualDataSize { fsbIndexes[i+1] - (fsbIndexes[i] + FSB_HEADER_SIZE) };
             if (fsbDataSize != actualDataSize) {
@@ -282,15 +280,14 @@ std::size_t findFirstFSBMatchingFileName(
     assert(pcssbFileName != nullptr);
     assert(fileNameString != nullptr);
 
-    constexpr int BUFFER_SIZE { 100 };
-    std::size_t fsbIndexes[BUFFER_SIZE] {};
-    const std::size_t numResults { findFSBHeaderIndexes(pcssbFileName, fsbIndexes, BUFFER_SIZE) };
-    for (std::size_t i = 0; i < numResults; i++) {
+    const std::vector<std::size_t> fsbIndexes = findFSBIndexes(pcssbFileName);
+
+    for (size_t fsbIndex : fsbIndexes) {
         char fsbFileName[FSB_FILENAME_SIZE] {};
-        readFileName(pcssbFileName, fsbIndexes[i], fsbFileName);
+        readFileName(pcssbFileName, fsbIndex, fsbFileName);
 
         if (std::strcmp(fsbFileName, fileNameString) == 0) {
-            return fsbIndexes[i];
+            return fsbIndex;
         }
     }
 
