@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <filesystem>
+#include <algorithm>
 
 #include <cassert>
 #include <cstdio>
@@ -10,73 +11,85 @@
 
 #include "myIO.hpp"
 
-std::size_t findFSBHeaderIndexes(
-    const char *const inputFileName,
-    std::size_t *const resultArr,
-    const std::size_t resultArrLen) {
-    assert(resultArr != nullptr);
+std::vector<size_t> findFSBIndexes(const char *const filePath) {
+    assert(filePath != nullptr);
 
-    //next index in resultArr to fill (0 indexed)
-    //also happens to be the number of results currently found
-    std::size_t resultCount { 0 };
+    std::vector<size_t> fsbIndexes {};
+    //PCSSBs can have a lot more FSBs than this (though seldom more than 50),
+    //but this expands in a way that should minimise the number of reallocations
+    fsbIndexes.reserve(12);
 
-    std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
+    const auto fileSize = static_cast<size_t>(getfilesize(filePath));
+    char *const buffer = new char[fileSize];
     {
-        //how many buffers into the file
-        std::size_t readIndex { 0 };
-
-        while (!std::feof(fileHandle)) {
-            constexpr std::size_t BUFFER_SIZE { 100 };
-            std::uint32_t buffer[BUFFER_SIZE] {};
-            static_assert((sizeof(buffer) / sizeof(std::uint32_t)) == BUFFER_SIZE);
-
+        //NOTE: we assume that result of getfilesize is the actual file size
+        std::FILE *const fileHandle { myfopen(filePath, "rb") };
+        {
+            //read entire file into buffer
             const std::size_t numRead = myfread(
                 buffer,
-                sizeof(std::uint32_t),
-                BUFFER_SIZE,
+                sizeof(char),
+                fileSize,
                 fileHandle);
+            assert(numRead == fileSize);
 
-            for (std::size_t i = 0; i < numRead; i++) {
-                if (buffer[i] == FSB_HEADER_VALUE) {
-                    if (resultCount >= resultArrLen) {
-                        std::cout << "LOG: More results were found than "
-                               "what result array can hold.\n";
+            //build a string view with length added in for safety
+            const std::string_view bufferSV { buffer, numRead };
+            assert(bufferSV.size() == fileSize);
 
-                        (void) std::fclose(fileHandle);
-
-                        return resultCount;
-                    }
-                    //position (in terms of how many longs into the file it is)
-                    const size_t uint32Pos { i + (readIndex * BUFFER_SIZE) };
-                    //get how many bytes into the file it is
-                    resultArr[resultCount] = uint32Pos * sizeof(uint32_t);
-                    resultCount++;
+            //search from start of the file
+            size_t searchStartPos = 0;
+            bool isFullySearched { false };
+            while (!isFullySearched) {
+                assert(searchStartPos < bufferSV.size());
+                //look for next occurrence of "FSB3" substring
+                const size_t fsbIndex = bufferSV.find(FSB_MAGIC_STRING, searchStartPos);
+                assert(fsbIndex >= searchStartPos);
+                //if an occurrence of the substring was found
+                if (fsbIndex != std::string_view::npos) {
+                    fsbIndexes.push_back(fsbIndex);
+                    //move the start index for the next search to after the found occurrence
+                    searchStartPos = fsbIndex + FSB_MAGIC_STRING.length();
+                }
+                else {
+                    isFullySearched = true;
                 }
             }
-            readIndex++;
         }
+        (void) std::fclose(fileHandle);
     }
-    (void) std::fclose(fileHandle);
-
-    return resultCount;
+    delete[] buffer;
+    return fsbIndexes;
 }
 
-void printFSBHeaderIndexes(const char *const fileName) {
-    constexpr int BUFFER_SIZE { 100 };
-    std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
-    const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
-    for (std::size_t i = 0; i < numResults; i++) {
-        (void) std::printf("%lu: decimal = %lu, hex = 0x%lX \n",
-            i+1,
-            fsbHeaderIndexes[i],
-            fsbHeaderIndexes[i]
-        );
+void printFSBHeaderIndexes(const char *const filePath) {
+    assert(filePath != nullptr);
+
+    const std::vector<size_t> indexes { findFSBIndexes(filePath) };
+    for (std::size_t i = 0; i < indexes.size(); i += 2) {
+        char buffer[FSB_FILENAME_SIZE];
+        readFileName(filePath, indexes.at(i), buffer);
+        if (i < indexes.size() - 2) {
+            std::printf("%lu: "
+                        "file name %s"
+                        "hex address = 0x%lX, "
+                        "fsb size = %lu, "
+                        "duplicate size = %lu, "
+                        "total size including duplicate = %lu\n",
+                        i+1,
+                        buffer,
+                        indexes.at(i),
+                        indexes.at(i+1)-indexes.at(i),
+                        indexes.at(i+2)-indexes.at(i+1),
+                        indexes.at(i+2)-indexes.at(i));
+        }
     }
 }
 
 std::uint32_t readDataSize(
     const char *const inputFileName,
     const std::size_t fsb3HeaderPosition) {
+    assert(inputFileName != nullptr);
 
     std::uint32_t dataSize { 0 };
 
@@ -99,6 +112,8 @@ void readFileName(
     const char *const inputFileName,
     const std::size_t fsb3HeaderPosition,
     char resultArr[FSB_FILENAME_SIZE]) {
+    assert(inputFileName != nullptr);
+    assert(resultArr != nullptr);
 
     std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
     {
@@ -120,6 +135,8 @@ void outputAudioData(
     const std::size_t headerSize,
     const std::size_t dataSize,
     const char *const outputFileName) {
+    assert(inputFileName != nullptr);
+    assert(outputFileName != nullptr);
 
     char *const audioData { static_cast<char *>(std::malloc(dataSize * sizeof(char))) };
     {
@@ -146,78 +163,79 @@ void outputAudioData(
 }
 
 void outputAudioFiles(const char *const inputFileName) {
-    constexpr int BUFFER_SIZE { 100 };
-    std::size_t fsbIndexes[BUFFER_SIZE] {};
-    const std::size_t numResults { findFSBHeaderIndexes(inputFileName, fsbIndexes, BUFFER_SIZE) };
+    assert(inputFileName != nullptr);
+
+    const std::vector<std::size_t> fsbIndexes { findFSBIndexes(inputFileName) };
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
     //the duplicate doesn't have all of the data, so isn't worth outputting
-    for (std::size_t i = 0; i < numResults; i += 2) {
+    for (std::size_t i = 0; i < fsbIndexes.size(); i += 2) {
         const std::uint32_t fsbDataSize { readDataSize(inputFileName, fsbIndexes[i]) };
-        if (i < numResults - 1) {
+        if (i < (fsbIndexes.size() - 1)) {
             //apart from the last FSB, actual data size is just distance from the data start until the next FSB
             const std::size_t actualDataSize { fsbIndexes[i+1] - (fsbIndexes[i] + FSB_HEADER_SIZE) };
             if (fsbDataSize != actualDataSize) {
                 std::cout << "LOG: Data size value doesn't match actual size!\n";
             }
-            char fsbFileName[FSB_FILENAME_SIZE] {};
-            readFileName(inputFileName, fsbIndexes[i], fsbFileName);
-
-            //get location of file extension start
-            /*TODO: should this be an assert? depends if this will be called from sm3tools.c
-                which already has file extension validation*/
-            const char* const fileExtensionPtr { std::strrchr(inputFileName, '.') };
-            if (fileExtensionPtr == nullptr) {
-                std::cerr << "ERROR: Input file doesn't have a file extension!\n";
-                std::exit(EXIT_FAILURE);
-            }
-            const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
-            assert(fileExtensionIndex > 0);
-
-            constexpr int OUTPUT_DIR_SIZE { 200 };
-            char outputDir[OUTPUT_DIR_SIZE] {};
-            //copy the head of the string until (excluding) the last '.'
-            (void) std::snprintf(
-                outputDir,
-                static_cast<std::size_t>(fileExtensionIndex + 1),
-                "%s",
-                inputFileName);
-            //create the directory corresponding to that path
-            mymkdir(outputDir);
-
-            //create path with file fsbFileName inside the output directory
-            constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
-            char outputPath[OUTPUT_PATH_SIZE] {};
-            (void) std::snprintf(
-                outputPath,
-                OUTPUT_PATH_SIZE,
-                "%s/%s",
-                outputDir,
-                fsbFileName);
-            outputAudioData(
-                inputFileName,
-                fsbIndexes[i],
-                FSB_HEADER_SIZE,
-                fsbDataSize,
-                outputPath);
         }
+        char fsbFileName[FSB_FILENAME_SIZE] {};
+        readFileName(inputFileName, fsbIndexes[i], fsbFileName);
+
+        //get location of file extension start
+        /*TODO: should this be an assert? depends if this will be called from sm3tools.c
+            which already has file extension validation*/
+        const char* const fileExtensionPtr { std::strrchr(inputFileName, '.') };
+        if (fileExtensionPtr == nullptr) {
+            std::cerr << "ERROR: Input file doesn't have a file extension!\n";
+            std::exit(EXIT_FAILURE);
+        }
+        const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
+        assert(fileExtensionIndex > 0);
+
+        constexpr int OUTPUT_DIR_SIZE { 200 };
+        char outputDir[OUTPUT_DIR_SIZE] {};
+        //copy the head of the string until (excluding) the last '.'
+        (void) std::snprintf(
+            outputDir,
+            static_cast<std::size_t>(fileExtensionIndex + 1),
+            "%s",
+            inputFileName);
+        //create the directory corresponding to that path
+        mymkdir(outputDir);
+
+        //create path with file fsbFileName inside the output directory
+        constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
+        char outputPath[OUTPUT_PATH_SIZE] {};
+        (void) std::snprintf(
+            outputPath,
+            OUTPUT_PATH_SIZE,
+            "%s/%s",
+            outputDir,
+            fsbFileName);
+        outputAudioData(
+            inputFileName,
+            fsbIndexes[i],
+            FSB_HEADER_SIZE,
+            fsbDataSize,
+            outputPath);
     }
 }
 
 std::size_t findFirstFSBMatchingFileName(
     const char *const pcssbFileName,
     const char *const fileNameString) {
+    assert(pcssbFileName != nullptr);
+    assert(fileNameString != nullptr);
 
-    constexpr int BUFFER_SIZE { 100 };
-    std::size_t fsbIndexes[BUFFER_SIZE] {};
-    const std::size_t numResults { findFSBHeaderIndexes(pcssbFileName, fsbIndexes, BUFFER_SIZE) };
-    for (std::size_t i = 0; i < numResults; i++) {
+    const std::vector<std::size_t> fsbIndexes = findFSBIndexes(pcssbFileName);
+
+    for (size_t fsbIndex : fsbIndexes) {
         char fsbFileName[FSB_FILENAME_SIZE] {};
-        readFileName(pcssbFileName, fsbIndexes[i], fsbFileName);
+        readFileName(pcssbFileName, fsbIndex, fsbFileName);
 
         if (std::strcmp(fsbFileName, fileNameString) == 0) {
-            return fsbIndexes[i];
+            return fsbIndex;
         }
     }
 
@@ -231,6 +249,9 @@ void readAndWriteToNewFile(
     const size_t readCount,
     const size_t readPosition,
     const bool append) {
+    assert(inputFileName != nullptr);
+    assert(outputFileName != nullptr);
+    assert(readCount > 0);
 
     //store bytes from input in intermediate buffer
     //(plus one extra byte for null terminator)
@@ -306,7 +327,7 @@ void replaceAudioinPCSSB(
         const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
         const std::intmax_t replaceDataSize = getfilesize(replaceFilePath);
         const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-        //append everything up to the existing audio data into the output file
+        //write everything up to the existing audio data into the output file
         readAndWriteToNewFile(
             pcssbFilePath,
             outputFilePath,
@@ -358,7 +379,7 @@ int main(const int argc, const char *const argv[]) {
     }
     if (argc == 2) {
         (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
-        //printFSBHeaderIndexes(argv[1]);
+        // printFSBHeaderIndexes(argv[1]);
         outputAudioFiles(argv[1]);
     }
     if (argc > 3) {

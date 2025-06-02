@@ -2,6 +2,8 @@
 #define PCSSB_H
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
+#include <vector>
 
 struct FSB {
     std::uint32_t fsb3Header {}; // "FSB3"
@@ -15,7 +17,9 @@ struct FSB {
     std::uint32_t unknown2 {}; // = 196609
     std::uint32_t null1 {};
 
-    char* fileName {}; // 32 bytes
+    std::uint16_t entrySize {}; // = 80 ("P\0")
+
+    char* fileName {}; // 30 bytes
 
     std::uint32_t unknown3 {};
     std::uint32_t unknown4 {};
@@ -33,24 +37,23 @@ struct FSB {
     char* data {};
 };
 
-// "FSB3" text represented as an unsigned long
-constexpr std::uint32_t FSB_HEADER_VALUE { 859984710 };
+// "FSB3" text that is at the start of each FSB file
+constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 
-//finds every instance of "FSB3" header text in the sound file
-//puts the absolute position in bytes of those instances
-//into the given resultArr in the order they are found.
-//return value is number of results found. if it returns a value greater than resultArrLen,
-//that means resultArr was too small and there may have been more results that couldn't fit.
-//NOTE: we assume that the file is aligned in terms of longs (i.e. position of header in file
-//is divisible by 4). In the case of Spider-Man 3 PCSSB files this seems to be the case.
-std::size_t findFSBHeaderIndexes(
-    const char *const inputFileName,
-    std::size_t *const resultArr,
-    const std::size_t resultArrLen);
+// "FSB3" text that is at the start of each FSB file, represented as
+// an unsigned long.
+constexpr std::uint32_t FSB_MAGIC_NUMBER { 859984710 }; // "FSB3"
+
+//finds every instance of "FSB3" header text in the file given by the filePath,
+//and puts the absolute position in bytes of the start of those instances
+//(in order from the start of the file) into the vector that is returned.
+//The size of the vector is the number of instances that were found.
+std::vector<size_t> findFSBIndexes(
+    const char *const filePath);
 
 //prints out location of each instance of the text "FSB3" in the file.
 //in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
-void printFSBHeaderIndexes(const char *const fileName);
+void printFSBHeaderIndexes(const char *const filePath);
 
 constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
 
@@ -64,15 +67,12 @@ std::uint32_t readDataSize(
     const std::size_t fsb3HeaderPosition);
 
 //number of bytes used to store the sample filename in FSB archives,
-//EXCLUDING the "P\0" at the start for simplicity (-2)
-//BUT INCLUDING an extra byte (+1) for adding a null terminator at the end when
-//read to a string, also for simplicity. 32 - 2 + 1 = 31
+//INCLUDING an extra byte (+1) for adding a null terminator at the end when
+//read to a string, for simplicity. 30 + 1 = 31
 constexpr int FSB_FILENAME_SIZE { 31 };
 
-//NOTE: set 2 bytes ahead because otherwise
-//it seems to begin with (P\0) which would null terminate the string
-//which is annoying, and I'm not sure if that's supposed
-//to be part of the file name anyway or if it's something else.
+//NOTE: skips 6 longs which are the other header information including "FSB3" text
+//before the entry starts, and then skips 2 bytes which is the entry size (which =80)
 constexpr int FILENAME_OFFSET { 2 + (6 * sizeof(uint32_t)) };
 
 //Reads the file name field in the FSB file that starts at fsb3HeaderPosition.
