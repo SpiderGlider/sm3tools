@@ -13,33 +13,53 @@
 #include "myIO.hpp"
 
 std::vector<size_t> findFSBHeaderIndexes(const char *const inputFileName) {
-    //next index in resultArr to fill (0 indexed)
-    //also happens to be the number of results currently found
-
+    //result container
     std::vector<size_t> indexes(10);
 
-    //NOTE: we assume that result of getfilesize is the actual file size
-    std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
+    const std::size_t BUFFER_SIZE = getfilesize(inputFileName);
+    char *const buffer = new char[BUFFER_SIZE];
     {
-        std::size_t resultCount { 0 };
-        const std::size_t BUFFER_SIZE = getfilesize(inputFileName);
-        char *const buffer = new char[BUFFER_SIZE];
+        //NOTE: we assume that result of getfilesize is the actual file size
+        std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
+        {
+            //next index in resultArr to fill (0 indexed)
+            //also happens to be the number of results currently found
+            std::size_t resultCount { 0 };
 
-        const std::size_t numRead = myfread(
-            buffer,
-            sizeof(char),
-            BUFFER_SIZE,
-            fileHandle);
-        assert(numRead == BUFFER_SIZE);
+            //read entire file into buffer
+            const std::size_t numRead = myfread(
+                buffer,
+                sizeof(char),
+                BUFFER_SIZE,
+                fileHandle);
+            assert(numRead == BUFFER_SIZE);
 
-        std::string_view sv { buffer, numRead };
-        std::search(
-            sv.begin(),
-            sv.end(),
-            FSB_MAGIC_STRING.begin(),
-            FSB_MAGIC_STRING.end());
+            const std::string_view bufferSV { buffer, numRead };
+            auto svIterator = bufferSV.begin();
+            bool isFullySearched { false };
+            while (!isFullySearched) {
+                //check for next occurence of the substring "FSB3"
+                //which denotes the start of an FSB file
+                auto foundOccurrence = std::search(
+                    svIterator,
+                    bufferSV.end(),
+                    FSB_MAGIC_STRING.begin(),
+                    FSB_MAGIC_STRING.end());
+                //std::search returns end if it couldn't find the substring
+                if (foundOccurrence != bufferSV.end()) {
+                    const size_t index = bufferSV.begin() - foundOccurrence;
+                    indexes[resultCount] = index;
+                    resultCount++;
+                    svIterator = foundOccurrence;
+                }
+                else {
+                    isFullySearched = true;
+                }
+            }
+        }
+        (void) std::fclose(fileHandle);
     }
-    (void) std::fclose(fileHandle);
+    delete[] buffer;
     return indexes;
 }
 
