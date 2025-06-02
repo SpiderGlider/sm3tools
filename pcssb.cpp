@@ -47,10 +47,10 @@ std::vector<size_t> findFSBHeaderIndexes(const char *const inputFileName) {
                     FSB_MAGIC_STRING.end());
                 //std::search returns end if it couldn't find the substring
                 if (foundOccurrence != bufferSV.end()) {
-                    const size_t index = bufferSV.begin() - foundOccurrence;
-                    indexes[resultCount] = index;
+                    const size_t index = foundOccurrence - bufferSV.begin();
+                    indexes.push_back(index);
                     resultCount++;
-                    svIterator = foundOccurrence;
+                    svIterator = ++foundOccurrence;
                 }
                 else {
                     isFullySearched = true;
