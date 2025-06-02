@@ -18,16 +18,12 @@ std::vector<size_t> findFSBIndexes(const char *const inputFileName) {
     //but this expands in a way that should minimise the number of reallocations
     fsbIndexes.reserve(12);
 
-    const std::size_t BUFFER_SIZE = getfilesize(inputFileName);
+    const auto BUFFER_SIZE = static_cast<size_t>(getfilesize(inputFileName));
     char *const buffer = new char[BUFFER_SIZE];
     {
         //NOTE: we assume that result of getfilesize is the actual file size
         std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
         {
-            //next index in resultArr to fill (0 indexed)
-            //also happens to be the number of results currently found
-            std::size_t resultCount { 0 };
-
             //read entire file into buffer
             const std::size_t numRead = myfread(
                 buffer,
@@ -49,9 +45,10 @@ std::vector<size_t> findFSBIndexes(const char *const inputFileName) {
                     FSB_MAGIC_STRING.end());
                 //std::search returns end if it couldn't find the substring
                 if (foundOccurrence != bufferSV.end()) {
-                    const size_t index = foundOccurrence - bufferSV.begin();
-                    indexes.push_back(index);
-                    resultCount++;
+                    const ptrdiff_t index = foundOccurrence - bufferSV.begin();
+                    fsbIndexes.push_back(index);
+                    //move the start index for the next search to the current instance
+                    //(incremented so that the search doesn't just return the same instance)
                     svIterator = ++foundOccurrence;
                 }
                 else {
@@ -62,7 +59,7 @@ std::vector<size_t> findFSBIndexes(const char *const inputFileName) {
         (void) std::fclose(fileHandle);
     }
     delete[] buffer;
-    return indexes;
+    return fsbIndexes;
 }
 
 std::size_t findFSBHeaderIndexes(
@@ -124,7 +121,7 @@ void printFSBHeaderIndexes(const char *const fileName) {
     constexpr int BUFFER_SIZE { 100 };
     std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
     const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
-    const std::vector<size_t> indexes { findFSBHeaderIndexes(fileName)};
+    const std::vector<size_t> indexes { findFSBIndexes(fileName)};
     for (std::size_t i = 0; i < numResults; i+=2) {
         // std::size_t actualDataSize { 0 };
         // std::size_t fsbSize { 0 };
