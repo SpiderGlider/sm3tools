@@ -14,7 +14,7 @@
 
 std::vector<size_t> findFSBHeaderIndexes(const char *const inputFileName) {
     //result container
-    std::vector<size_t> indexes(10);
+    std::vector<size_t> indexes {};
 
     const std::size_t BUFFER_SIZE = getfilesize(inputFileName);
     char *const buffer = new char[BUFFER_SIZE];
