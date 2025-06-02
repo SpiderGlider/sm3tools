@@ -65,7 +65,7 @@ std::vector<size_t> findFSBIndexes(
 
 //prints out location of each instance of the text "FSB3" in the file.
 //in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
-void printFSBHeaderIndexes(const char *const fileName);
+void printFSBHeaderIndexes(const char *const filePath);
 
 constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
 

@@ -114,49 +114,27 @@ std::size_t findFSBHeaderIndexes(
     return resultCount;
 }
 
-void printFSBHeaderIndexes(const char *const fileName) {
-    assert(fileName != nullptr);
+void printFSBHeaderIndexes(const char *const filePath) {
+    assert(filePath != nullptr);
 
-    constexpr int BUFFER_SIZE { 100 };
-    std::size_t fsbHeaderIndexes[BUFFER_SIZE] {};
-    const std::size_t numResults { findFSBHeaderIndexes(fileName, fsbHeaderIndexes, BUFFER_SIZE) };
-    const std::vector<size_t> indexes { findFSBIndexes(fileName)};
-    for (std::size_t i = 0; i < numResults; i+=2) {
-        // std::size_t actualDataSize { 0 };
-        // std::size_t fsbSize { 0 };
+    const std::vector<size_t> indexes { findFSBIndexes(filePath)};
+    for (std::size_t i = 0; i < indexes.size(); i+=2) {
         char buffer[FSB_FILENAME_SIZE];
-        readFileName(fileName, fsbHeaderIndexes[i], buffer);
-        if (i < numResults - 2) {
+        readFileName(filePath, indexes.at(i), buffer);
+        if (i < indexes.size() - 2) {
             std::printf("%lu: "
                         "file name %s"
                         "hex address = 0x%lX, "
-                        "hex address 2 = 0x%lX, "
                         "fsb size = %lu, "
                         "duplicate size = %lu, "
                         "total size including duplicate = %lu\n",
                         i+1,
                         buffer,
-                        fsbHeaderIndexes[i],
-                        indexes[i],
-                        fsbHeaderIndexes[i+1]-fsbHeaderIndexes[i],
-                        fsbHeaderIndexes[i+2]-fsbHeaderIndexes[i+1],
-                        fsbHeaderIndexes[i+2]-fsbHeaderIndexes[i]);
+                        indexes.at(i),
+                        indexes.at(i+1)-indexes.at(i),
+                        indexes.at(i+2)-indexes.at(i+1),
+                        indexes.at(i+2)-indexes.at(i));
         }
-        // if (i < numResults - 1) {
-        //     actualDataSize = fsbHeaderIndexes[i+1] - (fsbHeaderIndexes[i] + FSB_HEADER_SIZE);
-        //     fsbSize = fsbHeaderIndexes[i+1] - fsbHeaderIndexes[i];
-        // }
-        // (void) std::printf("%lu: "
-        //                    "hex address = 0x%lX, "
-        //                    "actual data size = %lu, "
-        //                    "data size field = %u,"
-        //                    "total size = %lu \n",
-        //     i+1,
-        //     fsbHeaderIndexes[i],
-        //     actualDataSize,
-        //     readDataSize(fileName, fsbHeaderIndexes[i]),
-        //     fsbSize
-        // );
     }
 }
 
