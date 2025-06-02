@@ -122,7 +122,8 @@ void readAndWriteToNewFile(
     const char *const outputFileName,
     const std::size_t readCount,
     const std::size_t readPosition,
-    const bool append);
+    const bool append,
+    const bool padWithZeroes);
 
 //replace a uint32_t field in a file.
 //the field has to be exactly sizeof(uint32_t) bytes, any less or more
