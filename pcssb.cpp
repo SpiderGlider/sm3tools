@@ -374,17 +374,13 @@ void replaceAudioinPCSSB(
             true,
             false);
 
-        // //NOTE: this warning is unlikely to be reachable on most platforms
-        // //but is just there for portability. The data size can't be more than 4 bits
-        // if (replaceDataSize > UINT32_MAX) {
-        //     std::cerr << "WARNING: Replacement audio data size is too large"
-        //                     ", replacement may not work properly!\n";
-        // }
-        // //change data size field to match size of replaceFilePath
-        // replaceLongInFile(
-        //     outputFilePath,
-        //     (fsbHeaderIndex + DATA_SIZE_OFFSET),
-        //     static_cast<std::uint32_t>(replaceDataSize));
+        /* NOTE: we currently don't modify the data size field in the FSB because
+            we only insert the replacement audio when it is smaller than
+            or the same size as the original. in the former case, we use 00 for the
+            remaining bytes - while technically they aren't really part of the audio
+            so the value of the data size field won't actually be representative,
+            in practise the game just ignores the null bytes and the original audio
+            in some of the FSBs is formatted the same way anyway. */
     }
     std::free(outputFilePath);
 }
