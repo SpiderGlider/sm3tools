@@ -71,7 +71,7 @@ void printFSBHeaderIndexes(const char *const filePath) {
         readFileName(filePath, indexes.at(i), buffer);
         if (i < indexes.size() - 2) {
             std::printf("%lu: "
-                        "file name %s"
+                        "file name %s, "
                         "hex address = 0x%lX, "
                         "fsb size = %lu, "
                         "duplicate size = %lu, "
@@ -248,30 +248,39 @@ void readAndWriteToNewFile(
     const char *const outputFileName,
     const size_t readCount,
     const size_t readPosition,
-    const bool append) {
+    const bool append,
+    const bool padWithZeroes) {
     assert(inputFileName != nullptr);
     assert(outputFileName != nullptr);
     assert(readCount > 0);
 
     //store bytes from input in intermediate buffer
     //(plus one extra byte for null terminator)
-    char *const buffer { static_cast<char *>(std::malloc((readCount + 1) * sizeof(char))) };
+    //NOTE: we use calloc here to ensure that the bytes of the buffer that don't get read to
+    // can still be written to the file as "zero padding" if padWithZeroes is enabled.
+    char *const buffer { static_cast<char *>(std::calloc(readCount + 1, sizeof(char))) };
     {
         std::FILE *const inputFileHandle { myfopen(inputFileName, "rb") };
         {
             myfseek_unsigned(inputFileHandle, readPosition, SEEK_SET);
 
             const std::size_t numRead { myfread(buffer, sizeof(char), readCount, inputFileHandle) };
+
+            //if padWithZeroes is false, only write the bytes that have been read
+            //if padWithZeroes is true, write the entire length of the buffer,
+            // with the remaining bytes being 00
+            const std::size_t numToWrite { padWithZeroes ? readCount : numRead };
+
             //null terminate buffer string for safety
-            buffer[numRead] = '\0';
+            buffer[numToWrite] = '\0';
 
             //either append or write depending on append argument
             //NOTE: we create an outputMode variable this way so that
-            //we can keep outputFileHandle const
+            // we can keep outputFileHandle const
             const char *const outputMode { append ? "ab" : "wb" };
             std::FILE *const outputFileHandle { myfopen(outputFileName, outputMode) };
             {
-                (void) myfwrite(buffer, sizeof(char), numRead, outputFileHandle);
+                (void) myfwrite(buffer, sizeof(char), numToWrite, outputFileHandle);
             }
             (void) std::fclose(outputFileHandle);
         }
@@ -326,6 +335,15 @@ void replaceAudioinPCSSB(
         const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName.c_str());
         const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
         const std::intmax_t replaceDataSize = getfilesize(replaceFilePath);
+
+        if (static_cast<std::size_t>(replaceDataSize) > originalDataSize) {
+            std::cerr << "ERROR: Given replacement audio has a larger file size than the original. "
+                         "Inserting it into the PCSSB would result in undesirable side effects. Aborting.\n";
+            std::exit(EXIT_FAILURE);
+        }
+
+        //TODO could trim metadata from the replacement audio
+
         const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
         //write everything up to the existing audio data into the output file
         readAndWriteToNewFile(
@@ -333,17 +351,16 @@ void replaceAudioinPCSSB(
             outputFilePath,
             fsbAudioDataIndex,
             0,
+            false,
             false);
 
         //append the replacement audio data into the output file
         readAndWriteToNewFile(
             replaceFilePath,
             outputFilePath,
-            //NOTE: case where the data size is negative is logged in myIO.c.
-            //apparently negative values for it are supposed to wrap around
-            //to positive ones anyway so this should work. but it is not guaranteed to.
-            static_cast<std::size_t>(replaceDataSize),
+            originalDataSize,
             0,
+            true,
             true);
 
         //append the rest of the original file after the audio data
@@ -354,19 +371,16 @@ void replaceAudioinPCSSB(
             //ensures all the bytes after from original file is read
             static_cast<std::size_t>(getfilesize(pcssbFilePath)),
             fsbAudioDataIndex + originalDataSize,
-            true);
+            true,
+            false);
 
-        //NOTE: this warning is unlikely to be reachable on most platforms
-        //but is just there for portability. The data size can't be more than 4 bits
-        if (replaceDataSize > UINT32_MAX) {
-            std::cerr << "WARNING: Replacement audio data size is too large"
-                            ", replacement may not work properly!\n";
-        }
-        //change data size field to match size of replaceFilePath
-        replaceLongInFile(
-            outputFilePath,
-            (fsbHeaderIndex + DATA_SIZE_OFFSET),
-            static_cast<std::uint32_t>(replaceDataSize));
+        /* NOTE: we currently don't modify the data size field in the FSB because
+            we only insert the replacement audio when it is smaller than
+            or the same size as the original. in the former case, we use 00 for the
+            remaining bytes - while technically they aren't really part of the audio
+            so the value of the data size field won't actually be representative,
+            in practise the game just ignores the null bytes and the original audio
+            in some of the FSBs is formatted the same way anyway. */
     }
     std::free(outputFilePath);
 }
@@ -379,8 +393,8 @@ int main(const int argc, const char *const argv[]) {
     }
     if (argc == 2) {
         (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
-        // printFSBHeaderIndexes(argv[1]);
-        outputAudioFiles(argv[1]);
+        printFSBHeaderIndexes(argv[1]);
+        // outputAudioFiles(argv[1]);
     }
     if (argc > 3) {
         std::cerr << "WARNING: Arguments after the 2nd"

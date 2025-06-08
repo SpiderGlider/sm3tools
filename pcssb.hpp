@@ -40,10 +40,6 @@ struct FSB {
 // "FSB3" text that is at the start of each FSB file
 constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 
-// "FSB3" text that is at the start of each FSB file, represented as
-// an unsigned long.
-constexpr std::uint32_t FSB_MAGIC_NUMBER { 859984710 }; // "FSB3"
-
 //finds every instance of "FSB3" header text in the file given by the filePath,
 //and puts the absolute position in bytes of the start of those instances
 //(in order from the start of the file) into the vector that is returned.
@@ -117,16 +113,23 @@ void outputAudioData(
 void outputAudioFiles(const char *const inputFileName);
 
 //reads readCount bytes from input (starting from readPosition)
-//and writes what's read to the output file
+//and writes those bytes to the output file
 //(destroying the file if it exists) if append is false.
 //otherwise it appends to the output file.
+//if padWithZeroes is true and the number of bytes that is read
+//from the input ends up being less than readCount, readCount bytes
+//are still written to the output (with null (00) bytes being written
+//for the remaining bytes). otherwise, only the bytes that are
+//read are written to the output, so the amount written may be less
+//than readCount.
 //creates output file if it does not exist.
 void readAndWriteToNewFile(
     const char *const inputFileName,
     const char *const outputFileName,
     const std::size_t readCount,
     const std::size_t readPosition,
-    const bool append);
+    const bool append,
+    const bool padWithZeroes);
 
 //replace a uint32_t field in a file.
 //the field has to be exactly sizeof(uint32_t) bytes, any less or more
