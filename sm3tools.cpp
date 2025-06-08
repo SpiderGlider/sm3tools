@@ -1,9 +1,9 @@
 #include <iostream>
 #include <filesystem>
+#include <string>
 
 #include <cassert>
 #include <cstdlib>
-#include <cstring>
 
 typedef enum FILE_TYPE {
     PCPACK,
