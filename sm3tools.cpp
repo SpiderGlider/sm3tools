@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 
 #include <cassert>
 #include <cstdlib>
@@ -11,12 +12,12 @@ typedef enum FILE_TYPE {
 
 // Checks the file extension of the file name, and returns the relevant
 // file type if one is matched. Otherwise it exits with an error message
-FileType getFileType(const char *const fileName) {
-    assert(fileName != nullptr);
+FileType getFileType(const char *const filePath) {
+    assert(filePath != nullptr);
 
-    const char *const fileExtension { std::strrchr(fileName, '.') };
+    const std::string fileExtension { std::filesystem::path(filePath).extension().string() };
 
-    if (fileExtension == nullptr) {
+    if (fileExtension.empty()) {
         std::cerr << "ERROR: Argument doesn't have a file extension."
                         " Are you sure this is a path to a file?\n";
         std::exit(EXIT_FAILURE);
@@ -24,8 +25,8 @@ FileType getFileType(const char *const fileName) {
 
     // TODO could check magic numbers as well
     // FIXME case sensitive currently
-    if (std::strcmp(fileExtension, ".PCPACK") == 0) return PCPACK;
-    if (std::strcmp(fileExtension, ".pcssb") == 0) return PCSSB;
+    if (fileExtension == ".PCPACK") return PCPACK;
+    if (fileExtension == ".pcssb") return PCSSB;
 
     std::cerr << "ERROR: File extension not recognised.\n";
     std::exit(EXIT_FAILURE);
