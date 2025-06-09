@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
+#include <cerrno>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -41,7 +42,7 @@ void mymkdir(const char *const path) {
 #else
     const int returnValue = mkdir(path, 0700);
 #endif
-    if (returnValue != 0) {
+    if (returnValue != 0 && errno != EEXIST) {
         std::perror("ERROR: Failed to create directory");
     }
 }
