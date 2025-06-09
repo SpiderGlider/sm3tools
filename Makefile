@@ -19,11 +19,11 @@ DEFAULTFLAGS_CPP = -std=c++17 -Wall -pedantic -g -fsanitize=undefined -fsanitize
 
 EXTRAFLAGS = -Wextra -Wformat=2 -Wconversion -Wno-strict-prototypes -Wno-unused-parameter -Wshadow -Wfloat-equal -Wundef # -O3 -Wwrite-strings -Wformat-signedness 
 
-sm3tools: sm3tools.cpp
-	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) sm3tools.cpp -o $@
+sm3tools: src/sm3tools.cpp
+	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) src/sm3tools.cpp -o $@
 
-pcssb: pcssb.cpp
-	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) pcssb.cpp myIO.cpp -o $@
+pcssb: src/pcssb.cpp
+	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) src/pcssb.cpp src/myIO.cpp -o $@
 
 %: %.cpp
 	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) $@.cpp -o $@
