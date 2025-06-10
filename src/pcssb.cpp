@@ -20,6 +20,7 @@
 #include "pcssb.hpp"
 
 #include <iostream>
+#include <sstream>
 #include <filesystem>
 #include <algorithm>
 
@@ -186,30 +187,20 @@ void outputAudioFiles(const char *const inputFileName) {
 
     const std::vector<std::size_t> fsbIndexes { findFSBIndexes(inputFileName) };
 
-    //get location of file extension start
-    const char* const fileExtensionPtr { std::strrchr(inputFileName, '.') };
-    /*TODO: should this be an assert? depends if this will be called from sm3tools.c
-        which already has file extension validation*/
-    if (fileExtensionPtr == nullptr) {
+    const std::filesystem::path inputFileNamePath = {inputFileName};
+
+    const std::filesystem::path fileName { inputFileNamePath.filename() };
+    if (fileName.empty()) {
         std::cerr << "ERROR: Input file doesn't have a file extension!\n";
         std::exit(EXIT_FAILURE);
     }
-    //get the index
-    const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
-    assert(fileExtensionIndex > 0);
+    const std::filesystem::path parentPath { inputFileNamePath.parent_path() };
 
-    constexpr int OUTPUT_DIR_SIZE { 200 };
-    char outputDir[OUTPUT_DIR_SIZE] {};
-    //copy the head of the string until (excluding) the last '.'
-    //(so that outputDir doesn't have the file extension and hence is
-    //distinct from the input PCSSB file that's in the same directory)
-    (void) std::snprintf(
-        outputDir,
-        static_cast<std::size_t>(fileExtensionIndex + 1),
-        "%s",
-        inputFileName);
-    //create the directory corresponding to that path
-    mymkdir(outputDir);
+    std::ostringstream stringStream {};
+    stringStream << parentPath.string() << "/out/" << fileName.string();
+    const std::string outputDirectory { stringStream.str() };
+
+    mymkdir(outputDirectory.c_str());
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
@@ -227,13 +218,13 @@ void outputAudioFiles(const char *const inputFileName) {
         readFileName(inputFileName, fsbIndexes[i], fsbFileName);
 
         //create path with file fsbFileName inside the output directory
-        constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
+        constexpr int OUTPUT_PATH_SIZE { 300 };
         char outputPath[OUTPUT_PATH_SIZE] {};
         (void) std::snprintf(
             outputPath,
             OUTPUT_PATH_SIZE,
             "%s/%s",
-            outputDir,
+            outputDirectory.c_str(),
             fsbFileName);
         outputAudioData(
             inputFileName,
