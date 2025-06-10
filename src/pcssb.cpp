@@ -22,7 +22,6 @@
 #include <iostream>
 #include <sstream>
 #include <filesystem>
-#include <algorithm>
 
 #include <cassert>
 #include <cstdio>
@@ -248,7 +247,7 @@ std::size_t findFirstFSBMatchingFileName(
 
     const std::vector<std::size_t> fsbIndexes = findFSBIndexes(pcssbFileName);
 
-    for (size_t fsbIndex : fsbIndexes) {
+    for (const size_t fsbIndex : fsbIndexes) {
         char fsbFileName[FSB_FILENAME_SIZE] {};
         readFileName(pcssbFileName, fsbIndex, fsbFileName);
 
