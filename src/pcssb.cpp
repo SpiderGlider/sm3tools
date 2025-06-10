@@ -197,14 +197,14 @@ void outputAudioFiles(const char *const inputFileName) {
     const std::filesystem::path parentPath { inputFileNamePath.parent_path() };
 
     std::ostringstream stringStream {};
+    //create /out directory
+    //TODO does this work on windows? (or should we use replace_filename() instead)?
     stringStream << parentPath.string() << "/out/";
-
     mymkdir(stringStream.str().c_str());
 
+    //create directory for the PCSSB file within /out
     stringStream << fileName.string();
-
     const std::string outputDirectory { stringStream.str() };
-
     mymkdir(outputDirectory.c_str());
 
     //we only look at the alternate found FSBs
