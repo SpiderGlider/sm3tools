@@ -186,6 +186,31 @@ void outputAudioFiles(const char *const inputFileName) {
 
     const std::vector<std::size_t> fsbIndexes { findFSBIndexes(inputFileName) };
 
+    //get location of file extension start
+    const char* const fileExtensionPtr { std::strrchr(inputFileName, '.') };
+    /*TODO: should this be an assert? depends if this will be called from sm3tools.c
+        which already has file extension validation*/
+    if (fileExtensionPtr == nullptr) {
+        std::cerr << "ERROR: Input file doesn't have a file extension!\n";
+        std::exit(EXIT_FAILURE);
+    }
+    //get the index
+    const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
+    assert(fileExtensionIndex > 0);
+
+    constexpr int OUTPUT_DIR_SIZE { 200 };
+    char outputDir[OUTPUT_DIR_SIZE] {};
+    //copy the head of the string until (excluding) the last '.'
+    //(so that outputDir doesn't have the file extension and hence is
+    //distinct from the input PCSSB file that's in the same directory)
+    (void) std::snprintf(
+        outputDir,
+        static_cast<std::size_t>(fileExtensionIndex + 1),
+        "%s",
+        inputFileName);
+    //create the directory corresponding to that path
+    mymkdir(outputDir);
+
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
     //the duplicate doesn't have all of the data, so isn't worth outputting
@@ -200,28 +225,6 @@ void outputAudioFiles(const char *const inputFileName) {
         }
         char fsbFileName[FSB_FILENAME_SIZE] {};
         readFileName(inputFileName, fsbIndexes[i], fsbFileName);
-
-        //get location of file extension start
-        /*TODO: should this be an assert? depends if this will be called from sm3tools.c
-            which already has file extension validation*/
-        const char* const fileExtensionPtr { std::strrchr(inputFileName, '.') };
-        if (fileExtensionPtr == nullptr) {
-            std::cerr << "ERROR: Input file doesn't have a file extension!\n";
-            std::exit(EXIT_FAILURE);
-        }
-        const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
-        assert(fileExtensionIndex > 0);
-
-        constexpr int OUTPUT_DIR_SIZE { 200 };
-        char outputDir[OUTPUT_DIR_SIZE] {};
-        //copy the head of the string until (excluding) the last '.'
-        (void) std::snprintf(
-            outputDir,
-            static_cast<std::size_t>(fileExtensionIndex + 1),
-            "%s",
-            inputFileName);
-        //create the directory corresponding to that path
-        mymkdir(outputDir);
 
         //create path with file fsbFileName inside the output directory
         constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
@@ -412,8 +415,8 @@ int main(const int argc, const char *const argv[]) {
     }
     if (argc == 2) {
         (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
-        printFSBHeaderIndexes(argv[1]);
-        // outputAudioFiles(argv[1]);
+        // printFSBHeaderIndexes(argv[1]);
+        outputAudioFiles(argv[1]);
     }
     if (argc > 3) {
         std::cerr << "WARNING: Arguments after the 2nd"

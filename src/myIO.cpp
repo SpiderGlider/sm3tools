@@ -42,7 +42,7 @@ void mymkdir(const char *const path) {
 #else
     const int returnValue = mkdir(path, 0700);
 #endif
-    if (returnValue != 0 && errno != EEXIST) {
+    if (returnValue != 0) {
         std::perror("ERROR: Failed to create directory");
     }
 }
