@@ -197,7 +197,12 @@ void outputAudioFiles(const char *const inputFileName) {
     const std::filesystem::path parentPath { inputFileNamePath.parent_path() };
 
     std::ostringstream stringStream {};
-    stringStream << parentPath.string() << "/out/" << fileName.string();
+    stringStream << parentPath.string() << "/out/";
+
+    mymkdir(stringStream.str().c_str());
+
+    stringStream << fileName.string();
+
     const std::string outputDirectory { stringStream.str() };
 
     mymkdir(outputDirectory.c_str());
