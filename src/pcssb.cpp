@@ -159,6 +159,11 @@ void outputAudioData(
 
     char *const audioData { static_cast<char *>(std::malloc(dataSize * sizeof(char))) };
     {
+        if (audioData == nullptr) {
+            std::cerr << "ERROR: Failed to allocate memory!\n";
+            std::exit(EXIT_FAILURE);
+        }
+
         std::FILE *const inputFileHandle { myfopen(inputFileName, "rb") };
         {
             //set the file position indicator to start of FSB file
@@ -277,6 +282,11 @@ void readAndWriteToNewFile(
     // can still be written to the file as "zero padding" if padWithZeroes is enabled.
     char *const buffer { static_cast<char *>(std::calloc(readCount + 1, sizeof(char))) };
     {
+        if (buffer == nullptr) {
+            std::cerr << "ERROR: Failed to allocate memory!";
+            std::exit(EXIT_FAILURE);
+        }
+
         std::FILE *const inputFileHandle { myfopen(inputFileName, "rb") };
         {
             myfseek_unsigned(inputFileHandle, readPosition, SEEK_SET);
@@ -288,6 +298,7 @@ void readAndWriteToNewFile(
             // with the remaining bytes being 00
             const std::size_t numToWrite { padWithZeroes ? readCount : numRead };
 
+            assert(numToWrite <= readCount);
             //null terminate buffer string for safety
             buffer[numToWrite] = '\0';
 
@@ -343,6 +354,11 @@ void replaceAudioinPCSSB(
         * sizeof(char) };
     char *const outputFilePath { static_cast<char *>(std::malloc(outputFilePathSize)) };
     {
+        if (outputFilePath == nullptr) {
+            std::cerr << "ERROR: Failed to allocate memory!\n";
+            std::exit(EXIT_FAILURE);
+        }
+
         //generate output file name
         (void) std::snprintf(outputFilePath, outputFilePathSize, "%s-mod", pcssbFilePath);
 
