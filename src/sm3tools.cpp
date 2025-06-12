@@ -24,13 +24,8 @@
 #include <cassert>
 #include <cstdlib>
 
-typedef enum FILE_TYPE {
-    PCPACK,
-    PCSSB
-} FileType;
+#import "sm3tools.hpp"
 
-// Checks the file extension of the file name, and returns the relevant
-// file type if one is matched. Otherwise it exits with an error message
 FileType getFileType(const char *const filePath) {
     assert(filePath != nullptr);
 
