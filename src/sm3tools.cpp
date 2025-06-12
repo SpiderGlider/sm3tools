@@ -17,6 +17,8 @@
  * along with sm3tools. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "sm3tools.hpp"
+
 #include <iostream>
 #include <filesystem>
 #include <string>
@@ -24,7 +26,7 @@
 #include <cassert>
 #include <cstdlib>
 
-#import "sm3tools.hpp"
+#include "pcssb.hpp"
 
 FileType getFileType(const char *const filePath) {
     assert(filePath != nullptr);
@@ -55,8 +57,8 @@ int main(const int argc, const char *const argv[]) {
                         " (the path to a file to parse).\n";
         std::exit(EXIT_FAILURE);
     }
-    if (argc > 2) {
-        std::cerr << "WARNING: Arguments after the 1st"
+    if (argc > 3) {
+        std::cerr << "WARNING: Arguments after the 2nd"
                         " argument are currently ignored.\n";
     }
 
@@ -68,6 +70,16 @@ int main(const int argc, const char *const argv[]) {
     // currently getFileType should never return a value outside of these two
     assert(fileType == PCSSB);
     std::cout << "INFO: Parsing as a PCSSB file.\n";
+
+    if (argc == 2) {
+        (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
+        // printFSBHeaderIndexes(argv[1]);
+        outputAudioFiles(argv[1]);
+    }
+    else {
+        (void) std::printf("Replacing %s in %s\n", argv[2], argv[1]);
+        replaceAudioinPCSSB(argv[1], argv[2]);
+    }
 
     return EXIT_SUCCESS;
 }
