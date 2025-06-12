@@ -89,12 +89,12 @@ void printFSBHeaderIndexes(const char *const filePath) {
         char buffer[FSB_FILENAME_SIZE];
         readFileName(filePath, indexes.at(i), buffer);
         if (i < indexes.size() - 2) {
-            std::printf("%lu: "
+            std::printf("%zu: "
                         "file name %s, "
-                        "hex address = 0x%lX, "
-                        "fsb size = %lu, "
-                        "duplicate size = %lu, "
-                        "total size including duplicate = %lu\n",
+                        "hex address = 0x%zX, "
+                        "fsb size = %zu, "
+                        "duplicate size = %zu, "
+                        "total size including duplicate = %zu\n",
                         i+1,
                         buffer,
                         indexes.at(i),
@@ -325,7 +325,7 @@ void replaceLongInFile(
 
         if (numWritten != 1) {
             (void) std::fprintf(stderr, "ERROR: Error replacing long"
-                            " at position %lu in %s!\n", longPosition, fileName);
+                            " at position %zu in %s!\n", longPosition, fileName);
             (void) std::fclose(fileHandle);
             std::exit(EXIT_FAILURE);
         }

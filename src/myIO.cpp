@@ -104,7 +104,7 @@ std::size_t myfread(
         std::cout << "LOG: EOF encountered when reading file.\n";
     }
     if (objsRead < count) {
-        (void) std::printf("LOG: count was %lu, amount read was only %lu.\n", count, objsRead);
+        (void) std::printf("LOG: count was %zu, amount read was only %zu.\n", count, objsRead);
     }
 
     return objsRead;
@@ -129,7 +129,7 @@ std::size_t myfwrite(
         std::exit(EXIT_FAILURE);
     }
     if (objsWritten < count) {
-        (void) std::printf("LOG: count was %lu, amount written was only %lu.\n", count, objsWritten);
+        (void) std::printf("LOG: count was %zu, amount written was only %zu.\n", count, objsWritten);
     }
 
     return objsWritten;
