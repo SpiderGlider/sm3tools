@@ -89,18 +89,12 @@ void printFSBHeaderIndexes(const char *const filePath) {
         char buffer[FSB_FILENAME_SIZE];
         readFileName(filePath, indexes.at(i), buffer);
         if (i < indexes.size() - 2) {
-            std::printf("%lu: "
-                        "file name %s, "
-                        "hex address = 0x%lX, "
-                        "fsb size = %lu, "
-                        "duplicate size = %lu, "
-                        "total size including duplicate = %lu\n",
-                        i+1,
-                        buffer,
-                        indexes.at(i),
-                        indexes.at(i+1)-indexes.at(i),
-                        indexes.at(i+2)-indexes.at(i+1),
-                        indexes.at(i+2)-indexes.at(i));
+            std::cout << "FSB" << (i/2)+1 << ": ";
+            std::cout << "File Name = " << buffer << ", ";
+            std::cout << "Offset = " << indexes.at(i) << ", ";
+            std::cout << "FSB Size = " << indexes.at(i + 1) - indexes.at(i) << ", ";
+            std::cout << "Duplicate Size = " << indexes.at(i + 2) - indexes.at(i + 1) << ", ";
+            std::cout << "Total Size = " << indexes.at(i + 2) - indexes.at(i) << std::endl;
         }
     }
 }
@@ -411,9 +405,9 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_FAILURE;
     }
     if (argc == 2) {
-        (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
-        // printFSBHeaderIndexes(argv[1]);
-        outputAudioFiles(argv[1]);
+        printFSBHeaderIndexes(argv[1]);
+        //(void)std::printf("INFO: Extracting audio from %s\n", argv[1]);
+        //outputAudioFiles(argv[1]);
     }
     if (argc > 3) {
         std::cerr << "WARNING: Arguments after the 2nd"
