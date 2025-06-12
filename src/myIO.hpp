@@ -26,7 +26,7 @@ namespace MyIO {
     //cross-platform mkdir wrapper.
     //creates directory with mode 0777 on linux
     //logs the error if the directory failed to be created
-    void mymkdir(const char *path);
+    void mkdir(const char *path);
 
     //cross-platform stat wrapper.
     //logs the error and exits if performing stat fails
@@ -39,14 +39,14 @@ namespace MyIO {
     //pointer is NULL, in which case it prints the error to stderr and exits.
     //NOTE: this does not close the file handle so you have to call fclose
     //after you're done using it, like with normal fopen.
-    std::FILE *myfopen(const char *fileName, const char *mode);
+    std::FILE *fopen(const char *fileName, const char *mode);
 
     //wrapper around fread that checks feof and ferror
     //after doing so. Prints to the terminal if any of those happen, and exits
     //in the case of ferror. The number of objects read is checked to see whether
     //it matches count, but it is still returned in case the caller wants to use it
     //for e.g. loop conditions
-    std::size_t myfread(
+    std::size_t fread(
         void *buffer,
         std::size_t size,
         std::size_t count,
@@ -57,7 +57,7 @@ namespace MyIO {
     //The number of objects written is checked to see whether
     //it matches count, but it is still returned in case the caller wants to use it
     //for e.g. loop conditions
-    std::size_t myfwrite(
+    std::size_t fwrite(
         const void *buffer,
         std::size_t size,
         std::size_t count,
@@ -65,11 +65,11 @@ namespace MyIO {
 
     //wrapper around fseek that checks whether the return
     //value is non-zero, in which case it prints to stderr and exits.
-    void myfseek(std::FILE *stream, long int offset, int origin);
+    void fseek(std::FILE *stream, long int offset, int origin);
 
-    //myfseek but working with unsigned long values. accounts for values over what
+    //fseek but working with unsigned long values. accounts for values over what
     //signed longs support by seeking twice.
     //if first fseek fails second isn't executed.
-    void myfseek_unsigned(std::FILE *stream, unsigned long int offset, int origin);
+    void fseekunsigned(std::FILE *stream, unsigned long int offset, int origin);
 }
 #endif

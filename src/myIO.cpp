@@ -35,13 +35,13 @@
 #include <sys/stat.h>
 
 namespace MyIO {
-    void mymkdir(const char *const path) {
+    void mkdir(const char *const path) {
         assert(path != nullptr);
 
 #ifdef _WIN32
-        const int returnValue = _mkdir(path);
+        const int returnValue = ::_mkdir(path);
 #else
-        const int returnValue = mkdir(path, 0700);
+        const int returnValue = ::mkdir(path, 0700);
 #endif
         if (returnValue != 0) {
             std::perror("ERROR: Failed to create directory");
@@ -53,11 +53,11 @@ namespace MyIO {
 
 #ifdef _WIN32
         struct _stat64 sb {};
-        const int returnValue = _stat64(filePath, &sb);
+        const int returnValue = ::_stat64(filePath, &sb);
         const intmax_t size = (intmax_t) sb.st_size;
 #else
         struct stat sb {};
-        const int returnValue = stat(filePath, &sb);
+        const int returnValue = ::stat(filePath, &sb);
         const std::intmax_t size = sb.st_size;
 #endif
         if (returnValue != 0) {
@@ -71,11 +71,11 @@ namespace MyIO {
         return size;
     }
 
-    std::FILE *myfopen(const char *const fileName, const char *const mode) {
+    std::FILE *fopen(const char *const fileName, const char *const mode) {
         assert(fileName != nullptr);
         assert(mode != nullptr);
 
-        std::FILE *const fileHandle = fopen(fileName, mode);
+        std::FILE *const fileHandle = std::fopen(fileName, mode);
         if (!fileHandle) {
             std::perror("ERROR: Failed to open file");
             std::exit(EXIT_FAILURE);
@@ -83,7 +83,7 @@ namespace MyIO {
         return fileHandle;
     }
 
-    std::size_t myfread(
+    std::size_t fread(
         void *const buffer,
         const std::size_t size,
         const std::size_t count,
@@ -111,7 +111,7 @@ namespace MyIO {
         return objsRead;
     }
 
-    std::size_t myfwrite(
+    std::size_t fwrite(
         const void *const buffer,
         const std::size_t size,
         const std::size_t count,
@@ -136,7 +136,7 @@ namespace MyIO {
         return objsWritten;
     }
 
-    void myfseek(std::FILE *const stream, const long int offset, const int origin) {
+    void fseek(std::FILE *const stream, const long int offset, const int origin) {
         assert(stream != nullptr);
 
         const int returnValue = std::fseek(stream, offset, origin);
@@ -150,22 +150,22 @@ namespace MyIO {
     // credit to Tyler Durden on SO for this code, which is used with modifications.
     // source: https://stackoverflow.com/a/47740105
     // licensed under CC BY-SA 3.0
-    void myfseek_unsigned(std::FILE *const stream, const unsigned long int offset, const int origin) {
+    void fseekunsigned(std::FILE *const stream, const unsigned long int offset, const int origin) {
         if (offset > LONG_MAX){
             //call fseek with max value it supports for the offset
-            myfseek(stream, LONG_MAX, origin);
+            MyIO::fseek(stream, LONG_MAX, origin);
             if (origin == SEEK_END) {
                 //seeks backwards the remaining distance
-                myfseek(stream, static_cast<long int>(-(offset - LONG_MAX)), SEEK_CUR);
+                MyIO::fseek(stream, static_cast<long int>(-(offset - LONG_MAX)), SEEK_CUR);
             }
             else {
                 //seeks forward the remaining distance
-                myfseek(stream, static_cast<long int>(offset - LONG_MAX), SEEK_CUR);
+                MyIO::fseek(stream, static_cast<long int>(offset - LONG_MAX), SEEK_CUR);
             }
         }
         else {
             //fseek normally if below max supported value
-            myfseek(stream, static_cast<long int>(offset), origin);
+            MyIO::fseek(stream, static_cast<long int>(offset), origin);
         }
     }
 }

@@ -42,10 +42,10 @@ std::vector<size_t> findFSBIndexes(const char *const filePath) {
     char *const buffer = new char[fileSize];
     {
         //NOTE: we assume that result of getfilesize is the actual file size
-        std::FILE *const fileHandle { MyIO::myfopen(filePath, "rb") };
+        std::FILE *const fileHandle { MyIO::fopen(filePath, "rb") };
         {
             //read entire file into buffer
-            const std::size_t numRead = MyIO::myfread(
+            const std::size_t numRead = MyIO::fread(
                 buffer,
                 sizeof(char),
                 fileSize,
@@ -112,15 +112,15 @@ std::uint32_t readDataSize(
 
     std::uint32_t dataSize { 0 };
 
-    std::FILE *const fileHandle { MyIO::myfopen(inputFileName, "rb") };
+    std::FILE *const fileHandle { MyIO::fopen(inputFileName, "rb") };
     {
         //set the file position indicator to start of FSB file
-        MyIO::myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
+        MyIO::fseekunsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
         //move to location where data size is written
-        MyIO::myfseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
+        MyIO::fseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
 
         //read data size long
-        (void) MyIO::myfread(&dataSize, sizeof(uint32_t), 1, fileHandle);
+        (void) MyIO::fread(&dataSize, sizeof(uint32_t), 1, fileHandle);
     }
     (void) std::fclose(fileHandle);
 
@@ -134,15 +134,15 @@ void readFileName(
     assert(inputFileName != nullptr);
     assert(resultArr != nullptr);
 
-    std::FILE *const fileHandle { MyIO::myfopen(inputFileName, "rb") };
+    std::FILE *const fileHandle { MyIO::fopen(inputFileName, "rb") };
     {
         //set the file position indicator to start of FSB file
-        MyIO::myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
+        MyIO::fseekunsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
         //move to location where file name is written
-        MyIO::myfseek(fileHandle, FILENAME_OFFSET, SEEK_CUR);
+        MyIO::fseek(fileHandle, FILENAME_OFFSET, SEEK_CUR);
 
         //read file name
-        (void) MyIO::myfread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
+        (void) MyIO::fread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
     }
     (void) std::fclose(fileHandle);
     resultArr[FSB_FILENAME_SIZE - 1] = '\0';
@@ -164,22 +164,22 @@ void outputAudioData(
             std::exit(EXIT_FAILURE);
         }
 
-        std::FILE *const inputFileHandle { MyIO::myfopen(inputFileName, "rb") };
+        std::FILE *const inputFileHandle { MyIO::fopen(inputFileName, "rb") };
         {
             //set the file position indicator to start of FSB file
-            MyIO::myfseek_unsigned(inputFileHandle, fsb3HeaderPosition, SEEK_SET);
+            MyIO::fseekunsigned(inputFileHandle, fsb3HeaderPosition, SEEK_SET);
             //move to start of audio data
-            MyIO::myfseek_unsigned(inputFileHandle, headerSize, SEEK_CUR);
+            MyIO::fseekunsigned(inputFileHandle, headerSize, SEEK_CUR);
 
             //read audio data
-            (void) MyIO::myfread(audioData, sizeof(char), dataSize, inputFileHandle);
+            (void) MyIO::fread(audioData, sizeof(char), dataSize, inputFileHandle);
         }
         (void) std::fclose(inputFileHandle);
 
         //write it to the output file
-        std::FILE *const outputFileHandle { MyIO::myfopen(outputFileName, "wb") };
+        std::FILE *const outputFileHandle { MyIO::fopen(outputFileName, "wb") };
         {
-            (void) MyIO::myfwrite(audioData, sizeof(char), dataSize, outputFileHandle);
+            (void) MyIO::fwrite(audioData, sizeof(char), dataSize, outputFileHandle);
         }
         (void) std::fclose(outputFileHandle);
     }
@@ -204,12 +204,12 @@ void outputAudioFiles(const char *const inputFileName) {
     //create /out directory
     //TODO does this work on windows? (or should we use replace_filename() instead)?
     stringStream << parentPath.string() << "/out/";
-    MyIO::mymkdir(stringStream.str().c_str());
+    MyIO::mkdir(stringStream.str().c_str());
 
     //create directory for the PCSSB file within /out
     stringStream << fileName.string();
     const std::string outputDirectory { stringStream.str() };
-    MyIO::mymkdir(outputDirectory.c_str());
+    MyIO::mkdir(outputDirectory.c_str());
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
@@ -287,11 +287,11 @@ void readAndWriteToNewFile(
             std::exit(EXIT_FAILURE);
         }
 
-        std::FILE *const inputFileHandle { MyIO::myfopen(inputFileName, "rb") };
+        std::FILE *const inputFileHandle { MyIO::fopen(inputFileName, "rb") };
         {
-            MyIO::myfseek_unsigned(inputFileHandle, readPosition, SEEK_SET);
+            MyIO::fseekunsigned(inputFileHandle, readPosition, SEEK_SET);
 
-            const std::size_t numRead { MyIO::myfread(buffer, sizeof(char), readCount, inputFileHandle) };
+            const std::size_t numRead { MyIO::fread(buffer, sizeof(char), readCount, inputFileHandle) };
 
             //if padWithZeroes is false, only write the bytes that have been read
             //if padWithZeroes is true, write the entire length of the buffer,
@@ -306,9 +306,9 @@ void readAndWriteToNewFile(
             //NOTE: we create an outputMode variable this way so that
             // we can keep outputFileHandle const
             const char *const outputMode { append ? "ab" : "wb" };
-            std::FILE *const outputFileHandle { MyIO::myfopen(outputFileName, outputMode) };
+            std::FILE *const outputFileHandle { MyIO::fopen(outputFileName, outputMode) };
             {
-                (void) MyIO::myfwrite(buffer, sizeof(char), numToWrite, outputFileHandle);
+                (void) MyIO::fwrite(buffer, sizeof(char), numToWrite, outputFileHandle);
             }
             (void) std::fclose(outputFileHandle);
         }
@@ -322,13 +322,13 @@ void replaceLongInFile(
     const std::size_t longPosition,
     const std::uint32_t newValue) {
 
-    std::FILE *const fileHandle { MyIO::myfopen(fileName, "r+b") };
+    std::FILE *const fileHandle { MyIO::fopen(fileName, "r+b") };
     {
         //move to long position
-        MyIO::myfseek_unsigned(fileHandle, longPosition, SEEK_SET);
+        MyIO::fseekunsigned(fileHandle, longPosition, SEEK_SET);
 
         //replace long
-        const std::size_t numWritten { MyIO::myfwrite(
+        const std::size_t numWritten { MyIO::fwrite(
             &newValue,
             sizeof(std::uint32_t),
             1,
