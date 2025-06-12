@@ -1,6 +1,6 @@
 .PHONY: clean all
 
-default: pcssb
+default: sm3tools
 all: sm3tools pcssb
 
 UARCH = $(shell uname -m)
@@ -20,10 +20,7 @@ DEFAULTFLAGS_CPP = -std=c++17 -Wall -pedantic -g -fsanitize=undefined -fsanitize
 EXTRAFLAGS = -Wextra -Wformat=2 -Wconversion -Wno-strict-prototypes -Wno-unused-parameter -Wshadow -Wfloat-equal -Wundef # -O3 -Wwrite-strings -Wformat-signedness 
 
 sm3tools: src/sm3tools.cpp
-	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) src/sm3tools.cpp -o bin/sm3tools
-
-pcssb: src/pcssb.cpp
-	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) src/pcssb.cpp src/myIO.cpp -o bin/pcssb
+	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) src/sm3tools.cpp src/pcssb.cpp src/myIO.cpp -o bin/sm3tools
 
 %: %.cpp
 	$(C++) $(DEFAULTFLAGS_CPP) $(EXTRAFLAGS) $@.cpp -o $@
