@@ -347,7 +347,9 @@ void replaceAudioinPCSSB(
         (void) std::snprintf(outputFilePath, outputFilePathSize, "%s-mod", pcssbFilePath);
 
         //find audio file in PCSSB using its filename (including file extension but excluding path)
-        const std::filesystem::path audioFileName { std::filesystem::path{replaceFilePath}.filename() };
+        //NOTE: we convert paths into strings first instead of using c_str() directly because the former
+        //paths have a value type of wchar_t on windows and we need multi byte char c style strings.
+        const std::string audioFileName { std::filesystem::path{replaceFilePath}.filename().string()};
 
         const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName.c_str());
         const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
@@ -362,7 +364,7 @@ void replaceAudioinPCSSB(
         //TODO could trim metadata from the replacement audio
 
         const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-        //write everything up to the existing audio data into the output file
+        //write everything up to the existing audio data into the output files
         readAndWriteToNewFile(
             pcssbFilePath,
             outputFilePath,
