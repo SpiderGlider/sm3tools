@@ -48,18 +48,31 @@ FileType getFileType(const char *const filePath) {
     std::exit(EXIT_FAILURE);
 }
 
+void printHelp() {
+    std::cout << "Usage (1): sm3tools.exe <PCSSB File>\n";
+    std::cout << "Usage (2): sm3tools.exe <Input PCSSB File> <Audio File To Replace>\n";
+    std::cout << "(1) Outputs all audio files from the PCSSB into the out directory.\n";
+    std::cout << "(2) Injects the specified audio file into the PCSSB file, replacing "
+        "the file with the same name.\n";
+}
+
 // Program takes one argument, that being the path to a file to parse.
 // Currently only PCSSB parsing is implemented. The file type is determined
 // only through the file extension currently.
 int main(const int argc, const char *const argv[]) {
     if (argc < 2) {
-        std::cout << "Usage (1): sm3tools.exe <PCSSB File>\n";
-        std::cout << "Usage (2): sm3tools.exe <Input PCSSB File> <Audio File To Replace>\n";
-        std::cout << "(1) Outputs all audio files from the PCSSB into the out directory.\n";
-        std::cout << "(2) Injects the specified audio file into the PCSSB file, replacing "
-            "the file with the same name.\n";
+        std::cerr << "ERROR: No arguments specified.\n";
+        printHelp();
         std::exit(EXIT_FAILURE);
     }
+
+    for (int i = 0; i < argc; i++) {
+        if (std::string_view{ argv[i] } == "--help") {
+            printHelp();
+            std::exit(EXIT_SUCCESS);
+        }
+    }
+
     if (argc > 3) {
         std::cerr << "WARNING: Arguments after the 2nd"
                         " argument are currently ignored.\n";
