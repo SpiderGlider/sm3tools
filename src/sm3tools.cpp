@@ -69,7 +69,7 @@ int main(const int argc, const char *const argv[]) {
         std::exit(EXIT_FAILURE);
     }
 
-    for (int i = 1; i < argc; i++) {
+    for (size_t i = 1; i < args.size(); i++) {
         if (args[i] == "--help") {
             printHelp();
             std::exit(EXIT_SUCCESS);
