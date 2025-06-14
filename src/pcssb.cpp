@@ -22,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 #include <filesystem>
+#include <array>
 
 #include <cassert>
 #include <cstdio>
@@ -86,9 +87,8 @@ void printFSBHeaderIndexes(const std::string& filePath) {
 
     const std::vector<size_t> indexes { findFSBIndexes(filePath) };
     for (std::size_t i = 0; i < indexes.size(); i += 2) {
-        char buffer[FSB_FILENAME_SIZE];
-        readFileName(filePath, indexes.at(i), buffer);
         if (i < indexes.size() - 2) {
+            const std::string fsbFileName = readFileName(filePath, indexes.at(i));
             std::printf("%zu: "
                         "file name %s, "
                         "hex address = 0x%zX, "
@@ -96,7 +96,7 @@ void printFSBHeaderIndexes(const std::string& filePath) {
                         "duplicate size = %zu, "
                         "total size including duplicate = %zu\n",
                         i+1,
-                        buffer,
+                        fsbFileName.c_str(),
                         indexes.at(i),
                         indexes.at(i+1)-indexes.at(i),
                         indexes.at(i+2)-indexes.at(i+1),
@@ -128,13 +128,14 @@ std::uint32_t readDataSize(
     return dataSize;
 }
 
-void readFileName(
+std::string readFileName(
     const std::string& inputFileName,
-    const std::size_t fsb3HeaderPosition,
-    char resultArr[FSB_FILENAME_SIZE]) {
+    const std::size_t fsb3HeaderPosition) {
 
     assert(!inputFileName.empty());
-    assert(resultArr != nullptr);
+
+    //NOTE: an extra byte is added to the length for the null terminator
+    std::array<char, FSB_FILENAME_SIZE + 1> buffer {};
 
     std::FILE *const fileHandle { MyIO::fopen(inputFileName.c_str(), "rb") };
     {
@@ -144,10 +145,17 @@ void readFileName(
         MyIO::fseek(fileHandle, FILENAME_OFFSET, SEEK_CUR);
 
         //read file name
-        (void) MyIO::fread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
+        (void) MyIO::fread(buffer.data(), sizeof(char), FSB_FILENAME_SIZE, fileHandle);
     }
     (void) std::fclose(fileHandle);
-    resultArr[FSB_FILENAME_SIZE - 1] = '\0';
+    //NOTE: we add a null terminator manually
+    //for the case that the file name is 30 bytes long.
+    //The std::string constructor probably doesn't need it
+    //because the length is passed in, but just for safety we
+    //include a null terminator anyway.
+    buffer[FSB_FILENAME_SIZE] = '\0';
+
+    return { buffer.data(), FSB_FILENAME_SIZE };
 }
 
 void outputAudioData(
@@ -226,8 +234,7 @@ void outputAudioFiles(const std::string& inputFileName) {
                 std::cout << "LOG: Data size value doesn't match actual size!\n";
             }
         }
-        char fsbFileName[FSB_FILENAME_SIZE] {};
-        readFileName(inputFileName, fsbIndexes[i], fsbFileName);
+        const std::string fsbFileName = readFileName(inputFileName, fsbIndexes[i]);
 
         //create path with file fsbFileName inside the output directory
         constexpr int OUTPUT_PATH_SIZE { 300 };
@@ -237,7 +244,7 @@ void outputAudioFiles(const std::string& inputFileName) {
             OUTPUT_PATH_SIZE,
             "%s/%s",
             outputDirectory.c_str(),
-            fsbFileName);
+            fsbFileName.c_str());
         outputAudioData(
             inputFileName,
             fsbIndexes[i],
@@ -257,10 +264,7 @@ std::size_t findFirstFSBMatchingFileName(
     const std::vector<std::size_t> fsbIndexes = findFSBIndexes(pcssbFileName);
 
     for (const size_t fsbIndex : fsbIndexes) {
-        char fsbFileName[FSB_FILENAME_SIZE] {};
-        readFileName(pcssbFileName, fsbIndex, fsbFileName);
-
-        if (std::string_view{fsbFileName} == fileNameString) {
+        if (readFileName(pcssbFileName, fsbIndex) == fileNameString) {
             return fsbIndex;
         }
     }

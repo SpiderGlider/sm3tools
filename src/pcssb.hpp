@@ -81,10 +81,10 @@ std::uint32_t readDataSize(
     const std::string& inputFileName,
     std::size_t fsb3HeaderPosition);
 
-//number of bytes used to store the sample filename in FSB archives,
-//INCLUDING an extra byte (+1) for adding a null terminator at the end when
-//read to a string, for simplicity. 30 + 1 = 31
-constexpr int FSB_FILENAME_SIZE { 31 };
+//maximum number of bytes used to store the sample filename in FSB3 archives
+//NOTE that if the length of the file name takes the entire 30 bytes,
+//an extra byte will be needed for the null terminator.
+constexpr int FSB_FILENAME_SIZE { 30 };
 
 //NOTE: skips 6 longs which are the other header information including "FSB3" text
 //before the entry starts, and then skips 2 bytes which is the entry size (which =80)
@@ -93,10 +93,9 @@ constexpr int FILENAME_OFFSET { 2 + (6 * sizeof(uint32_t)) };
 //Reads the file name field in the FSB file that starts at fsb3HeaderPosition.
 //fsb3HeaderPosition must be the location of the start of the "FSB3" header string.
 //we ignore the "P\0" bytes at the start of the file name for simplicity.
-void readFileName(
+std::string readFileName(
     const std::string& inputFileName,
-    std::size_t fsb3HeaderPosition,
-    char resultArr[FSB_FILENAME_SIZE]);
+    std::size_t fsb3HeaderPosition);
 
 //find the first FSB in the PCSSB that has a filename field
 //matching fileNameString. Returns the fsb header index of that FSB.
