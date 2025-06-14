@@ -64,12 +64,11 @@ constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 //and puts the absolute position in bytes of the start of those instances
 //(in order from the start of the file) into the vector that is returned.
 //The size of the vector is the number of instances that were found.
-std::vector<size_t> findFSBIndexes(
-    const std::string& filePath);
+std::vector<size_t> findFSBIndexes(const std::string& filePath);
 
 //prints out location of each instance of the text "FSB3" in the file.
 //in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
-void printFSBHeaderIndexes(const char *filePath);
+void printFSBHeaderIndexes(const std::string& filePath);
 
 constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
 
@@ -79,7 +78,7 @@ constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
 //the FSB3 file (i.e. the rest of the data in the file after the 104 bytes of header information).
 //but it seems in the Spider-Man 3 PCSSB files this is not always the case.
 std::uint32_t readDataSize(
-    const char *inputFileName,
+    const std::string& inputFileName,
     std::size_t fsb3HeaderPosition);
 
 //number of bytes used to store the sample filename in FSB archives,
@@ -95,15 +94,15 @@ constexpr int FILENAME_OFFSET { 2 + (6 * sizeof(uint32_t)) };
 //fsb3HeaderPosition must be the location of the start of the "FSB3" header string.
 //we ignore the "P\0" bytes at the start of the file name for simplicity.
 void readFileName(
-    const char *inputFileName,
+    const std::string& inputFileName,
     std::size_t fsb3HeaderPosition,
     char resultArr[FSB_FILENAME_SIZE]);
 
 //find the first FSB in the PCSSB that has a filename field
 //matching fileNameString. Returns the fsb header index of that FSB.
 std::size_t findFirstFSBMatchingFileName(
-    const char *pcssbFileName,
-    const char *fileNameString);
+    const std::string& pcssbFileName,
+    const std::string& fileNameString);
 
 constexpr int FSB_HEADER_SIZE { 104 };
 
@@ -114,23 +113,23 @@ constexpr int FSB_HEADER_SIZE { 104 };
 //pointed to by pcssbFilePath but with "-mod" appended
 //to the end.
 void replaceAudioinPCSSB(
-    const char *pcssbFilePath,
-    const char *replaceFilePath);
+    const std::string& pcssbFilePath,
+    const std::string& replaceFilePath);
 
 //Writes the audio data from an FSB file into a file with file name = outputFileName
 //NOTE: overwrites file if it already exists.
 void outputAudioData(
-    const char *inputFileName,
+    const std::string& inputFileName,
     std::size_t fsb3HeaderPosition,
     std::size_t headerSize,
     std::size_t dataSize,
-    const char *outputFileName);
+    const std::string& outputFileName);
 
 //Writes the audio data of all FSB files in a PCSSB into separate files.
 //output files are stored in an /out directory from where the PCSSB is located.
 //Assumes various things about the file that are likely only true for the Spider-Man 3
 //PC .PCSSB files. For example, each FSB file is partly duplicated so we don't output the duplicate.
-void outputAudioFiles(const char *inputFileName);
+void outputAudioFiles(const std::string& inputFileName);
 
 //reads readCount bytes from input (starting from readPosition)
 //and writes those bytes to the output file
@@ -144,8 +143,8 @@ void outputAudioFiles(const char *inputFileName);
 //than readCount.
 //creates output file if it does not exist.
 void readAndWriteToNewFile(
-    const char *inputFileName,
-    const char *outputFileName,
+    const std::string& inputFileName,
+    const std::string& outputFileName,
     std::size_t readCount,
     std::size_t readPosition,
     bool append,
@@ -155,7 +154,7 @@ void readAndWriteToNewFile(
 //the field has to be exactly sizeof(uint32_t) bytes, any less or more
 //and the write will not work as expected.
 void replaceLongInFile(
-    const char *fileName,
+    const std::string& fileName,
     std::size_t longPosition,
     std::uint32_t newValue);
 
