@@ -28,8 +28,8 @@
 
 #include "pcssb.hpp"
 
-FileType getFileType(const char *const filePath) {
-    assert(filePath != nullptr);
+FileType getFileType(const std::string_view filePath) {
+    assert(!filePath.empty());
 
     const std::string fileExtension { std::filesystem::path(filePath).extension().string() };
 
@@ -60,14 +60,17 @@ void printHelp() {
 // Currently only PCSSB parsing is implemented. The file type is determined
 // only through the file extension currently.
 int main(const int argc, const char *const argv[]) {
+    //vectorize arguments using the range constructor
+    std::vector<std::string> args {argv, argv + argc };
+
     if (argc < 2) {
         std::cerr << "ERROR: No arguments specified.\n";
         printHelp();
         std::exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < argc; i++) {
-        if (std::string_view{ argv[i] } == "--help") {
+    for (size_t i = 1; i < args.size(); i++) {
+        if (args[i] == "--help") {
             printHelp();
             std::exit(EXIT_SUCCESS);
         }
