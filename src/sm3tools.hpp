@@ -29,4 +29,7 @@ typedef enum FILE_TYPE {
 // file type if one is matched. Otherwise it exits with an error message
 FileType getFileType(const char *const filePath);
 
+//Prints usage information to stdout
+void printHelp();
+
 #endif
