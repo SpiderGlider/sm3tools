@@ -19,6 +19,7 @@
 
 #ifndef SM3TOOLS_H
 #define SM3TOOLS_H
+#include <string_view>
 
 typedef enum FILE_TYPE {
     PCPACK,
@@ -27,7 +28,7 @@ typedef enum FILE_TYPE {
 
 // Checks the file extension of the file name, and returns the relevant
 // file type if one is matched. Otherwise it exits with an error message
-FileType getFileType(const char *const filePath);
+FileType getFileType(std::string_view filePath);
 
 //Prints usage information to stdout
 void printHelp();

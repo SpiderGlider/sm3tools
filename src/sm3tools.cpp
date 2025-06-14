@@ -28,8 +28,8 @@
 
 #include "pcssb.hpp"
 
-FileType getFileType(const char *const filePath) {
-    assert(filePath != nullptr);
+FileType getFileType(const std::string_view filePath) {
+    assert(!filePath.empty());
 
     const std::string fileExtension { std::filesystem::path(filePath).extension().string() };
 
