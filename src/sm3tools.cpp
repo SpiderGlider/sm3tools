@@ -91,12 +91,12 @@ int main(const int argc, const char *const argv[]) {
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 
     if (argc == 2) {
-        (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
+        std::cout << "INFO: Extracting audio from " << argv[1] << '\n';
         // printFSBHeaderIndexes(argv[1]);
         outputAudioFiles(argv[1]);
     }
     else {
-        (void) std::printf("Replacing %s in %s\n", argv[2], argv[1]);
+        std::cout << "Replacing " << argv[2] << " in " << argv[1] << '\n';
         replaceAudioinPCSSB(argv[1], argv[2]);
     }
 
