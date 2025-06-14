@@ -30,19 +30,19 @@
 
 #include "myIO.hpp"
 
-std::vector<size_t> findFSBIndexes(const char *const filePath) {
-    assert(filePath != nullptr);
+std::vector<size_t> findFSBIndexes(const std::string& filePath) {
+    assert(!filePath.empty());
 
     std::vector<size_t> fsbIndexes {};
     //PCSSBs can have a lot more FSBs than this (though seldom more than 50),
     //but this expands in a way that should minimise the number of reallocations
     fsbIndexes.reserve(12);
 
-    const auto fileSize = static_cast<size_t>(MyIO::getfilesize(filePath));
+    const auto fileSize = static_cast<size_t>(MyIO::getfilesize(filePath.c_str()));
     char *const buffer = new char[fileSize];
     {
         //NOTE: we assume that result of getfilesize is the actual file size
-        std::FILE *const fileHandle { MyIO::fopen(filePath, "rb") };
+        std::FILE *const fileHandle { MyIO::fopen(filePath.c_str(), "rb") };
         {
             //read entire file into buffer
             const std::size_t numRead = MyIO::fread(

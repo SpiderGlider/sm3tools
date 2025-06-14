@@ -19,10 +19,11 @@
 
 #ifndef PCSSB_H
 #define PCSSB_H
+#include <string>
+#include <vector>
+
 #include <cstddef>
 #include <cstdint>
-#include <string_view>
-#include <vector>
 
 struct FSB {
     std::uint32_t fsb3Header {}; // "FSB3"
@@ -64,7 +65,7 @@ constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 //(in order from the start of the file) into the vector that is returned.
 //The size of the vector is the number of instances that were found.
 std::vector<size_t> findFSBIndexes(
-    const char *filePath);
+    const std::string& filePath);
 
 //prints out location of each instance of the text "FSB3" in the file.
 //in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
