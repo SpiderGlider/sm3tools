@@ -1,5 +1,6 @@
-sm3tools
-pcssb
+bin/
+/**/pcssb
+/**/sm3tools
 
 test_files/
 

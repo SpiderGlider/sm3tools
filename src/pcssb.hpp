@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2025 SpiderGlider
+ *
+ * This file is part of sm3tools.
+ *
+ * sm3tools is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * sm3tools is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with sm3tools. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef PCSSB_H
 #define PCSSB_H
 #include <cstddef>
@@ -45,11 +64,11 @@ constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 //(in order from the start of the file) into the vector that is returned.
 //The size of the vector is the number of instances that were found.
 std::vector<size_t> findFSBIndexes(
-    const char *const filePath);
+    const char *filePath);
 
 //prints out location of each instance of the text "FSB3" in the file.
 //in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
-void printFSBHeaderIndexes(const char *const filePath);
+void printFSBHeaderIndexes(const char *filePath);
 
 constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
 
@@ -59,8 +78,8 @@ constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
 //the FSB3 file (i.e. the rest of the data in the file after the 104 bytes of header information).
 //but it seems in the Spider-Man 3 PCSSB files this is not always the case.
 std::uint32_t readDataSize(
-    const char *const inputFileName,
-    const std::size_t fsb3HeaderPosition);
+    const char *inputFileName,
+    std::size_t fsb3HeaderPosition);
 
 //number of bytes used to store the sample filename in FSB archives,
 //INCLUDING an extra byte (+1) for adding a null terminator at the end when
@@ -75,15 +94,15 @@ constexpr int FILENAME_OFFSET { 2 + (6 * sizeof(uint32_t)) };
 //fsb3HeaderPosition must be the location of the start of the "FSB3" header string.
 //we ignore the "P\0" bytes at the start of the file name for simplicity.
 void readFileName(
-    const char *const inputFileName,
-    const std::size_t fsb3HeaderPosition,
+    const char *inputFileName,
+    std::size_t fsb3HeaderPosition,
     char resultArr[FSB_FILENAME_SIZE]);
 
 //find the first FSB in the PCSSB that has a filename field
 //matching fileNameString. Returns the fsb header index of that FSB.
 std::size_t findFirstFSBMatchingFileName(
-    const char *const pcssbFileName,
-    const char *const fileNameString);
+    const char *pcssbFileName,
+    const char *fileNameString);
 
 constexpr int FSB_HEADER_SIZE { 104 };
 
@@ -94,23 +113,23 @@ constexpr int FSB_HEADER_SIZE { 104 };
 //pointed to by pcssbFilePath but with "-mod" appended
 //to the end.
 void replaceAudioinPCSSB(
-    const char *const pcssbFilePath,
-    const char *const replaceFilePath);
+    const char *pcssbFilePath,
+    const char *replaceFilePath);
 
 //Writes the audio data from an FSB file into a file with file name = outputFileName
 //NOTE: overwrites file if it already exists.
 void outputAudioData(
-    const char *const inputFileName,
-    const std::size_t fsb3HeaderPosition,
-    const std::size_t headerSize,
-    const std::size_t dataSize,
-    const char *const outputFileName);
+    const char *inputFileName,
+    std::size_t fsb3HeaderPosition,
+    std::size_t headerSize,
+    std::size_t dataSize,
+    const char *outputFileName);
 
 //Writes the audio data of all FSB files in a PCSSB into separate files.
-//output file names are formatted as "[pcssb file name].pcssb-[FSB file name]".
+//output files are stored in an /out directory from where the PCSSB is located.
 //Assumes various things about the file that are likely only true for the Spider-Man 3
 //PC .PCSSB files. For example, each FSB file is partly duplicated so we don't output the duplicate.
-void outputAudioFiles(const char *const inputFileName);
+void outputAudioFiles(const char *inputFileName);
 
 //reads readCount bytes from input (starting from readPosition)
 //and writes those bytes to the output file
@@ -124,19 +143,19 @@ void outputAudioFiles(const char *const inputFileName);
 //than readCount.
 //creates output file if it does not exist.
 void readAndWriteToNewFile(
-    const char *const inputFileName,
-    const char *const outputFileName,
-    const std::size_t readCount,
-    const std::size_t readPosition,
-    const bool append,
-    const bool padWithZeroes);
+    const char *inputFileName,
+    const char *outputFileName,
+    std::size_t readCount,
+    std::size_t readPosition,
+    bool append,
+    bool padWithZeroes);
 
 //replace a uint32_t field in a file.
 //the field has to be exactly sizeof(uint32_t) bytes, any less or more
 //and the write will not work as expected.
 void replaceLongInFile(
-    const char *const fileName,
-    const std::size_t longPosition,
-    const std::uint32_t newValue);
+    const char *fileName,
+    std::size_t longPosition,
+    std::uint32_t newValue);
 
 #endif

@@ -1,8 +1,27 @@
+/*
+ * Copyright (c) 2025 SpiderGlider
+ *
+ * This file is part of sm3tools.
+ *
+ * sm3tools is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * sm3tools is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with sm3tools. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "pcssb.hpp"
 
 #include <iostream>
+#include <sstream>
 #include <filesystem>
-#include <algorithm>
 
 #include <cassert>
 #include <cstdio>
@@ -19,14 +38,14 @@ std::vector<size_t> findFSBIndexes(const char *const filePath) {
     //but this expands in a way that should minimise the number of reallocations
     fsbIndexes.reserve(12);
 
-    const auto fileSize = static_cast<size_t>(getfilesize(filePath));
+    const auto fileSize = static_cast<size_t>(MyIO::getfilesize(filePath));
     char *const buffer = new char[fileSize];
     {
         //NOTE: we assume that result of getfilesize is the actual file size
-        std::FILE *const fileHandle { myfopen(filePath, "rb") };
+        std::FILE *const fileHandle { MyIO::fopen(filePath, "rb") };
         {
             //read entire file into buffer
-            const std::size_t numRead = myfread(
+            const std::size_t numRead = MyIO::fread(
                 buffer,
                 sizeof(char),
                 fileSize,
@@ -70,12 +89,12 @@ void printFSBHeaderIndexes(const char *const filePath) {
         char buffer[FSB_FILENAME_SIZE];
         readFileName(filePath, indexes.at(i), buffer);
         if (i < indexes.size() - 2) {
-            std::printf("%lu: "
+            std::printf("%zu: "
                         "file name %s, "
-                        "hex address = 0x%lX, "
-                        "fsb size = %lu, "
-                        "duplicate size = %lu, "
-                        "total size including duplicate = %lu\n",
+                        "hex address = 0x%zX, "
+                        "fsb size = %zu, "
+                        "duplicate size = %zu, "
+                        "total size including duplicate = %zu\n",
                         i+1,
                         buffer,
                         indexes.at(i),
@@ -93,15 +112,15 @@ std::uint32_t readDataSize(
 
     std::uint32_t dataSize { 0 };
 
-    std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
+    std::FILE *const fileHandle { MyIO::fopen(inputFileName, "rb") };
     {
         //set the file position indicator to start of FSB file
-        myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
+        MyIO::fseekunsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
         //move to location where data size is written
-        myfseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
+        MyIO::fseek(fileHandle, DATA_SIZE_OFFSET, SEEK_CUR);
 
         //read data size long
-        (void) myfread(&dataSize, sizeof(uint32_t), 1, fileHandle);
+        (void) MyIO::fread(&dataSize, sizeof(uint32_t), 1, fileHandle);
     }
     (void) std::fclose(fileHandle);
 
@@ -115,15 +134,15 @@ void readFileName(
     assert(inputFileName != nullptr);
     assert(resultArr != nullptr);
 
-    std::FILE *const fileHandle { myfopen(inputFileName, "rb") };
+    std::FILE *const fileHandle { MyIO::fopen(inputFileName, "rb") };
     {
         //set the file position indicator to start of FSB file
-        myfseek_unsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
+        MyIO::fseekunsigned(fileHandle, fsb3HeaderPosition, SEEK_SET);
         //move to location where file name is written
-        myfseek(fileHandle, FILENAME_OFFSET, SEEK_CUR);
+        MyIO::fseek(fileHandle, FILENAME_OFFSET, SEEK_CUR);
 
         //read file name
-        (void) myfread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
+        (void) MyIO::fread(resultArr, sizeof(char), FSB_FILENAME_SIZE, fileHandle);
     }
     (void) std::fclose(fileHandle);
     resultArr[FSB_FILENAME_SIZE - 1] = '\0';
@@ -140,22 +159,27 @@ void outputAudioData(
 
     char *const audioData { static_cast<char *>(std::malloc(dataSize * sizeof(char))) };
     {
-        std::FILE *const inputFileHandle { myfopen(inputFileName, "rb") };
+        if (audioData == nullptr) {
+            std::cerr << "ERROR: Failed to allocate memory!\n";
+            std::exit(EXIT_FAILURE);
+        }
+
+        std::FILE *const inputFileHandle { MyIO::fopen(inputFileName, "rb") };
         {
             //set the file position indicator to start of FSB file
-            myfseek_unsigned(inputFileHandle, fsb3HeaderPosition, SEEK_SET);
+            MyIO::fseekunsigned(inputFileHandle, fsb3HeaderPosition, SEEK_SET);
             //move to start of audio data
-            myfseek_unsigned(inputFileHandle, headerSize, SEEK_CUR);
+            MyIO::fseekunsigned(inputFileHandle, headerSize, SEEK_CUR);
 
             //read audio data
-            (void) myfread(audioData, sizeof(char), dataSize, inputFileHandle);
+            (void) MyIO::fread(audioData, sizeof(char), dataSize, inputFileHandle);
         }
         (void) std::fclose(inputFileHandle);
 
         //write it to the output file
-        std::FILE *const outputFileHandle { myfopen(outputFileName, "wb") };
+        std::FILE *const outputFileHandle { MyIO::fopen(outputFileName, "wb") };
         {
-            (void) myfwrite(audioData, sizeof(char), dataSize, outputFileHandle);
+            (void) MyIO::fwrite(audioData, sizeof(char), dataSize, outputFileHandle);
         }
         (void) std::fclose(outputFileHandle);
     }
@@ -166,6 +190,26 @@ void outputAudioFiles(const char *const inputFileName) {
     assert(inputFileName != nullptr);
 
     const std::vector<std::size_t> fsbIndexes { findFSBIndexes(inputFileName) };
+
+    const std::filesystem::path inputFileNamePath = {inputFileName};
+
+    const std::filesystem::path fileName { inputFileNamePath.filename() };
+    if (fileName.empty()) {
+        std::cerr << "ERROR: Input file doesn't have a file extension!\n";
+        std::exit(EXIT_FAILURE);
+    }
+    const std::filesystem::path parentPath { inputFileNamePath.parent_path() };
+
+    std::ostringstream stringStream {};
+    //create /out directory
+    //TODO does this work on windows? (or should we use replace_filename() instead)?
+    stringStream << parentPath.string() << "/out/";
+    MyIO::mkdir(stringStream.str().c_str());
+
+    //create directory for the PCSSB file within /out
+    stringStream << fileName.string();
+    const std::string outputDirectory { stringStream.str() };
+    MyIO::mkdir(outputDirectory.c_str());
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
@@ -182,36 +226,14 @@ void outputAudioFiles(const char *const inputFileName) {
         char fsbFileName[FSB_FILENAME_SIZE] {};
         readFileName(inputFileName, fsbIndexes[i], fsbFileName);
 
-        //get location of file extension start
-        /*TODO: should this be an assert? depends if this will be called from sm3tools.c
-            which already has file extension validation*/
-        const char* const fileExtensionPtr { std::strrchr(inputFileName, '.') };
-        if (fileExtensionPtr == nullptr) {
-            std::cerr << "ERROR: Input file doesn't have a file extension!\n";
-            std::exit(EXIT_FAILURE);
-        }
-        const std::ptrdiff_t fileExtensionIndex { fileExtensionPtr - inputFileName };
-        assert(fileExtensionIndex > 0);
-
-        constexpr int OUTPUT_DIR_SIZE { 200 };
-        char outputDir[OUTPUT_DIR_SIZE] {};
-        //copy the head of the string until (excluding) the last '.'
-        (void) std::snprintf(
-            outputDir,
-            static_cast<std::size_t>(fileExtensionIndex + 1),
-            "%s",
-            inputFileName);
-        //create the directory corresponding to that path
-        mymkdir(outputDir);
-
         //create path with file fsbFileName inside the output directory
-        constexpr int OUTPUT_PATH_SIZE { OUTPUT_DIR_SIZE + 100 };
+        constexpr int OUTPUT_PATH_SIZE { 300 };
         char outputPath[OUTPUT_PATH_SIZE] {};
         (void) std::snprintf(
             outputPath,
             OUTPUT_PATH_SIZE,
             "%s/%s",
-            outputDir,
+            outputDirectory.c_str(),
             fsbFileName);
         outputAudioData(
             inputFileName,
@@ -230,7 +252,7 @@ std::size_t findFirstFSBMatchingFileName(
 
     const std::vector<std::size_t> fsbIndexes = findFSBIndexes(pcssbFileName);
 
-    for (size_t fsbIndex : fsbIndexes) {
+    for (const size_t fsbIndex : fsbIndexes) {
         char fsbFileName[FSB_FILENAME_SIZE] {};
         readFileName(pcssbFileName, fsbIndex, fsbFileName);
 
@@ -260,17 +282,23 @@ void readAndWriteToNewFile(
     // can still be written to the file as "zero padding" if padWithZeroes is enabled.
     char *const buffer { static_cast<char *>(std::calloc(readCount + 1, sizeof(char))) };
     {
-        std::FILE *const inputFileHandle { myfopen(inputFileName, "rb") };
-        {
-            myfseek_unsigned(inputFileHandle, readPosition, SEEK_SET);
+        if (buffer == nullptr) {
+            std::cerr << "ERROR: Failed to allocate memory!";
+            std::exit(EXIT_FAILURE);
+        }
 
-            const std::size_t numRead { myfread(buffer, sizeof(char), readCount, inputFileHandle) };
+        std::FILE *const inputFileHandle { MyIO::fopen(inputFileName, "rb") };
+        {
+            MyIO::fseekunsigned(inputFileHandle, readPosition, SEEK_SET);
+
+            const std::size_t numRead { MyIO::fread(buffer, sizeof(char), readCount, inputFileHandle) };
 
             //if padWithZeroes is false, only write the bytes that have been read
             //if padWithZeroes is true, write the entire length of the buffer,
             // with the remaining bytes being 00
             const std::size_t numToWrite { padWithZeroes ? readCount : numRead };
 
+            assert(numToWrite <= readCount);
             //null terminate buffer string for safety
             buffer[numToWrite] = '\0';
 
@@ -278,9 +306,9 @@ void readAndWriteToNewFile(
             //NOTE: we create an outputMode variable this way so that
             // we can keep outputFileHandle const
             const char *const outputMode { append ? "ab" : "wb" };
-            std::FILE *const outputFileHandle { myfopen(outputFileName, outputMode) };
+            std::FILE *const outputFileHandle { MyIO::fopen(outputFileName, outputMode) };
             {
-                (void) myfwrite(buffer, sizeof(char), numToWrite, outputFileHandle);
+                (void) MyIO::fwrite(buffer, sizeof(char), numToWrite, outputFileHandle);
             }
             (void) std::fclose(outputFileHandle);
         }
@@ -294,13 +322,13 @@ void replaceLongInFile(
     const std::size_t longPosition,
     const std::uint32_t newValue) {
 
-    std::FILE *const fileHandle { myfopen(fileName, "r+b") };
+    std::FILE *const fileHandle { MyIO::fopen(fileName, "r+b") };
     {
         //move to long position
-        myfseek_unsigned(fileHandle, longPosition, SEEK_SET);
+        MyIO::fseekunsigned(fileHandle, longPosition, SEEK_SET);
 
         //replace long
-        const std::size_t numWritten { myfwrite(
+        const std::size_t numWritten { MyIO::fwrite(
             &newValue,
             sizeof(std::uint32_t),
             1,
@@ -308,7 +336,7 @@ void replaceLongInFile(
 
         if (numWritten != 1) {
             (void) std::fprintf(stderr, "ERROR: Error replacing long"
-                            " at position %lu in %s!\n", longPosition, fileName);
+                            " at position %zu in %s!\n", longPosition, fileName);
             (void) std::fclose(fileHandle);
             std::exit(EXIT_FAILURE);
         }
@@ -326,15 +354,22 @@ void replaceAudioinPCSSB(
         * sizeof(char) };
     char *const outputFilePath { static_cast<char *>(std::malloc(outputFilePathSize)) };
     {
+        if (outputFilePath == nullptr) {
+            std::cerr << "ERROR: Failed to allocate memory!\n";
+            std::exit(EXIT_FAILURE);
+        }
+
         //generate output file name
         (void) std::snprintf(outputFilePath, outputFilePathSize, "%s-mod", pcssbFilePath);
 
         //find audio file in PCSSB using its filename (including file extension but excluding path)
-        const std::filesystem::path audioFileName { std::filesystem::path{replaceFilePath}.filename() };
+        //NOTE: we convert paths into strings first instead of using c_str() directly because the former
+        //paths have a value type of wchar_t on windows and we need multi byte char c style strings.
+        const std::string audioFileName { std::filesystem::path{replaceFilePath}.filename().string()};
 
         const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName.c_str());
         const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
-        const std::intmax_t replaceDataSize = getfilesize(replaceFilePath);
+        const std::intmax_t replaceDataSize = MyIO::getfilesize(replaceFilePath);
 
         if (static_cast<std::size_t>(replaceDataSize) > originalDataSize) {
             std::cerr << "ERROR: Given replacement audio has a larger file size than the original. "
@@ -345,7 +380,7 @@ void replaceAudioinPCSSB(
         //TODO could trim metadata from the replacement audio
 
         const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-        //write everything up to the existing audio data into the output file
+        //write everything up to the existing audio data into the output files
         readAndWriteToNewFile(
             pcssbFilePath,
             outputFilePath,
@@ -369,7 +404,7 @@ void replaceAudioinPCSSB(
             outputFilePath,
             //NOTE: this will overflow but it shouldn't matter
             //ensures all the bytes after from original file is read
-            static_cast<std::size_t>(getfilesize(pcssbFilePath)),
+            static_cast<std::size_t>(MyIO::getfilesize(pcssbFilePath)),
             fsbAudioDataIndex + originalDataSize,
             true,
             false);
@@ -383,27 +418,5 @@ void replaceAudioinPCSSB(
             in some of the FSBs is formatted the same way anyway. */
     }
     std::free(outputFilePath);
-}
-
-int main(const int argc, const char *const argv[]) {
-    if (argc < 2) {
-        std::cerr << "ERROR: This program needs "
-                               "at least one input argument.";
-        return EXIT_FAILURE;
-    }
-    if (argc == 2) {
-        (void) std::printf("INFO: Extracting audio from %s\n", argv[1]);
-        printFSBHeaderIndexes(argv[1]);
-        // outputAudioFiles(argv[1]);
-    }
-    if (argc > 3) {
-        std::cerr << "WARNING: Arguments after the 2nd"
-                        " argument are currently ignored.\n";
-    }
-    if (argc >= 3) {
-        (void) std::printf("Replacing %s in %s\n", argv[2], argv[1]);
-        replaceAudioinPCSSB(argv[1], argv[2]);
-    }
-    return EXIT_SUCCESS;
 }
 
