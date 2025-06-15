@@ -44,7 +44,11 @@ namespace MyIO {
         const int returnValue = ::mkdir(path, 0700);
 #endif
         if (returnValue != 0) {
-            std::perror("ERROR: Failed to create directory");
+            //Folder already existing is a natural thing to have occur
+            //when running the program multiple times, so we don't need to log it
+            if (errno != EEXIST) {
+                std::perror("ERROR: Failed to create directory");
+            }
         }
     }
 
