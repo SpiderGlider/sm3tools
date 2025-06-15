@@ -81,7 +81,7 @@ int main(const int argc, const char *const argv[]) {
                         " argument are currently ignored.\n";
     }
 
-    const FileType fileType { getFileType(argv[1]) };
+    const FileType fileType { getFileType(args[1]) };
     if (fileType == PCPACK) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
         std::exit(EXIT_FAILURE);
@@ -91,13 +91,13 @@ int main(const int argc, const char *const argv[]) {
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 
     if (argc == 2) {
-        std::cout << "INFO: Extracting audio from " << argv[1] << '\n';
+        std::cout << "INFO: Extracting audio from " << args[1] << '\n';
         // printFSBHeaderIndexes(argv[1]);
-        outputAudioFiles(argv[1]);
+        outputAudioFiles(args[1]);
     }
     else {
-        std::cout << "Replacing " << argv[2] << " in " << argv[1] << '\n';
-        replaceAudioinPCSSB(argv[1], argv[2]);
+        std::cout << "Replacing " << args[2] << " in " << args[1] << '\n';
+        replaceAudioinPCSSB(args[1], args[2]);
     }
 
     return EXIT_SUCCESS;
