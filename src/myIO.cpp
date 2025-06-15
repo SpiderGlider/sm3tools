@@ -156,7 +156,7 @@ namespace MyIO {
             MyIO::fseek(stream, LONG_MAX, origin);
             if (origin == SEEK_END) {
                 //seeks backwards the remaining distance
-                MyIO::fseek(stream, static_cast<long int>(-(offset - LONG_MAX)), SEEK_CUR);
+                MyIO::fseek(stream, -(static_cast<long int>(offset - LONG_MAX)), SEEK_CUR);
             }
             else {
                 //seeks forward the remaining distance
