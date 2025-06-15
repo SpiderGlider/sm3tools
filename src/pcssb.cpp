@@ -292,7 +292,7 @@ void readAndWriteToNewFile(
     char *const buffer { static_cast<char *>(std::calloc(readCount + 1, sizeof(char))) };
     {
         if (buffer == nullptr) {
-            std::cerr << "ERROR: Failed to allocate memory!";
+            std::cerr << "ERROR: Failed to allocate memory!\n";
             std::exit(EXIT_FAILURE);
         }
 
