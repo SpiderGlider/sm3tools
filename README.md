@@ -22,3 +22,13 @@ To run those build files you can use:
 ```
 cmake --build .
 ```
+
+## Example Workflow - PCSSB
+
+1. Copy a .pcssb file that you want to extract from the game's sound folder
+2. Run `sm3tools <path to copied PCSSB file>` to extract the audio from it
+3. View the extracted audio files in `<directory of copied PCSSB file location>/out`
+4. Modify the relevant audio file that you want to edit, keeping the file name the same
+5. Inject the modified audio into the PCSSB by running 
+`sm3tools <path to copied PCSSB file> <path to modified audio>`
+6. Modified PCSSB will be where the copied PCSSB file is with "-mod" at the end of the file name
