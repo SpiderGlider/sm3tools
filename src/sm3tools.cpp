@@ -61,18 +61,18 @@ void printHelp() {
 // only through the file extension currently.
 int main(const int argc, const char *const argv[]) {
     //vectorize arguments using the range constructor
-    std::vector<std::string> args {argv, argv + argc };
+    const std::vector<std::string> args {argv, argv + argc };
 
     if (argc < 2) {
         std::cerr << "ERROR: No arguments specified.\n";
         printHelp();
-        std::exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     for (size_t i = 1; i < args.size(); i++) {
         if (args[i] == "--help") {
             printHelp();
-            std::exit(EXIT_SUCCESS);
+            return EXIT_SUCCESS;
         }
     }
 
@@ -84,15 +84,23 @@ int main(const int argc, const char *const argv[]) {
     const FileType fileType { getFileType(args[1]) };
     if (fileType == PCPACK) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
-        std::exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
     // currently getFileType should never return a value outside of these two
     assert(fileType == PCSSB);
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 
+    for (size_t i = 1; i < args.size(); i++) {
+        if (args[i] == "--list") {
+            std::cout << "INFO: Listing FSBs in " << args[1] << '\n';
+            printFSBHeaderIndexes(args[1]);
+            return EXIT_SUCCESS;
+        }
+    }
+
     if (argc == 2) {
         std::cout << "INFO: Extracting audio from " << args[1] << '\n';
-        // printFSBHeaderIndexes(argv[1]);
+
         outputAudioFiles(args[1]);
     }
     else {
