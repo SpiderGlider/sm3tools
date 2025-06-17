@@ -70,10 +70,14 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_FAILURE;
     }
 
+    const std::string& inputFile = args[1];
     for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--help") {
+        if (args[i] == "--help" || args[i] == "-h") {
             printHelp();
             return EXIT_SUCCESS;
+        }
+        if (args[i+1] == "--input" || args[i] == "-i") {
+            inputFile = args[i];
         }
     }
 
@@ -101,7 +105,6 @@ int main(const int argc, const char *const argv[]) {
 
     if (argc == 2) {
         std::cout << "INFO: Extracting audio from " << args[1] << '\n';
-
         outputAudioFiles(args[1]);
     }
     else {
