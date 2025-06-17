@@ -48,6 +48,21 @@ FileType getFileType(const std::string_view filePath) {
     std::exit(EXIT_FAILURE);
 }
 
+const std::string& findInputFileArg(const std::vector<std::string>& args) {
+    assert(!args.empty());
+
+    for (size_t i = 1; i < args.size(); i++) {
+        if (args[i] == "--input" || args[i] == "-i") {
+            if ((i+1) < args.size()) {
+                return args[i+1];
+            }
+            std::cerr << "ERROR: Input flag was passed, "
+                    "but no input file was specified!\n";
+        }
+    }
+    return args[1];
+}
+
 void printHelp() {
     std::cout << "Usage (1): sm3tools.exe <PCSSB File>\n";
     std::cout << "Usage (2): sm3tools.exe <Input PCSSB File> <Audio File To Replace>\n";
@@ -70,14 +85,10 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_FAILURE;
     }
 
-    const std::string& inputFile = args[1];
     for (size_t i = 1; i < args.size(); i++) {
         if (args[i] == "--help" || args[i] == "-h") {
             printHelp();
             return EXIT_SUCCESS;
-        }
-        if (args[i+1] == "--input" || args[i] == "-i") {
-            inputFile = args[i];
         }
     }
 
@@ -86,7 +97,9 @@ int main(const int argc, const char *const argv[]) {
                         " argument are currently ignored.\n";
     }
 
-    const FileType fileType { getFileType(args[1]) };
+    const std::string& inputFilePath { findInputFileArg(args) };
+
+    const FileType fileType { getFileType(inputFilePath) };
     if (fileType == PCPACK) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
         return EXIT_FAILURE;
@@ -96,20 +109,21 @@ int main(const int argc, const char *const argv[]) {
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 
     for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--list") {
-            std::cout << "INFO: Listing FSBs in " << args[1] << '\n';
-            printFSBHeaderIndexes(args[1]);
+        if (args[i] == "--list" || args[i] == "-l") {
+            std::cout << "INFO: Listing FSBs in " << inputFilePath << '\n';
+            printFSBHeaderIndexes(inputFilePath);
             return EXIT_SUCCESS;
         }
     }
 
     if (argc == 2) {
-        std::cout << "INFO: Extracting audio from " << args[1] << '\n';
+        std::cout << "INFO: Extracting audio from " << inputFilePath << '\n';
         outputAudioFiles(args[1]);
     }
     else {
-        std::cout << "Replacing " << args[2] << " in " << args[1] << '\n';
-        replaceAudioinPCSSB(args[1], args[2]);
+        //FIXME
+        std::cout << "Replacing " << args[2] << " in " << inputFilePath << '\n';
+        replaceAudioinPCSSB(inputFilePath, args[2]);
     }
 
     return EXIT_SUCCESS;
