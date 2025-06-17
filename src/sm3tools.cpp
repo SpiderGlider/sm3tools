@@ -60,8 +60,9 @@ void printHelp() {
 // Currently only PCSSB parsing is implemented. The file type is determined
 // only through the file extension currently.
 int main(const int argc, const char *const argv[]) {
-    //vectorize arguments using the range constructor
     const std::vector<std::string> args {argv, argv + argc };
+    assert(argc == static_cast<int>(args.size()));
+    assert(args[0] == argv[0]);
 
     if (argc < 2) {
         std::cerr << "ERROR: No arguments specified.\n";
