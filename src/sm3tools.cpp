@@ -63,6 +63,41 @@ const std::string& findInputFileArg(const std::vector<std::string>& args) {
     return args[1];
 }
 
+struct options {
+    const bool list;
+    const bool verbose;
+    const std::string& inputFilePath;
+    const FileType inputFileType;
+    const std::string& replaceFilePath;
+};
+
+struct options parseFlags(const std::vector<std::string>& args) {
+    bool list = false;
+    bool verbose = false;
+
+    for (size_t i = 1; i < args.size(); i++) {
+        if (args[i] == "--list" || args[i] == "-l") {
+            list = true;
+        }
+        else if (args[i] == "--verbose" || args[i] == "-v") {
+            verbose = true;
+        }
+        if (args[i] == "--input" || args[i] == "-i") {
+            if ((i+1) < args.size()) {
+                const std::string& inputFilePath { args[i+1] };
+            }
+            std::cerr << "ERROR: Input flag was passed, "
+                    "but no input file was specified!\n";
+        }
+        else if (args[i] == "--verbose" || args[i] == "-v") {
+            verbose = true;
+        }
+        else if (args[i] == "--verbose" || args[i] == "-v") {
+            verbose = true;
+        }
+    }
+}
+
 void printHelp() {
     std::cout << "Usage (1): sm3tools.exe <PCSSB File>\n";
     std::cout << "Usage (2): sm3tools.exe <Input PCSSB File> <Audio File To Replace>\n";

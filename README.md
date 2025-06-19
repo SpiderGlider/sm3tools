@@ -25,6 +25,16 @@ To run those build files you can use:
 cmake --build .
 ```
 
+## Flags
+
+`-i <path to input file>`
+`-v` - verbose
+`-r <path to replacement file>`
+`-r <file to replace> <path to replacement file>`
+`-l --list` - list files in archive
+`-t PCSSB | pcpack` type to interpret as, if not specified
+then inferred from the file name
+
 ## Example Workflow - PCSSB
 
 1. Copy a .pcssb file that you want to extract from the game's sound folder
