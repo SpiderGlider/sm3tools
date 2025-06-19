@@ -72,8 +72,9 @@ struct options {
 };
 
 struct options parseFlags(const std::vector<std::string>& args) {
-    bool list = false;
-    bool verbose = false;
+    bool list { false };
+    bool verbose = { false };
+    const std::string& inputFilePath { findInputFileArg(args) };
 
     for (size_t i = 1; i < args.size(); i++) {
         if (args[i] == "--list" || args[i] == "-l") {
@@ -82,20 +83,19 @@ struct options parseFlags(const std::vector<std::string>& args) {
         else if (args[i] == "--verbose" || args[i] == "-v") {
             verbose = true;
         }
-        if (args[i] == "--input" || args[i] == "-i") {
+        else if (args[i] == "--") {
+
+        }
+        else if (args[i] == "--input" || args[i] == "-i") {
             if ((i+1) < args.size()) {
                 const std::string& inputFilePath { args[i+1] };
             }
             std::cerr << "ERROR: Input flag was passed, "
                     "but no input file was specified!\n";
         }
-        else if (args[i] == "--verbose" || args[i] == "-v") {
-            verbose = true;
-        }
-        else if (args[i] == "--verbose" || args[i] == "-v") {
-            verbose = true;
-        }
     }
+
+    return { list, verbose, inputFilePath}
 }
 
 void printHelp() {
