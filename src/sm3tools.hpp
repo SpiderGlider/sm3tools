@@ -20,6 +20,8 @@
 #ifndef SM3TOOLS_H
 #define SM3TOOLS_H
 #include <string_view>
+#include <string>
+#include <vector>
 
 enum class FileType {
     none,
@@ -35,5 +37,22 @@ FileType getFileType(std::string_view filePath);
 
 //Prints usage information to stdout
 void printHelp();
+
+//finds the input file path from the program arguments.
+//if the -i flag isn't passed, we assume that the file path is the 1st argument.
+const std::string& findInputFileArg(const std::vector<std::string>& args);
+
+// program options, which are decided depending on the flags the user passes
+struct Options {
+    bool help;
+    bool list;
+    bool verbose;
+    const std::string& inputFilePath;
+    FileType inputFileType;
+};
+
+// parses program arguments to find any flags that are passed and construct
+// the program options struct
+Options parseFlags(const std::vector<std::string>& args);
 
 #endif

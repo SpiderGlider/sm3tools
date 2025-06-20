@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <filesystem>
-#include <string>
 
 #include <cassert>
 #include <cstdlib>
@@ -59,14 +58,6 @@ const std::string& findInputFileArg(const std::vector<std::string>& args) {
     }
     return args[1];
 }
-
-struct Options {
-    bool help;
-    bool list;
-    bool verbose;
-    const std::string& inputFilePath;
-    FileType inputFileType;
-};
 
 Options parseFlags(const std::vector<std::string>& args) {
     bool help { false };
