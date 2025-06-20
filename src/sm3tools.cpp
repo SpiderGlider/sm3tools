@@ -34,9 +34,7 @@ File::FileType getFileType(const std::string_view filePath) {
     const std::string fileExtension { std::filesystem::path(filePath).extension().string() };
 
     if (fileExtension.empty()) {
-        std::cerr << "ERROR: Argument doesn't have a file extension."
-                        " Are you sure this is a path to a file?\n";
-        std::exit(EXIT_FAILURE);
+        return File::none;
     }
 
     // TODO could check magic numbers as well
@@ -44,8 +42,7 @@ File::FileType getFileType(const std::string_view filePath) {
     if (fileExtension == ".PCPACK") return File::pcpack;
     if (fileExtension == ".pcssb") return File::pcssb;
 
-    std::cerr << "ERROR: File extension not recognised.\n";
-    std::exit(EXIT_FAILURE);
+    return File::unknown;
 }
 
 const std::string& findInputFileArg(const std::vector<std::string>& args) {
@@ -135,11 +132,20 @@ int main(const int argc, const char *const argv[]) {
     const std::string& inputFilePath { findInputFileArg(args) };
 
     const File::FileType fileType { getFileType(inputFilePath) };
+    if (fileType == File::none) {
+        std::cerr << "ERROR: Argument doesn't have a file extension."
+                                " Are you sure this is a path to a file?\n";
+        return EXIT_FAILURE;
+    }
+    if (fileType == File::unknown) {
+        std::cerr << "ERROR: File extension not recognised.\n";
+        return EXIT_FAILURE;
+    }
     if (fileType == File::pcpack) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
         return EXIT_FAILURE;
     }
-    // currently getFileType should never return a value outside of these two
+    // currently getFileType should never return a value outside of these
     assert(fileType == File::pcssb);
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 

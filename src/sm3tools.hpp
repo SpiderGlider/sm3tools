@@ -23,7 +23,8 @@
 
 namespace File {
     enum FileType {
-        unknown,
+        unknown = -1,
+        none = 0,
         pcpack,
         pcssb,
     };
@@ -31,7 +32,7 @@ namespace File {
 
 
 // Checks the file extension of the file name, and returns the relevant
-// file type if one is matched. Otherwise it exits with an error message
+// file type if one is matched. Otherwise it returns unknown
 File::FileType getFileType(std::string_view filePath);
 
 //Prints usage information to stdout
