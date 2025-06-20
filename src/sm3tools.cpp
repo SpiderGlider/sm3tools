@@ -60,39 +60,34 @@ const std::string& findInputFileArg(const std::vector<std::string>& args) {
     return args[1];
 }
 
-struct options {
-    const bool list;
-    const bool verbose;
+struct Options {
+    bool help;
+    bool list;
+    bool verbose;
     const std::string& inputFilePath;
-    const FileType inputFileType;
-    const std::string& replaceFilePath;
+    FileType inputFileType;
 };
 
-struct options parseFlags(const std::vector<std::string>& args) {
+Options parseFlags(const std::vector<std::string>& args) {
+    bool help { false };
     bool list { false };
     bool verbose = { false };
     const std::string& inputFilePath { findInputFileArg(args) };
+    const FileType inputFileType { getFileType(inputFilePath) };
 
     for (size_t i = 1; i < args.size(); i++) {
+        if (args[i] == "--help" || args[i] == "-h") {
+            help = true;
+        }
         if (args[i] == "--list" || args[i] == "-l") {
             list = true;
         }
         else if (args[i] == "--verbose" || args[i] == "-v") {
             verbose = true;
         }
-        else if (args[i] == "--") {
-
-        }
-        else if (args[i] == "--input" || args[i] == "-i") {
-            if ((i+1) < args.size()) {
-                const std::string& inputFilePath { args[i+1] };
-            }
-            std::cerr << "ERROR: Input flag was passed, "
-                    "but no input file was specified!\n";
-        }
     }
 
-    return { list, verbose, inputFilePath}
+    return { help, list, verbose, inputFilePath, inputFileType };
 }
 
 void printHelp() {
@@ -117,11 +112,11 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_FAILURE;
     }
 
-    for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--help" || args[i] == "-h") {
-            printHelp();
-            return EXIT_SUCCESS;
-        }
+    const Options options { parseFlags(args) };
+
+    if (options.help) {
+        printHelp();
+        return EXIT_SUCCESS;
     }
 
     if (argc > 3) {

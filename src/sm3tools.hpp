@@ -29,7 +29,8 @@ enum class FileType {
 };
 
 // Checks the file extension of the file name, and returns the relevant
-// file type if one is matched. Otherwise it returns unknown
+// file type if one is matched. Otherwise it returns unknown, or none if no
+// file extension was found at all.
 FileType getFileType(std::string_view filePath);
 
 //Prints usage information to stdout
