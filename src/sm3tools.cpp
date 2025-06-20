@@ -28,7 +28,7 @@
 
 #include "pcssb.hpp"
 
-FileType getFileType(const std::string_view filePath) {
+File::FileType getFileType(const std::string_view filePath) {
     assert(!filePath.empty());
 
     const std::string fileExtension { std::filesystem::path(filePath).extension().string() };
@@ -41,8 +41,8 @@ FileType getFileType(const std::string_view filePath) {
 
     // TODO could check magic numbers as well
     // FIXME case sensitive currently
-    if (fileExtension == ".PCPACK") return PCPACK;
-    if (fileExtension == ".pcssb") return PCSSB;
+    if (fileExtension == ".PCPACK") return File::pcpack;
+    if (fileExtension == ".pcssb") return File::pcssb;
 
     std::cerr << "ERROR: File extension not recognised.\n";
     std::exit(EXIT_FAILURE);
@@ -67,7 +67,7 @@ struct options {
     const bool list;
     const bool verbose;
     const std::string& inputFilePath;
-    const FileType inputFileType;
+    const File::FileType inputFileType;
     const std::string& replaceFilePath;
 };
 
@@ -134,13 +134,13 @@ int main(const int argc, const char *const argv[]) {
 
     const std::string& inputFilePath { findInputFileArg(args) };
 
-    const FileType fileType { getFileType(inputFilePath) };
-    if (fileType == PCPACK) {
+    const File::FileType fileType { getFileType(inputFilePath) };
+    if (fileType == File::pcpack) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
         return EXIT_FAILURE;
     }
     // currently getFileType should never return a value outside of these two
-    assert(fileType == PCSSB);
+    assert(fileType == File::pcssb);
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 
     for (size_t i = 1; i < args.size(); i++) {

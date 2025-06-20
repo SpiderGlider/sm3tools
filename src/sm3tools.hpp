@@ -21,14 +21,17 @@
 #define SM3TOOLS_H
 #include <string_view>
 
-typedef enum FILE_TYPE {
-    PCPACK,
-    PCSSB
-} FileType;
+namespace File {
+    enum FileType {
+        pcpack,
+        pcssb,
+    };
+}
+
 
 // Checks the file extension of the file name, and returns the relevant
 // file type if one is matched. Otherwise it exits with an error message
-FileType getFileType(std::string_view filePath);
+File::FileType getFileType(std::string_view filePath);
 
 //Prints usage information to stdout
 void printHelp();
