@@ -21,19 +21,16 @@
 #define SM3TOOLS_H
 #include <string_view>
 
-namespace File {
-    enum FileType {
-        unknown = -1,
-        none = 0,
-        pcpack,
-        pcssb,
-    };
-}
-
+enum class FileType {
+    none,
+    unknown,
+    pcpack,
+    pcssb,
+};
 
 // Checks the file extension of the file name, and returns the relevant
 // file type if one is matched. Otherwise it returns unknown
-File::FileType getFileType(std::string_view filePath);
+FileType getFileType(std::string_view filePath);
 
 //Prints usage information to stdout
 void printHelp();

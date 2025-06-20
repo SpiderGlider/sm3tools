@@ -28,21 +28,21 @@
 
 #include "pcssb.hpp"
 
-File::FileType getFileType(const std::string_view filePath) {
+FileType getFileType(const std::string_view filePath) {
     assert(!filePath.empty());
 
     const std::string fileExtension { std::filesystem::path(filePath).extension().string() };
 
     if (fileExtension.empty()) {
-        return File::none;
+        return FileType::none;
     }
 
     // TODO could check magic numbers as well
     // FIXME case sensitive currently
-    if (fileExtension == ".PCPACK") return File::pcpack;
-    if (fileExtension == ".pcssb") return File::pcssb;
+    if (fileExtension == ".PCPACK") return FileType::pcpack;
+    if (fileExtension == ".pcssb") return FileType::pcssb;
 
-    return File::unknown;
+    return FileType::unknown;
 }
 
 const std::string& findInputFileArg(const std::vector<std::string>& args) {
@@ -64,7 +64,7 @@ struct options {
     const bool list;
     const bool verbose;
     const std::string& inputFilePath;
-    const File::FileType inputFileType;
+    const FileType inputFileType;
     const std::string& replaceFilePath;
 };
 
@@ -131,22 +131,22 @@ int main(const int argc, const char *const argv[]) {
 
     const std::string& inputFilePath { findInputFileArg(args) };
 
-    const File::FileType fileType { getFileType(inputFilePath) };
-    if (fileType == File::none) {
+    const FileType fileType { getFileType(inputFilePath) };
+    if (fileType == FileType::none) {
         std::cerr << "ERROR: Argument doesn't have a file extension."
                                 " Are you sure this is a path to a file?\n";
         return EXIT_FAILURE;
     }
-    if (fileType == File::unknown) {
+    if (fileType == FileType::unknown) {
         std::cerr << "ERROR: File extension not recognised.\n";
         return EXIT_FAILURE;
     }
-    if (fileType == File::pcpack) {
+    if (fileType == FileType::pcpack) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
         return EXIT_FAILURE;
     }
     // currently getFileType should never return a value outside of these
-    assert(fileType == File::pcssb);
+    assert(fileType == FileType::pcssb);
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 
     for (size_t i = 1; i < args.size(); i++) {
