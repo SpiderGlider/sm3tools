@@ -28,7 +28,7 @@
 
 #include "pcssb.hpp"
 
-FileType getFileTypeFromExtension(const std::string_view filePath) {
+FileType getFileType(const std::string_view filePath) {
     assert(!filePath.empty());
 
     const std::string fileExtension { std::filesystem::path(filePath).extension().string() };
@@ -48,21 +48,6 @@ FileType getFileTypeFromExtension(const std::string_view filePath) {
     std::exit(EXIT_FAILURE);
 }
 
-FileType findFileType(const std::vector<std::string>& args) {
-    assert(!args.empty());
-
-    for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--flags" || args[i] == "-i") {
-            if ((i+1) < args.size()) {
-                return args[i+1];
-            }
-            std::cerr << "ERROR: Input flag was passed, "
-                    "but no input file was specified!\n";
-        }
-    }
-    return args[1];
-}
-
 const std::string& findInputFileArg(const std::vector<std::string>& args) {
     assert(!args.empty());
 
@@ -78,7 +63,7 @@ const std::string& findInputFileArg(const std::vector<std::string>& args) {
     return args[1];
 }
 
-struct Options {
+struct options {
     const bool list;
     const bool verbose;
     const std::string& inputFilePath;
@@ -86,13 +71,10 @@ struct Options {
     const std::string& replaceFilePath;
 };
 
-Options parseFlags(const std::vector<std::string>& args) {
+struct options parseFlags(const std::vector<std::string>& args) {
     bool list { false };
     bool verbose = { false };
     const std::string& inputFilePath { findInputFileArg(args) };
-
-    // start off with the assump
-    FileType inputFileType { getFileTypeFromExtension(inputFilePath) };
 
     for (size_t i = 1; i < args.size(); i++) {
         if (args[i] == "--list" || args[i] == "-l") {
@@ -104,9 +86,16 @@ Options parseFlags(const std::vector<std::string>& args) {
         else if (args[i] == "--") {
 
         }
+        else if (args[i] == "--input" || args[i] == "-i") {
+            if ((i+1) < args.size()) {
+                const std::string& inputFilePath { args[i+1] };
+            }
+            std::cerr << "ERROR: Input flag was passed, "
+                    "but no input file was specified!\n";
+        }
     }
 
-    return { list, verbose, inputFilePath};
+    return { list, verbose, inputFilePath}
 }
 
 void printHelp() {
@@ -145,12 +134,12 @@ int main(const int argc, const char *const argv[]) {
 
     const std::string& inputFilePath { findInputFileArg(args) };
 
-    const FileType fileType { getFileTypeFromExtension(inputFilePath) };
+    const FileType fileType { getFileType(inputFilePath) };
     if (fileType == PCPACK) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
         return EXIT_FAILURE;
     }
-    // currently getFileTypeFromExtension should never return a value outside of these two
+    // currently getFileType should never return a value outside of these two
     assert(fileType == PCSSB);
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 

@@ -28,7 +28,7 @@ typedef enum FILE_TYPE {
 
 // Checks the file extension of the file name, and returns the relevant
 // file type if one is matched. Otherwise it exits with an error message
-FileType getFileTypeFromExtension(std::string_view filePath);
+FileType getFileType(std::string_view filePath);
 
 //Prints usage information to stdout
 void printHelp();
