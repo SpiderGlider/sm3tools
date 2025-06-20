@@ -23,6 +23,7 @@
 
 namespace File {
     enum FileType {
+        unknown,
         pcpack,
         pcssb,
     };
