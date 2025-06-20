@@ -103,6 +103,11 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_FAILURE;
     }
 
+    if (argc > 3) {
+        std::cerr << "WARNING: Arguments after the 2nd"
+                        " argument are currently ignored.\n";
+    }
+
     const Options options { parseFlags(args) };
 
     if (options.help) {
@@ -110,47 +115,37 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_SUCCESS;
     }
 
-    if (argc > 3) {
-        std::cerr << "WARNING: Arguments after the 2nd"
-                        " argument are currently ignored.\n";
-    }
-
-    const std::string& inputFilePath { findInputFileArg(args) };
-
-    const FileType fileType { getFileType(inputFilePath) };
-    if (fileType == FileType::none) {
+    if (options.inputFileType == FileType::none) {
         std::cerr << "ERROR: Argument doesn't have a file extension."
                                 " Are you sure this is a path to a file?\n";
         return EXIT_FAILURE;
     }
-    if (fileType == FileType::unknown) {
+    if (options.inputFileType == FileType::unknown) {
         std::cerr << "ERROR: File extension not recognised.\n";
         return EXIT_FAILURE;
     }
-    if (fileType == FileType::pcpack) {
+    if (options.inputFileType == FileType::pcpack) {
         std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
         return EXIT_FAILURE;
     }
     // currently getFileType should never return a value outside of these
-    assert(fileType == FileType::pcssb);
+    assert(options.inputFileType == FileType::pcssb);
     std::cout << "INFO: Parsing as a PCSSB file.\n";
 
-    for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--list" || args[i] == "-l") {
-            std::cout << "INFO: Listing FSBs in " << inputFilePath << '\n';
-            printFSBHeaderIndexes(inputFilePath);
-            return EXIT_SUCCESS;
-        }
+    if (options.list) {
+        std::cout << "INFO: Listing FSBs in " << options.inputFilePath << '\n';
+        printFSBHeaderIndexes(options.inputFilePath);
+        return EXIT_SUCCESS;
     }
 
     if (argc == 2) {
-        std::cout << "INFO: Extracting audio from " << inputFilePath << '\n';
+        std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
         outputAudioFiles(args[1]);
     }
     else {
         //FIXME
-        std::cout << "Replacing " << args[2] << " in " << inputFilePath << '\n';
-        replaceAudioinPCSSB(inputFilePath, args[2]);
+        std::cout << "Replacing " << args[2] << " in " << options.inputFilePath << '\n';
+        replaceAudioinPCSSB(options.inputFilePath, args[2]);
     }
 
     return EXIT_SUCCESS;
