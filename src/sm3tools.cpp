@@ -89,6 +89,23 @@ void printHelp() {
         "the file with the same name.\n";
 }
 
+void pcssbMain(const Options& options) {
+    if (options.list) {
+        std::cout << "INFO: Listing FSBs in " << options.inputFilePath << '\n';
+        printFSBHeaderIndexes(options.inputFilePath);
+        std::exit(EXIT_SUCCESS);
+    }
+    if (false) {
+        std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
+        outputAudioFiles(options.inputFilePath);
+    }
+    else if (false) {
+        //FIXME
+        std::cout << "Replacing " << args[2] << " in " << options.inputFilePath << '\n';
+        replaceAudioinPCSSB(options.inputFilePath, args[2]);
+    }
+}
+
 // Program takes one argument, that being the path to a file to parse.
 // Currently only PCSSB parsing is implemented. The file type is determined
 // only through the file extension currently.
@@ -115,38 +132,23 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_SUCCESS;
     }
 
-    if (options.inputFileType == FileType::none) {
-        std::cerr << "ERROR: Argument doesn't have a file extension."
+    switch (options.inputFileType) {
+        case FileType::none:
+            std::cerr << "ERROR: Argument doesn't have a file extension."
                                 " Are you sure this is a path to a file?\n";
-        return EXIT_FAILURE;
+            return EXIT_FAILURE;
+        case FileType::unknown:
+            std::cerr << "ERROR: File extension not recognised.\n";
+            return EXIT_FAILURE;
+        case FileType::pcpack:
+            std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
+            return EXIT_FAILURE;
+        case FileType::pcssb:
+            std::cout << "INFO: Parsing as a PCSSB file.\n";
+            pcssbMain(options);
+            return EXIT_SUCCESS;
+        default:
+            std::cerr << "ERROR: Unhandled FileType!";
+            return EXIT_FAILURE;
     }
-    if (options.inputFileType == FileType::unknown) {
-        std::cerr << "ERROR: File extension not recognised.\n";
-        return EXIT_FAILURE;
-    }
-    if (options.inputFileType == FileType::pcpack) {
-        std::cerr << "ERROR: PCPACK parsing is not yet implemented.\n";
-        return EXIT_FAILURE;
-    }
-    // currently getFileType should never return a value outside of these
-    assert(options.inputFileType == FileType::pcssb);
-    std::cout << "INFO: Parsing as a PCSSB file.\n";
-
-    if (options.list) {
-        std::cout << "INFO: Listing FSBs in " << options.inputFilePath << '\n';
-        printFSBHeaderIndexes(options.inputFilePath);
-        return EXIT_SUCCESS;
-    }
-
-    if (argc == 2) {
-        std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
-        outputAudioFiles(args[1]);
-    }
-    else {
-        //FIXME
-        std::cout << "Replacing " << args[2] << " in " << options.inputFilePath << '\n';
-        replaceAudioinPCSSB(options.inputFilePath, args[2]);
-    }
-
-    return EXIT_SUCCESS;
 }
