@@ -70,7 +70,7 @@ Options parseFlags(const std::vector<std::string>& args) {
         if (args[i] == "--help" || args[i] == "-h") {
             help = true;
         }
-        if (args[i] == "--list" || args[i] == "-l") {
+        else if (args[i] == "--list" || args[i] == "-l") {
             list = true;
         }
         else if (args[i] == "--verbose" || args[i] == "-v") {

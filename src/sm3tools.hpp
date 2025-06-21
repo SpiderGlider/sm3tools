@@ -47,7 +47,7 @@ struct Options {
     bool help { false };
     bool list { false };
     bool verbose { false };
-    const std::string& inputFilePath {};
+    std::string inputFilePath {};
     FileType inputFileType { FileType::unknown };
 };
 
