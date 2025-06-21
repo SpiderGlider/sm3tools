@@ -44,11 +44,11 @@ const std::string& findInputFileArg(const std::vector<std::string>& args);
 
 // program options, which are decided depending on the flags the user passes
 struct Options {
-    bool help;
-    bool list;
-    bool verbose;
-    const std::string& inputFilePath;
-    FileType inputFileType;
+    bool help { false };
+    bool list { false };
+    bool verbose { false };
+    const std::string& inputFilePath {};
+    FileType inputFileType { FileType::unknown };
 };
 
 // parses program arguments to find any flags that are passed and construct

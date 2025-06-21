@@ -99,11 +99,11 @@ void pcssbMain(const Options& options) {
         std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
         outputAudioFiles(options.inputFilePath);
     }
-    else if (false) {
-        //FIXME
-        std::cout << "Replacing " << args[2] << " in " << options.inputFilePath << '\n';
-        replaceAudioinPCSSB(options.inputFilePath, args[2]);
-    }
+    // else if (false) {
+    //     //FIXME
+    //     std::cout << "Replacing " << args[2] << " in " << options.inputFilePath << '\n';
+    //     replaceAudioinPCSSB(options.inputFilePath, args[2]);
+    // }
 }
 
 // Program takes one argument, that being the path to a file to parse.
@@ -118,11 +118,6 @@ int main(const int argc, const char *const argv[]) {
         std::cerr << "ERROR: No arguments specified.\n";
         printHelp();
         return EXIT_FAILURE;
-    }
-
-    if (argc > 3) {
-        std::cerr << "WARNING: Arguments after the 2nd"
-                        " argument are currently ignored.\n";
     }
 
     const Options options { parseFlags(args) };
