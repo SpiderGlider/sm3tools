@@ -1,7 +1,7 @@
 .PHONY: clean all
 
-default: sm3tools
-all: sm3tools
+default: bin/sm3tools
+all: bin/sm3tools
 
 UARCH = $(shell uname -m)
 
@@ -20,8 +20,8 @@ EXTRAFLAGS = -Wextra -Wformat=2 -Wconversion \
  -Wold-style-cast -Wcast-align -Wsign-conversion -Wdouble-promotion \
  -Wimplicit-fallthrough -Wnon-virtual-dtor # -O3 -Wwrite-strings -Wformat-signedness
 
-sm3tools: src/sm3tools.cpp
-	$(C++) $(DEFAULTFLAGS) $(EXTRAFLAGS) src/sm3tools.cpp src/pcssb.cpp src/myIO.cpp -o bin/sm3tools
+bin/sm3tools: src/sm3tools.cpp src/pcssb.cpp src/myIO.cpp
+	$(C++) $(DEFAULTFLAGS) $(EXTRAFLAGS) $^ -o $@
 
 %: %.cpp
 	$(C++) $(DEFAULTFLAGS) $(EXTRAFLAGS) $@.cpp -o $@
