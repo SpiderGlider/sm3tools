@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <filesystem>
+#include <vector>
 
 #include <cassert>
 #include <cstdlib>
@@ -59,21 +60,44 @@ const std::string& findInputFileArg(const std::vector<std::string>& args) {
     return args[1];
 }
 
+std::vector<size_t> findFlagIndexes(const std::vector<std::string>& args) {
+    assert(!args.empty());
+    std::vector<size_t> flagIndexes {};
+
+    for (size_t i = 1; i < args.size(); i++) {
+        //special argument "--" forces end of flag scanning.
+        //can be used to pass in files starting with - as an argument
+        if (args[i] == "--") {
+            break;
+        }
+        if (args[i][0] == '-') {
+            flagIndexes.push_back(i);
+        }
+    }
+    return flagIndexes;
+}
+
 Options parseFlags(const std::vector<std::string>& args) {
+    assert(!args.empty());
+
     bool help { false };
     bool list { false };
     bool verbose = { false };
     const std::string& inputFilePath { findInputFileArg(args) };
     const FileType inputFileType { getFileType(inputFilePath) };
 
-    for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--help" || args[i] == "-h") {
+    const std::vector<size_t> flagIndexes = findFlagIndexes(args);
+
+    for (size_t i = 1; i < flagIndexes.size(); i++) {
+        const std::string& flag = args[flagIndexes[i]];
+
+        if (flag == "--help" || flag == "-h") {
             help = true;
         }
-        else if (args[i] == "--list" || args[i] == "-l") {
+        else if (flag == "--list" || flag == "-l") {
             list = true;
         }
-        else if (args[i] == "--verbose" || args[i] == "-v") {
+        else if (flag == "--verbose" || flag == "-v") {
             verbose = true;
         }
     }
