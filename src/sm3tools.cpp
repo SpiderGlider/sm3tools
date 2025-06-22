@@ -89,9 +89,35 @@ bool checkFlagPresent(const std::vector<std::string>& args,
     return false;
 }
 
+const std::string& findArgument(const std::vector<std::string>& args,
+    const size_t argNumber) {
+
+    assert(!args.empty());
+
+    size_t argCount = 1;
+
+    bool skipFlags { true };
+    for (size_t i = 1; i < args.size(); i++) {
+        if (args[i] == "--") {
+            skipFlags = false;
+        }
+        else if (skipFlags == true || args[i][0] != '-') {
+            if (argCount == argNumber) {
+                return args[i];
+            }
+            argCount++;
+        }
+    }
+
+    return std::string {};
+}
+
 const std::string& getFlagArgument(const std::vector<std::string>& args,
     const std::string_view flagName,
     const std::string_view flagAltName) {
+
+    assert(!args.empty());
+
     for (size_t i = 1; i < args.size(); i++) {
         if (args[i] == flagName || args[i] == flagAltName) {
             if ((i + 1) < args.size()) {
