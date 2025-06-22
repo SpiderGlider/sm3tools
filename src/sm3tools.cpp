@@ -77,30 +77,41 @@ std::vector<size_t> findFlagIndexes(const std::vector<std::string>& args) {
     return flagIndexes;
 }
 
+bool checkFlagPresent(const std::vector<std::string>& args,
+    const std::string_view flagName,
+    const std::string_view flagAltName) {
+
+    for (size_t i = 1; i < args.size(); i++) {
+        if (args[i] == flagName || args[i] == flagAltName) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const std::string& getFlagArgument(const std::vector<std::string>& args,
+    const std::string_view flagName,
+    const std::string_view flagAltName) {
+    for (size_t i = 1; i < args.size(); i++) {
+        if (args[i] == flagName || args[i] == flagAltName) {
+            if ((i + 1) < args.size()) {
+                //NOTE that this doesn't check that
+                //the next argument isn't a flag
+                return args[i+1];
+            }
+        }
+    }
+    return std::string {};
+}
+
 Options parseFlags(const std::vector<std::string>& args) {
     assert(!args.empty());
 
-    bool help { false };
-    bool list { false };
-    bool verbose = { false };
-    const std::string& inputFilePath { findInputFileArg(args) };
+    const bool help { checkFlagPresent(args, "--help", "-h") };
+    const bool list { checkFlagPresent(args, "--list", "-l") };
+    const bool verbose = { checkFlagPresent(args, "--verbose", "-v") };
+    const std::string& inputFilePath { getFlagArgument(args, "--input", "-i") };
     const FileType inputFileType { getFileType(inputFilePath) };
-
-    const std::vector<size_t> flagIndexes = findFlagIndexes(args);
-
-    for (size_t i = 1; i < flagIndexes.size(); i++) {
-        const std::string& flag = args[flagIndexes[i]];
-
-        if (flag == "--help" || flag == "-h") {
-            help = true;
-        }
-        else if (flag == "--list" || flag == "-l") {
-            list = true;
-        }
-        else if (flag == "--verbose" || flag == "-v") {
-            verbose = true;
-        }
-    }
 
     return { help, list, verbose, inputFilePath, inputFileType };
 }
