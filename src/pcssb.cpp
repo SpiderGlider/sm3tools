@@ -359,6 +359,7 @@ void replaceAudioinPCSSB(
 
     //length of output path including null terminator
     //- byte for null terminator is included in sizeof("-mod")
+    //TODO use a better output format
     const std::size_t outputFilePathSize { (std::strlen(pcssbFilePath.c_str()) + sizeof("-mod"))
         * sizeof(char) };
     char *const outputFilePath { static_cast<char *>(std::malloc(outputFilePathSize)) };
