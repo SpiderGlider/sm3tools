@@ -65,10 +65,6 @@ std::vector<size_t> findFlagIndexes(const std::vector<std::string>& args) {
     std::vector<size_t> flagIndexes {};
 
     for (size_t i = 1; i < args.size(); i++) {
-        //special argument "--" forces end of flag scanning.
-        //can be used to pass in files starting with - as an argument
-        if (args[i] == "--") break;
-        
         if (args[i][0] == '-') {
             flagIndexes.push_back(i);
         }
@@ -81,8 +77,6 @@ bool checkFlagPresent(const std::vector<std::string>& args,
     const std::string_view flagAltName) {
 
     for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--") break;
-
         if (args[i] == flagName || args[i] == flagAltName) {
             return true;
         }
@@ -97,12 +91,8 @@ const std::string& findArgument(const std::vector<std::string>& args,
 
     size_t argCount = 1;
 
-    bool skipFlags { true };
     for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--") {
-            skipFlags = false;
-        }
-        else if (skipFlags == true || args[i][0] != '-') {
+        if (args[i][0] != '-') {
             if (argCount == argNumber) {
                 return args[i];
             }
@@ -120,8 +110,6 @@ const std::string& getFlagArgument(const std::vector<std::string>& args,
     assert(!args.empty());
 
     for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--") break;
-
         if (args[i] == flagName || args[i] == flagAltName) {
             if ((i + 1) < args.size()) {
                 //NOTE that this doesn't check that
