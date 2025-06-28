@@ -150,12 +150,12 @@ std::string readFileName(
     (void) std::fclose(fileHandle);
     //NOTE: we add a null terminator manually
     //for the case that the file name is 30 bytes long.
-    //The std::string constructor probably doesn't need it
-    //because the length is passed in, but just for safety we
-    //include a null terminator anyway.
     buffer[FSB_FILENAME_SIZE] = '\0';
 
-    return { buffer.data(), FSB_FILENAME_SIZE };
+    //NOTE: we don't include the length in this constructor because
+    //that would tell it to include trailing null characters rather
+    //than stopping when it encounters the null terminator
+    return { buffer.data() };
 }
 
 void outputAudioData(
