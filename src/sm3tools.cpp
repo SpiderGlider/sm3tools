@@ -127,8 +127,9 @@ Options parseFlags(const std::vector<std::string>& args) {
     const bool verbose = { checkFlagPresent(args, "--verbose", "-v") };
     const std::string inputFilePath { getFlagArgument(args, "--input", "-i") };
     const FileType inputFileType { getFileType(inputFilePath) };
+    const std::string replaceFilePath { getFlagArgument(args, "--replace", "-r")};
 
-    return { help, list, verbose, inputFilePath, inputFileType };
+    return { help, list, verbose, inputFilePath, inputFileType, replaceFilePath };
 }
 
 void printHelp() {
@@ -149,11 +150,10 @@ void pcssbMain(const Options& options) {
         std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
         outputAudioFiles(options.inputFilePath);
     }
-    // else if (false) {
-    //     //FIXME
-    //     std::cout << "Replacing " << args[2] << " in " << options.inputFilePath << '\n';
-    //     replaceAudioinPCSSB(options.inputFilePath, args[2]);
-    // }
+    else if (!options.replaceFilePath.empty()) {
+         std::cout << "Replacing " << options.replaceFilePath << " in " << options.inputFilePath << '\n';
+         replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath);
+    }
 }
 
 // Program takes one argument, that being the path to a file to parse.

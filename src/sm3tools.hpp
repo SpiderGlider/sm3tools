@@ -49,6 +49,7 @@ struct Options {
     bool verbose { false };
     std::string inputFilePath {};
     FileType inputFileType { FileType::unknown };
+    std::string replaceFilePath {};
 };
 
 // parses program arguments to find any flags that are passed and construct
