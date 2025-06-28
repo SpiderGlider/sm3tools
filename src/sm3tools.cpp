@@ -29,8 +29,6 @@
 #include "pcssb.hpp"
 
 FileType getFileType(const std::string_view filePath) {
-    assert(!filePath.empty());
-
     const std::string fileExtension { std::filesystem::path(filePath).extension().string() };
 
     if (fileExtension.empty()) {
@@ -84,7 +82,7 @@ bool checkFlagPresent(const std::vector<std::string>& args,
     return false;
 }
 
-const std::string& findArgument(const std::vector<std::string>& args,
+std::string findArgument(const std::vector<std::string>& args,
     const size_t argNumber) {
 
     assert(!args.empty());
@@ -103,7 +101,7 @@ const std::string& findArgument(const std::vector<std::string>& args,
     return std::string {};
 }
 
-const std::string& getFlagArgument(const std::vector<std::string>& args,
+std::string getFlagArgument(const std::vector<std::string>& args,
     const std::string_view flagName,
     const std::string_view flagAltName) {
 
@@ -127,7 +125,7 @@ Options parseFlags(const std::vector<std::string>& args) {
     const bool help { checkFlagPresent(args, "--help", "-h") };
     const bool list { checkFlagPresent(args, "--list", "-l") };
     const bool verbose = { checkFlagPresent(args, "--verbose", "-v") };
-    const std::string& inputFilePath { getFlagArgument(args, "--input", "-i") };
+    const std::string inputFilePath { getFlagArgument(args, "--input", "-i") };
     const FileType inputFileType { getFileType(inputFilePath) };
 
     return { help, list, verbose, inputFilePath, inputFileType };
