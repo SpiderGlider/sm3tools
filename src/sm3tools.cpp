@@ -124,15 +124,31 @@ std::string getFlagArgument(const std::vector<std::string>& args,
     return std::string {};
 }
 
+std::string getArgument(const std::vector<std::string>& args,
+    const std::string_view flagName,
+    const std::string_view flagAltName,
+    const size_t argAltNumber) {
+
+    assert(!args.empty());
+
+    std::string flagArgument = getFlagArgument(args, flagName, flagAltName);
+
+    if (flagArgument.empty()) {
+        return findArgument(args, argAltNumber);
+    }
+
+    return flagArgument;
+}
+
 Options parseFlags(const std::vector<std::string>& args) {
     assert(!args.empty());
 
     const bool help { checkFlagPresent(args, "--help", "-h") };
     const bool list { checkFlagPresent(args, "--list", "-l") };
     const bool verbose = { checkFlagPresent(args, "--verbose", "-v") };
-    const std::string inputFilePath { getFlagArgument(args, "--input", "-i") };
+    const std::string inputFilePath { getArgument(args, "--input", "-i", 1) };
     const FileType inputFileType { getFileType(inputFilePath) };
-    const std::string replaceFilePath { getFlagArgument(args, "--replace", "-r")};
+    const std::string replaceFilePath { getArgument(args, "--replace", "-r", 2)};
 
     return { help, list, verbose, inputFilePath, inputFileType, replaceFilePath };
 }
