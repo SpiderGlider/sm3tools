@@ -198,6 +198,12 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_SUCCESS;
     }
 
+    if (options.inputFilePath.empty()) {
+        std::cerr << "ERROR: Program needs an input file argument.\n";
+        printHelp();
+        return EXIT_FAILURE;
+    }
+
     switch (options.inputFileType) {
         case FileType::none:
             std::cerr << "ERROR: Argument doesn't have a file extension."
