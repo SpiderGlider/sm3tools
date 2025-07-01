@@ -90,12 +90,17 @@ std::string findArgument(const std::vector<std::string>& args,
     size_t argCount = 1;
 
     for (size_t i = 1; i < args.size(); i++) {
-        if (args[i][0] != '-') {
-            if (argCount == argNumber) {
-                return args[i];
-            }
-            argCount++;
+        if (args[i][0] == '-') {
+            //if there is a flag preceding the argument, it would be
+            //a complex procedure to determine whether the argument is part of
+            //that flag or not, so we avoid that case altogether
+            break;
         }
+
+        if (argCount == argNumber) {
+            return args[i];
+        }
+        argCount++;
     }
 
     return std::string {};
