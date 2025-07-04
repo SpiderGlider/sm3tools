@@ -43,33 +43,6 @@ FileType getFileType(const std::string_view filePath) {
     return FileType::unknown;
 }
 
-const std::string& findInputFileArg(const std::vector<std::string>& args) {
-    assert(!args.empty());
-
-    for (size_t i = 1; i < args.size(); i++) {
-        if (args[i] == "--input" || args[i] == "-i") {
-            if ((i+1) < args.size()) {
-                return args[i+1];
-            }
-            std::cerr << "ERROR: Input flag was passed, "
-                    "but no input file was specified!\n";
-        }
-    }
-    return args[1];
-}
-
-std::vector<size_t> findFlagIndexes(const std::vector<std::string>& args) {
-    assert(!args.empty());
-    std::vector<size_t> flagIndexes {};
-
-    for (size_t i = 1; i < args.size(); i++) {
-        if (args[i][0] == '-') {
-            flagIndexes.push_back(i);
-        }
-    }
-    return flagIndexes;
-}
-
 bool checkFlagPresent(const std::vector<std::string>& args,
     const std::string_view flagName,
     const std::string_view flagAltName) {
