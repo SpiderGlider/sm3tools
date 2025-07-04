@@ -38,10 +38,6 @@ FileType getFileType(std::string_view filePath);
 //Prints usage information to stdout
 void printHelp();
 
-//finds the input file path from the program arguments.
-//if the -i flag isn't passed, we assume that the file path is the 1st argument.
-const std::string& findInputFileArg(const std::vector<std::string>& args);
-
 // program options, which are decided depending on the flags the user passes
 struct Options {
     bool help { false };
@@ -51,6 +47,45 @@ struct Options {
     FileType inputFileType { FileType::unknown };
     std::string replaceFilePath {};
 };
+
+//checks if a flag (either flagName or flagAltName) was passed at least once.
+//flagAltName is a parameter so that you can check if either the short
+//or long form of a flag was passed.
+//flagName and flagAltName are case-sensitive.
+bool checkFlagPresent(const std::vector<std::string>& args,
+    const std::string_view flagName,
+    const std::string_view flagAltName);
+
+//find a positional argument by its arg number (starting from 1 for the first).
+//for complexity reasons this does not include flags, and only arguments
+//up until (but not including) the first flag are counted.
+//returns the argument by value. if the argument is not found an empty
+//string is returned.
+std::string getArgument(const std::vector<std::string>& args,
+    const size_t argNumber);
+
+//looks for a value that was passed with the flag (either flagName or flagAltName).
+//flagAltName is a parameter so that you can check if either the short
+//or long form of a flag was passed.
+//flagName and flagAltName are case-sensitive.
+//if no value was passed with the flag or if the flag hasn't been passed at all
+//an empty string is returned.
+std::string getFlagValue(const std::vector<std::string>& args,
+    const std::string_view flagName,
+    const std::string_view flagAltName);
+
+//wrapper function that aims to look for an argument which can be passed either
+//as the value to a flag or as a positional argument (before any flags are passed).
+//first the value to the flag (flagName or flagAltName) is checked, then if not found.
+//the arg position argAltNumber is checked.
+//flagAltName is a parameter so that you can check if either the short
+//or long form of a flag was passed.
+//flagName and flagAltName are case-sensitive.
+//if not found as either, an empty string is returned.
+std::string getArgOrFlagValue(const std::vector<std::string>& args,
+    const std::string_view flagName,
+    const std::string_view flagAltName,
+    const size_t argAltNumber);
 
 // parses program arguments to find any flags that are passed and construct
 // the program options struct

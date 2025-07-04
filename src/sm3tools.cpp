@@ -55,7 +55,7 @@ bool checkFlagPresent(const std::vector<std::string>& args,
     return false;
 }
 
-std::string findArgument(const std::vector<std::string>& args,
+std::string getArgument(const std::vector<std::string>& args,
     const size_t argNumber) {
 
     assert(!args.empty());
@@ -79,7 +79,7 @@ std::string findArgument(const std::vector<std::string>& args,
     return std::string {};
 }
 
-std::string getFlagArgument(const std::vector<std::string>& args,
+std::string getFlagValue(const std::vector<std::string>& args,
     const std::string_view flagName,
     const std::string_view flagAltName) {
 
@@ -97,17 +97,17 @@ std::string getFlagArgument(const std::vector<std::string>& args,
     return std::string {};
 }
 
-std::string getArgument(const std::vector<std::string>& args,
+std::string getArgOrFlagValue(const std::vector<std::string>& args,
     const std::string_view flagName,
     const std::string_view flagAltName,
     const size_t argAltNumber) {
 
     assert(!args.empty());
 
-    std::string flagArgument = getFlagArgument(args, flagName, flagAltName);
+    std::string flagArgument = getFlagValue(args, flagName, flagAltName);
 
     if (flagArgument.empty()) {
-        return findArgument(args, argAltNumber);
+        return getArgument(args, argAltNumber);
     }
 
     return flagArgument;
@@ -119,9 +119,9 @@ Options parseFlags(const std::vector<std::string>& args) {
     const bool help { checkFlagPresent(args, "--help", "-h") };
     const bool list { checkFlagPresent(args, "--list", "-l") };
     const bool verbose = { checkFlagPresent(args, "--verbose", "-v") };
-    const std::string inputFilePath { getArgument(args, "--input", "-i", 1) };
+    const std::string inputFilePath { getArgOrFlagValue(args, "--input", "-i", 1) };
     const FileType inputFileType { getFileType(inputFilePath) };
-    const std::string replaceFilePath { getArgument(args, "--replace", "-r", 2)};
+    const std::string replaceFilePath { getArgOrFlagValue(args, "--replace", "-r", 2)};
 
     return { help, list, verbose, inputFilePath, inputFileType, replaceFilePath };
 }
