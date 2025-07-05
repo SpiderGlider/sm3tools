@@ -287,15 +287,10 @@ void readAndWriteToNewFile(
 
     //store bytes from input in intermediate buffer
     //(plus one extra byte for null terminator)
-    //NOTE: we use calloc here to ensure that the bytes of the buffer that don't get read to
+    //NOTE: buffer is initialized to 0 to ensure that the bytes of the it that don't get read to
     // can still be written to the file as "zero padding" if padWithZeroes is enabled.
-    char *const buffer { static_cast<char *>(std::calloc(readCount + 1, sizeof(char))) };
+    char *const buffer { new char[readCount + 1]{} };
     {
-        if (buffer == nullptr) {
-            std::cerr << "ERROR: Failed to allocate memory!\n";
-            std::exit(EXIT_FAILURE);
-        }
-
         std::FILE *const inputFileHandle { MyIO::fopen(inputFileName.c_str(), "rb") };
         {
             MyIO::fseekunsigned(inputFileHandle, readPosition, SEEK_SET);
@@ -323,7 +318,7 @@ void readAndWriteToNewFile(
         }
         (void) std::fclose(inputFileHandle);
     }
-    std::free(buffer);
+    delete[] buffer;
 }
 
 void replaceLongInFile(
