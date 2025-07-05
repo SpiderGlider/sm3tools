@@ -138,7 +138,6 @@ void pcssbMain(const Options& options) {
     if (options.list) {
         std::cout << "INFO: Listing FSBs in " << options.inputFilePath << '\n';
         printFSBHeaderIndexes(options.inputFilePath);
-        std::exit(EXIT_SUCCESS);
     }
     else if (!options.replaceFilePath.empty()) {
          std::cout << "Replacing " << options.replaceFilePath << " in " << options.inputFilePath << '\n';
