@@ -140,13 +140,13 @@ void pcssbMain(const Options& options) {
         printFSBHeaderIndexes(options.inputFilePath);
         std::exit(EXIT_SUCCESS);
     }
-    if (false) {
-        std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
-        outputAudioFiles(options.inputFilePath);
-    }
     else if (!options.replaceFilePath.empty()) {
          std::cout << "Replacing " << options.replaceFilePath << " in " << options.inputFilePath << '\n';
          replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath);
+    }
+    else {
+        std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
+        outputAudioFiles(options.inputFilePath);
     }
 }
 
