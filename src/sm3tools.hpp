@@ -91,4 +91,7 @@ std::string getArgOrFlagValue(const std::vector<std::string>& args,
 // the program options struct
 Options parseFlags(const std::vector<std::string>& args);
 
+// performs operations on a PCSSB file using the specified program options
+void pcssbMain(const Options& options);
+
 #endif
