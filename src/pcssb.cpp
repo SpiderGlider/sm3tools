@@ -168,13 +168,8 @@ void outputAudioData(
     assert(!inputFileName.empty());
     assert(!outputFileName.empty());
 
-    char *const audioData { static_cast<char *>(std::malloc(dataSize * sizeof(char))) };
+    char *const audioData { new char[dataSize] };
     {
-        if (audioData == nullptr) {
-            std::cerr << "ERROR: Failed to allocate memory!\n";
-            std::exit(EXIT_FAILURE);
-        }
-
         std::FILE *const inputFileHandle { MyIO::fopen(inputFileName.c_str(), "rb") };
         {
             //set the file position indicator to start of FSB file
@@ -194,7 +189,7 @@ void outputAudioData(
         }
         (void) std::fclose(outputFileHandle);
     }
-    std::free(audioData);
+    delete[] audioData;
 }
 
 void outputAudioFiles(const std::string& inputFileName) {
@@ -357,13 +352,8 @@ void replaceAudioinPCSSB(
     //TODO use a better output format
     const std::size_t outputFilePathSize { (std::strlen(pcssbFilePath.c_str()) + sizeof("-mod"))
         * sizeof(char) };
-    char *const outputFilePath { static_cast<char *>(std::malloc(outputFilePathSize)) };
+    char *const outputFilePath { new char[outputFilePathSize] };
     {
-        if (outputFilePath == nullptr) {
-            std::cerr << "ERROR: Failed to allocate memory!\n";
-            std::exit(EXIT_FAILURE);
-        }
-
         //generate output file name
         (void) std::snprintf(outputFilePath, outputFilePathSize, "%s-mod", pcssbFilePath.c_str());
 
@@ -422,6 +412,6 @@ void replaceAudioinPCSSB(
             in practise the game just ignores the null bytes and the original audio
             in some of the FSBs is formatted the same way anyway. */
     }
-    std::free(outputFilePath);
+   delete[] outputFilePath;
 }
 
