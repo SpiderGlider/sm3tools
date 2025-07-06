@@ -104,6 +104,7 @@ std::string getArgOrFlagValue(const std::vector<std::string>& args,
 
     assert(!args.empty());
 
+    //this being const would prevent automatic move
     std::string flagArgument = getFlagValue(args, flagName, flagAltName);
 
     if (flagArgument.empty()) {
@@ -122,8 +123,9 @@ Options parseFlags(const std::vector<std::string>& args) {
     const std::string inputFilePath { getArgOrFlagValue(args, "--input", "-i", 1) };
     const FileType inputFileType { getFileType(inputFilePath) };
     const std::string replaceFilePath { getArgOrFlagValue(args, "--replace", "-r", 2)};
+    const std::string outputDirectory { getFlagValue(args, "--out", "-o") };
 
-    return { help, list, verbose, inputFilePath, inputFileType, replaceFilePath };
+    return { help, list, verbose, inputFilePath, inputFileType, replaceFilePath, outputDirectory };
 }
 
 void printHelp() {
@@ -145,7 +147,12 @@ void pcssbMain(const Options& options) {
     }
     else {
         std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
-        outputAudioFiles(options.inputFilePath);
+        if (options.outputDirectory.empty()) {
+            outputAudioFiles(options.inputFilePath, "/out");
+        }
+        else {
+            outputAudioFiles(options.inputFilePath, options.outputDirectory);
+        }
     }
 }
 

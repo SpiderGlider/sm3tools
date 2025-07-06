@@ -192,7 +192,7 @@ void outputAudioData(
     delete[] audioData;
 }
 
-void outputAudioFiles(const std::string& inputFileName) {
+void outputAudioFiles(const std::string& inputFileName, const std::string_view outputDirectory) {
     assert(!inputFileName.empty());
 
     const std::vector<std::size_t> fsbIndexes { findFSBIndexes(inputFileName) };
@@ -209,13 +209,13 @@ void outputAudioFiles(const std::string& inputFileName) {
     std::ostringstream stringStream {};
     //create /out directory
     //TODO does this work on windows? (or should we use replace_filename() instead)?
-    stringStream << parentPath.string() << "/out/";
+    stringStream << parentPath.string() << outputDirectory;
     MyIO::mkdir(stringStream.str().c_str());
 
     //create directory for the PCSSB file within /out
     stringStream << fileName.string();
-    const std::string outputDirectory { stringStream.str() };
-    MyIO::mkdir(outputDirectory.c_str());
+    const std::string outputDirectoryPath { stringStream.str() };
+    MyIO::mkdir(outputDirectoryPath.c_str());
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
@@ -238,7 +238,7 @@ void outputAudioFiles(const std::string& inputFileName) {
             outputPath,
             OUTPUT_PATH_SIZE,
             "%s/%s",
-            outputDirectory.c_str(),
+            outputDirectoryPath.c_str(),
             fsbFileName.c_str());
         outputAudioData(
             inputFileName,

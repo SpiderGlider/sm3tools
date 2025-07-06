@@ -46,6 +46,7 @@ struct Options {
     std::string inputFilePath {};
     FileType inputFileType { FileType::unknown };
     std::string replaceFilePath {};
+    std::string outputDirectory {};
 };
 
 //checks if a flag (either flagName or flagAltName) was passed at least once.
