@@ -207,13 +207,15 @@ void outputAudioFiles(const std::string& inputFileName, const std::string_view o
     const std::filesystem::path parentPath { inputFileNamePath.parent_path() };
 
     std::ostringstream stringStream {};
-    //create /out directory
-    //TODO does this work on windows? (or should we use replace_filename() instead)?
-    stringStream << parentPath.string() << outputDirectory;
+    //create output directory
+    stringStream << outputDirectory;
     MyIO::mkdir(stringStream.str().c_str());
 
-    //create directory for the PCSSB file within /out
-    stringStream << fileName.string();
+    //create directory for the PCSSB file within the output directory
+    //NOTE: if output directory already has a / at the end, it shouldn't matter
+    //because repeated directory separators are treated the same as a single one
+    //TODO: test on windows if user inputs a directory with \ at the end
+    stringStream << '/' << fileName.string();
     const std::string outputDirectoryPath { stringStream.str() };
     MyIO::mkdir(outputDirectoryPath.c_str());
 
