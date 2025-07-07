@@ -194,17 +194,12 @@ void outputAudioData(
 
 std::string createPCSSBOutputDirectory(const std::string_view fileName, const std::string_view outDirectory) {
     std::ostringstream stringStream {};
-    //make sure output directory is created
-    stringStream << outDirectory;
-    MyIO::mkdir(stringStream.str().c_str());
-
-    //create directory for the PCSSB file within the output directory
-    //NOTE: if output directory already has a / at the end, it shouldn't matter
+    //NOTE: if out directory already has a / at the end, it shouldn't matter
     //because repeated directory separators are treated the same as a single one
     //TODO: test on windows if user inputs a directory with \ at the end
-    stringStream << '/' << fileName;
+    stringStream << outDirectory << '/' << fileName;
     const std::string outputDirectoryPath { stringStream.str() };
-    MyIO::mkdir(outputDirectoryPath.c_str());
+    std::filesystem::create_directories(outputDirectoryPath);
 
     return outputDirectoryPath;
 }
