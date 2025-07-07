@@ -192,6 +192,23 @@ void outputAudioData(
     delete[] audioData;
 }
 
+std::string createPCSSBOutputDirectory(const std::string_view fileName, const std::string_view outDirectory) {
+    std::ostringstream stringStream {};
+    //make sure output directory is created
+    stringStream << outDirectory;
+    MyIO::mkdir(stringStream.str().c_str());
+
+    //create directory for the PCSSB file within the output directory
+    //NOTE: if output directory already has a / at the end, it shouldn't matter
+    //because repeated directory separators are treated the same as a single one
+    //TODO: test on windows if user inputs a directory with \ at the end
+    stringStream << '/' << fileName;
+    const std::string outputDirectoryPath { stringStream.str() };
+    MyIO::mkdir(outputDirectoryPath.c_str());
+
+    return outputDirectoryPath;
+}
+
 void outputAudioFiles(const std::string& inputFileName, const std::string_view outputDirectory) {
     assert(!inputFileName.empty());
 
@@ -200,24 +217,10 @@ void outputAudioFiles(const std::string& inputFileName, const std::string_view o
     const std::filesystem::path inputFileNamePath = { inputFileName };
 
     const std::filesystem::path fileName { inputFileNamePath.filename() };
-    if (fileName.empty()) {
-        std::cerr << "ERROR: Input file doesn't have a file extension!\n";
-        std::exit(EXIT_FAILURE);
-    }
-    const std::filesystem::path parentPath { inputFileNamePath.parent_path() };
+    //case where file has no file extension is checked in sm3tools.cpp
+    assert(!fileName.empty());
 
-    std::ostringstream stringStream {};
-    //create output directory
-    stringStream << outputDirectory;
-    MyIO::mkdir(stringStream.str().c_str());
-
-    //create directory for the PCSSB file within the output directory
-    //NOTE: if output directory already has a / at the end, it shouldn't matter
-    //because repeated directory separators are treated the same as a single one
-    //TODO: test on windows if user inputs a directory with \ at the end
-    stringStream << '/' << fileName.string();
-    const std::string outputDirectoryPath { stringStream.str() };
-    MyIO::mkdir(outputDirectoryPath.c_str());
+    const std::string outputDirectoryPath { createPCSSBOutputDirectory(fileName.string(), outputDirectory) };
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.

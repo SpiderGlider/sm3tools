@@ -148,7 +148,7 @@ void pcssbMain(const Options& options) {
     else {
         std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
         if (options.outputDirectory.empty()) {
-            outputAudioFiles(options.inputFilePath, "/out");
+            outputAudioFiles(options.inputFilePath, "./out");
         }
         else {
             outputAudioFiles(options.inputFilePath, options.outputDirectory);
