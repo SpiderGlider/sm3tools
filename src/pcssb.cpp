@@ -192,15 +192,13 @@ void outputAudioData(
     delete[] audioData;
 }
 
-std::string createPCSSBOutputDirectory(const std::string_view fileName, const std::string_view outDirectory) {
+std::string constructOutputDirectoryPath(const std::string_view fileName, const std::string_view outDirectory) {
     std::ostringstream stringStream {};
     //NOTE: if out directory already has a / at the end, it shouldn't matter
     //because repeated directory separators are treated the same as a single one
     //TODO: test on windows if user inputs a directory with \ at the end
     stringStream << outDirectory << '/' << fileName;
     const std::string outputDirectoryPath { stringStream.str() };
-    std::filesystem::create_directories(outputDirectoryPath);
-
     return outputDirectoryPath;
 }
 
@@ -215,7 +213,9 @@ void outputAudioFiles(const std::string& inputFileName, const std::string_view o
     //case where file has no file extension is checked in sm3tools.cpp
     assert(!fileName.empty());
 
-    const std::string outputDirectoryPath { createPCSSBOutputDirectory(fileName.string(), outputDirectory) };
+    const std::string outputDirectoryPath { constructOutputDirectoryPath(fileName.string(), outputDirectory) };
+
+    std::filesystem::create_directories(outputDirectoryPath);
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
