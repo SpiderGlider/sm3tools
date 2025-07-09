@@ -192,16 +192,6 @@ void outputAudioData(
     delete[] audioData;
 }
 
-std::string constructOutputDirectoryPath(const std::string_view fileName, const std::string_view outDirectory) {
-    std::ostringstream stringStream {};
-    //NOTE: if out directory already has a / at the end, it shouldn't matter
-    //because repeated directory separators are treated the same as a single one
-    //TODO: test on windows if user inputs a directory with \ at the end
-    stringStream << outDirectory << '/' << fileName;
-    const std::string outputDirectoryPath { stringStream.str() };
-    return outputDirectoryPath;
-}
-
 void outputAudioFiles(const std::string& inputFileName, const std::string_view outputDirectory) {
     assert(!inputFileName.empty());
 
@@ -213,7 +203,7 @@ void outputAudioFiles(const std::string& inputFileName, const std::string_view o
     //case where file has no file extension is checked in sm3tools.cpp
     assert(!fileName.empty());
 
-    const std::string outputDirectoryPath { constructOutputDirectoryPath(fileName.string(), outputDirectory) };
+    const std::filesystem::path outputDirectoryPath { outputDirectory / fileName };
 
     std::filesystem::create_directories(outputDirectoryPath);
 
@@ -232,20 +222,14 @@ void outputAudioFiles(const std::string& inputFileName, const std::string_view o
         const std::string fsbFileName = readFileName(inputFileName, fsbIndexes[i]);
 
         //create path with file fsbFileName inside the output directory
-        constexpr int OUTPUT_PATH_SIZE { 300 };
-        char outputPath[OUTPUT_PATH_SIZE] {};
-        (void) std::snprintf(
-            outputPath,
-            OUTPUT_PATH_SIZE,
-            "%s/%s",
-            outputDirectoryPath.c_str(),
-            fsbFileName.c_str());
+        std::filesystem::path outputPath { outputDirectoryPath / fsbFileName };
+
         outputAudioData(
             inputFileName,
             fsbIndexes[i],
             FSB_HEADER_SIZE,
             fsbDataSize,
-            outputPath);
+            outputPath.string());
     }
 }
 
