@@ -221,15 +221,14 @@ void outputAudioFiles(const std::string& inputFileName, const std::string_view o
         }
         const std::string fsbFileName = readFileName(inputFileName, fsbIndexes[i]);
 
-        //create path with file fsbFileName inside the output directory
-        std::filesystem::path outputPath { outputDirectoryPath / fsbFileName };
+        std::filesystem::path outputAudioFilePath { outputDirectoryPath / fsbFileName };
 
         outputAudioData(
             inputFileName,
             fsbIndexes[i],
             FSB_HEADER_SIZE,
             fsbDataSize,
-            outputPath.string());
+            outputAudioFilePath.string());
     }
 }
 
