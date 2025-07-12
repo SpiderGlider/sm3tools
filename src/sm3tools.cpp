@@ -140,11 +140,14 @@ void printHelp() {
 std::string constructOutputPathFromInput(const std::string& inputFilePath) {
     std::ostringstream strStream{};
     const std::filesystem::path inputFSPath { inputFilePath };
+    //construct output file name
     strStream 
         << inputFSPath.stem().string()
         << "-mod" 
         << inputFSPath.extension().string();
     const std::string outputFileName { strStream.str() };
+    //output in the same directory as the input file
+    //TODO should it output in ./out instead?
     return (inputFSPath.parent_path() / outputFileName).string();
 }
 
@@ -156,6 +159,7 @@ void pcssbMain(const Options& options) {
     else if (!options.replaceFilePath.empty()) {
          std::cout << "Replacing " << options.replaceFilePath << " in " << options.inputFilePath << '\n';
          if (options.outputPath.empty()) {
+             //default output path (input file name with -mod at the end of it, in the same directory)
              replaceAudioinPCSSB(
                  options.inputFilePath, 
                  options.replaceFilePath, 
