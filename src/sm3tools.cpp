@@ -141,11 +141,11 @@ std::string constructOutputPathFromInput(const std::string& inputFilePath) {
     std::ostringstream strStream{};
     const std::filesystem::path inputFSPath { inputFilePath };
     strStream 
-        << inputFSPath.filename().string()
+        << inputFSPath.stem().string()
         << "-mod" 
         << inputFSPath.extension().string();
-    const std::string outputFileName{ strStream.str() };
-    return std::filesystem::path(inputFSPath.parent_path() / outputFileName).string();
+    const std::string outputFileName { strStream.str() };
+    return (inputFSPath.parent_path() / outputFileName).string();
 }
 
 void pcssbMain(const Options& options) {
@@ -161,7 +161,9 @@ void pcssbMain(const Options& options) {
                  options.replaceFilePath, 
                  constructOutputPathFromInput(options.inputFilePath));
          }
-         replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath, options.outputPath);
+         else {
+             replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath, options.outputPath);
+         }
     }
     else {
         std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
