@@ -22,6 +22,7 @@
 #include <iostream>
 #include <filesystem>
 #include <vector>
+#include <sstream>
 
 #include <cassert>
 #include <cstdlib>
@@ -123,9 +124,9 @@ Options parseFlags(const std::vector<std::string>& args) {
     const std::string inputFilePath { getArgOrFlagValue(args, "--input", "-i", 1) };
     const FileType inputFileType { getFileType(inputFilePath) };
     const std::string replaceFilePath { getArgOrFlagValue(args, "--replace", "-r", 2)};
-    const std::string outputDirectory { getFlagValue(args, "--out", "-o") };
+    const std::string outputPath { getFlagValue(args, "--out", "-o") };
 
-    return { help, list, verbose, inputFilePath, inputFileType, replaceFilePath, outputDirectory };
+    return { help, list, verbose, inputFilePath, inputFileType, replaceFilePath, outputPath };
 }
 
 void printHelp() {
@@ -136,6 +137,17 @@ void printHelp() {
         "the file with the same name.\n";
 }
 
+std::string constructOutputPathFromInput(const std::string& inputFilePath) {
+    std::ostringstream strStream{};
+    std::filesystem::path inputFSPath { inputFilePath };
+    strStream 
+        << inputFSPath.parent_path() 
+        << inputFSPath.filename() 
+        << "-mod" 
+        << inputFSPath.extension();
+    return strStream.str();
+}
+
 void pcssbMain(const Options& options) {
     if (options.list) {
         std::cout << "INFO: Listing FSBs in " << options.inputFilePath << '\n';
@@ -143,15 +155,21 @@ void pcssbMain(const Options& options) {
     }
     else if (!options.replaceFilePath.empty()) {
          std::cout << "Replacing " << options.replaceFilePath << " in " << options.inputFilePath << '\n';
-         replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath, options.outputDirectory);
+         if (options.outputPath.empty()) {
+             replaceAudioinPCSSB(
+                 options.inputFilePath, 
+                 options.replaceFilePath, 
+                 constructOutputPathFromInput(options.inputFilePath));
+         }
+         replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath, options.outputPath);
     }
     else {
         std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
-        if (options.outputDirectory.empty()) {
+        if (options.outputPath.empty()) {
             outputAudioFiles(options.inputFilePath, "./out");
         }
         else {
-            outputAudioFiles(options.inputFilePath, options.outputDirectory);
+            outputAudioFiles(options.inputFilePath, options.outputPath);
         }
     }
 }

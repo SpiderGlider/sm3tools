@@ -46,7 +46,7 @@ struct Options {
     std::string inputFilePath {};
     FileType inputFileType { FileType::unknown };
     std::string replaceFilePath {};
-    std::string outputDirectory {};
+    std::string outputPath {};
 };
 
 //checks if a flag (either flagName or flagAltName) was passed at least once.
@@ -91,6 +91,8 @@ std::string getArgOrFlagValue(const std::vector<std::string>& args,
 // parses program arguments to find any flags that are passed and construct
 // the program options struct
 Options parseFlags(const std::vector<std::string>& args);
+
+std::string constructOutputPathFromInput(const std::string& inputFilePath);
 
 // performs operations on a PCSSB file using the specified program options
 void pcssbMain(const Options& options);
