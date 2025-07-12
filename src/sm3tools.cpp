@@ -139,13 +139,13 @@ void printHelp() {
 
 std::string constructOutputPathFromInput(const std::string& inputFilePath) {
     std::ostringstream strStream{};
-    std::filesystem::path inputFSPath { inputFilePath };
+    const std::filesystem::path inputFSPath { inputFilePath };
     strStream 
-        << inputFSPath.parent_path() 
-        << inputFSPath.filename() 
+        << inputFSPath.filename().string()
         << "-mod" 
-        << inputFSPath.extension();
-    return strStream.str();
+        << inputFSPath.extension().string();
+    const std::string outputFileName{ strStream.str() };
+    return std::filesystem::path(inputFSPath.parent_path() / outputFileName).string();
 }
 
 void pcssbMain(const Options& options) {
