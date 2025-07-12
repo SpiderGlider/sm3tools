@@ -108,12 +108,12 @@ constexpr int FSB_HEADER_SIZE { 104 };
 //uses the filename of the file pointed to by replaceFilePath to find the relevant
 //FSB that has a matching filename field. then replaces the audio data
 //in that FSB with the contents of the file at replaceFilePath
-//into a new file that has the filename of the file
-//pointed to by pcssbFilePath but with "-mod" appended
-//to the end.
+//into the file at outputFilePath. Creates the file if it does not exist, replaces
+//it if it does exist.
 void replaceAudioinPCSSB(
     const std::string& pcssbFilePath,
-    const std::string& replaceFilePath);
+    const std::string& replaceFilePath,
+    const std::string& outputFilePath);
 
 //Writes the audio data from an FSB file into a file with file name = outputFileName
 //NOTE: overwrites file if it already exists.

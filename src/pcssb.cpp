@@ -328,73 +328,62 @@ void replaceLongInFile(
 
 void replaceAudioinPCSSB(
     const std::string& pcssbFilePath,
-    const std::string& replaceFilePath) {
+    const std::string& replaceFilePath,
+    const std::string& outputFilePath) {
 
-    //length of output path including null terminator
-    //- byte for null terminator is included in sizeof("-mod")
-    //TODO use a better output format
-    const std::size_t outputFilePathSize { (std::strlen(pcssbFilePath.c_str()) + sizeof("-mod"))
-        * sizeof(char) };
-    char *const outputFilePath { new char[outputFilePathSize] };
-    {
-        //generate output file name
-        (void) std::snprintf(outputFilePath, outputFilePathSize, "%s-mod", pcssbFilePath.c_str());
+    //find audio file in PCSSB using its filename (including file extension but excluding path)
+    //NOTE: we convert paths into strings first instead of using c_str() directly because the former
+    //paths have a value type of wchar_t on windows and we need multi byte char c style strings.
+    const std::string audioFileName { std::filesystem::path{replaceFilePath}.filename().string() };
 
-        //find audio file in PCSSB using its filename (including file extension but excluding path)
-        //NOTE: we convert paths into strings first instead of using c_str() directly because the former
-        //paths have a value type of wchar_t on windows and we need multi byte char c style strings.
-        const std::string audioFileName { std::filesystem::path{replaceFilePath}.filename().string()};
+    const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName);
+    const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
+    const std::intmax_t replaceDataSize = MyIO::getfilesize(replaceFilePath.c_str());
 
-        const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName);
-        const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
-        const std::intmax_t replaceDataSize = MyIO::getfilesize(replaceFilePath.c_str());
-
-        if (static_cast<std::size_t>(replaceDataSize) > originalDataSize) {
-            std::cerr << "ERROR: Given replacement audio has a larger file size than the original. "
-                         "Inserting it into the PCSSB would result in undesirable side effects. Aborting.\n";
-            std::exit(EXIT_FAILURE);
-        }
-
-        //TODO could trim metadata from the replacement audio
-
-        const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-        //write everything up to the existing audio data into the output files
-        readAndWriteToNewFile(
-            pcssbFilePath,
-            outputFilePath,
-            fsbAudioDataIndex,
-            0,
-            false,
-            false);
-
-        //append the replacement audio data into the output file
-        readAndWriteToNewFile(
-            replaceFilePath,
-            outputFilePath,
-            originalDataSize,
-            0,
-            true,
-            true);
-
-        //append the rest of the original file after the audio data
-        readAndWriteToNewFile(
-            pcssbFilePath,
-            outputFilePath,
-            //NOTE: this will overflow but it shouldn't matter
-            //ensures all the bytes after from original file is read
-            static_cast<std::size_t>(MyIO::getfilesize(pcssbFilePath.c_str())),
-            fsbAudioDataIndex + originalDataSize,
-            true,
-            false);
-
-        /* NOTE: we currently don't modify the data size field in the FSB because
-            we only insert the replacement audio when it is smaller than
-            or the same size as the original. in the former case, we use 00 for the
-            remaining bytes - while technically they aren't really part of the audio
-            so the value of the data size field won't actually be representative,
-            in practise the game just ignores the null bytes and the original audio
-            in some of the FSBs is formatted the same way anyway. */
+    if (static_cast<std::size_t>(replaceDataSize) > originalDataSize) {
+        std::cerr << "ERROR: Given replacement audio has a larger file size than the original. "
+                        "Inserting it into the PCSSB would result in undesirable side effects. Aborting.\n";
+        std::exit(EXIT_FAILURE);
     }
-   delete[] outputFilePath;
+
+    //TODO could trim metadata from the replacement audio
+
+    const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
+    //write everything up to the existing audio data into the output files
+    readAndWriteToNewFile(
+        pcssbFilePath,
+        outputFilePath,
+        fsbAudioDataIndex,
+        0,
+        false,
+        false);
+
+    //append the replacement audio data into the output file
+    readAndWriteToNewFile(
+        replaceFilePath,
+        outputFilePath,
+        originalDataSize,
+        0,
+        true,
+        true);
+
+    //append the rest of the original file after the audio data
+    readAndWriteToNewFile(
+        pcssbFilePath,
+        outputFilePath,
+        //NOTE: this will overflow but it shouldn't matter
+        //ensures all the bytes after from original file is read
+        static_cast<std::size_t>(MyIO::getfilesize(pcssbFilePath.c_str())),
+        fsbAudioDataIndex + originalDataSize,
+        true,
+        false);
+
+    /* NOTE: we currently don't modify the data size field in the FSB because
+        we only insert the replacement audio when it is smaller than
+        or the same size as the original. in the former case, we use 00 for the
+        remaining bytes - while technically they aren't really part of the audio
+        so the value of the data size field won't actually be representative,
+        in practise the game just ignores the null bytes and the original audio
+        in some of the FSBs is formatted the same way anyway. */
 }
 

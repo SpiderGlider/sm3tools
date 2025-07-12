@@ -143,7 +143,7 @@ void pcssbMain(const Options& options) {
     }
     else if (!options.replaceFilePath.empty()) {
          std::cout << "Replacing " << options.replaceFilePath << " in " << options.inputFilePath << '\n';
-         replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath);
+         replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath, options.outputDirectory);
     }
     else {
         std::cout << "INFO: Extracting audio from " << options.inputFilePath << '\n';
