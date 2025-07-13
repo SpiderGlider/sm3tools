@@ -122,11 +122,10 @@ Options parseFlags(const std::vector<std::string>& args) {
     const bool list { checkFlagPresent(args, "--list", "-l") };
     const bool verbose = { checkFlagPresent(args, "--verbose", "-v") };
     const std::string inputFilePath { getArgOrFlagValue(args, "--input", "-i", 1) };
-    const FileType inputFileType { getFileType(inputFilePath) };
     const std::string replaceFilePath { getArgOrFlagValue(args, "--replace", "-r", 2)};
     const std::string outputPath { getFlagValue(args, "--out", "-o") };
 
-    return { help, list, verbose, inputFilePath, inputFileType, replaceFilePath, outputPath };
+    return { help, list, verbose, inputFilePath, replaceFilePath, outputPath };
 }
 
 void printHelp() {
@@ -207,7 +206,7 @@ int main(const int argc, const char *const argv[]) {
         return EXIT_FAILURE;
     }
 
-    switch (options.inputFileType) {
+    switch (getFileType(options.inputFilePath)) {
         case FileType::none:
             std::cerr << "ERROR: Argument doesn't have a file extension."
                                 " Are you sure this is a path to a file?\n";
@@ -221,9 +220,11 @@ int main(const int argc, const char *const argv[]) {
         case FileType::pcssb:
             std::cout << "INFO: Parsing as a PCSSB file.\n";
             pcssbMain(options);
-            return EXIT_SUCCESS;
+            break;
         default:
             std::cerr << "ERROR: Unhandled FileType!";
             return EXIT_FAILURE;
     }
+
+    return EXIT_SUCCESS;
 }

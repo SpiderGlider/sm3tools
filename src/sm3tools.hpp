@@ -44,7 +44,6 @@ struct Options {
     bool list { false }; // whether to list files within the input archive and exit
     bool verbose { false }; // (UNUSED) whether to increase verbosity of output
     std::string inputFilePath {}; // path to an input file archive
-    FileType inputFileType { FileType::unknown }; // file type of the input file
     std::string replaceFilePath {}; // path to a file to replace within the input archive
     // either the output directory (if outputting contents of archive),
     // or the output file path (if modifying an archive)
