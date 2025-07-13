@@ -264,7 +264,7 @@ void readAndWriteToNewFile(
 
     //store bytes from input in intermediate buffer
     //(plus one extra byte for null terminator)
-    //NOTE: buffer is initialized to 0 to ensure that the bytes of the it that don't get read to
+    //NOTE: buffer is initialized to 0 to ensure that the bytes of it that don't get read to
     // can still be written to the file as "zero padding" if padWithZeroes is enabled.
     char *const buffer { new char[readCount + 1]{} };
     {
