@@ -92,6 +92,8 @@ std::string getArgOrFlagValue(const std::vector<std::string>& args,
 // the program options struct
 Options parseFlags(const std::vector<std::string>& args);
 
+// generates a default output file name given an input file.
+// adds "-mod" onto the end of the stem (i.e. before the file extension).
 std::string constructOutputPathFromInput(const std::string& inputFilePath);
 
 // performs operations on a PCSSB file using the specified program options

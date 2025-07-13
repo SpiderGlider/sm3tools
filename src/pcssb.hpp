@@ -125,7 +125,7 @@ void outputAudioData(
     const std::string& outputFileName);
 
 //Writes the audio data of all FSB files in a PCSSB into separate files.
-//output files are into outputDirectory, which is a relative path from where the PCSSB is located.
+//Written to a folder with the name being the input file name, in outputDirectory.
 //Assumes various things about the file that are likely only true for the Spider-Man 3
 //PC .PCSSB files. For example, each FSB file is partly duplicated so we don't output the duplicate.
 void outputAudioFiles(const std::string& inputFileName, std::string_view outputDirectory);
