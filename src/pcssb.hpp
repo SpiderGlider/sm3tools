@@ -108,12 +108,12 @@ constexpr int FSB_HEADER_SIZE { 104 };
 //uses the filename of the file pointed to by replaceFilePath to find the relevant
 //FSB that has a matching filename field. then replaces the audio data
 //in that FSB with the contents of the file at replaceFilePath
-//into a new file that has the filename of the file
-//pointed to by pcssbFilePath but with "-mod" appended
-//to the end.
+//into the file at outputFilePath. Creates the file if it does not exist, replaces
+//it if it does exist.
 void replaceAudioinPCSSB(
     const std::string& pcssbFilePath,
-    const std::string& replaceFilePath);
+    const std::string& replaceFilePath,
+    const std::string& outputFilePath);
 
 //Writes the audio data from an FSB file into a file with file name = outputFileName
 //NOTE: overwrites file if it already exists.
@@ -125,10 +125,10 @@ void outputAudioData(
     const std::string& outputFileName);
 
 //Writes the audio data of all FSB files in a PCSSB into separate files.
-//output files are stored in an /out directory from where the PCSSB is located.
+//Written to a folder that has the name of the input file, in outputDirectory.
 //Assumes various things about the file that are likely only true for the Spider-Man 3
 //PC .PCSSB files. For example, each FSB file is partly duplicated so we don't output the duplicate.
-void outputAudioFiles(const std::string& inputFileName);
+void outputAudioFiles(const std::string& inputFileName, std::string_view outputDirectory);
 
 //reads readCount bytes from input (starting from readPosition)
 //and writes those bytes to the output file

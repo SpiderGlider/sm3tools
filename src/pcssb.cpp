@@ -20,7 +20,6 @@
 #include "pcssb.hpp"
 
 #include <iostream>
-#include <sstream>
 #include <filesystem>
 #include <array>
 
@@ -150,12 +149,12 @@ std::string readFileName(
     (void) std::fclose(fileHandle);
     //NOTE: we add a null terminator manually
     //for the case that the file name is 30 bytes long.
-    //The std::string constructor probably doesn't need it
-    //because the length is passed in, but just for safety we
-    //include a null terminator anyway.
     buffer[FSB_FILENAME_SIZE] = '\0';
 
-    return { buffer.data(), FSB_FILENAME_SIZE };
+    //NOTE: we don't include the length in this constructor because
+    //that would tell it to include trailing null characters rather
+    //than stopping when it encounters the null terminator
+    return { buffer.data() };
 }
 
 void outputAudioData(
@@ -168,13 +167,8 @@ void outputAudioData(
     assert(!inputFileName.empty());
     assert(!outputFileName.empty());
 
-    char *const audioData { static_cast<char *>(std::malloc(dataSize * sizeof(char))) };
+    char *const audioData { new char[dataSize] };
     {
-        if (audioData == nullptr) {
-            std::cerr << "ERROR: Failed to allocate memory!\n";
-            std::exit(EXIT_FAILURE);
-        }
-
         std::FILE *const inputFileHandle { MyIO::fopen(inputFileName.c_str(), "rb") };
         {
             //set the file position indicator to start of FSB file
@@ -194,10 +188,10 @@ void outputAudioData(
         }
         (void) std::fclose(outputFileHandle);
     }
-    std::free(audioData);
+    delete[] audioData;
 }
 
-void outputAudioFiles(const std::string& inputFileName) {
+void outputAudioFiles(const std::string& inputFileName, const std::string_view outputDirectory) {
     assert(!inputFileName.empty());
 
     const std::vector<std::size_t> fsbIndexes { findFSBIndexes(inputFileName) };
@@ -205,22 +199,12 @@ void outputAudioFiles(const std::string& inputFileName) {
     const std::filesystem::path inputFileNamePath = { inputFileName };
 
     const std::filesystem::path fileName { inputFileNamePath.filename() };
-    if (fileName.empty()) {
-        std::cerr << "ERROR: Input file doesn't have a file extension!\n";
-        std::exit(EXIT_FAILURE);
-    }
-    const std::filesystem::path parentPath { inputFileNamePath.parent_path() };
+    //case where file has no file extension is checked in sm3tools.cpp
+    assert(!fileName.empty());
 
-    std::ostringstream stringStream {};
-    //create /out directory
-    //TODO does this work on windows? (or should we use replace_filename() instead)?
-    stringStream << parentPath.string() << "/out/";
-    MyIO::mkdir(stringStream.str().c_str());
+    const std::filesystem::path outputDirectoryPath { outputDirectory / fileName };
 
-    //create directory for the PCSSB file within /out
-    stringStream << fileName.string();
-    const std::string outputDirectory { stringStream.str() };
-    MyIO::mkdir(outputDirectory.c_str());
+    std::filesystem::create_directories(outputDirectoryPath);
 
     //we only look at the alternate found FSBs
     //(1st, 3rd) etc. because each one is duplicated in the PCSSB archive.
@@ -236,21 +220,14 @@ void outputAudioFiles(const std::string& inputFileName) {
         }
         const std::string fsbFileName = readFileName(inputFileName, fsbIndexes[i]);
 
-        //create path with file fsbFileName inside the output directory
-        constexpr int OUTPUT_PATH_SIZE { 300 };
-        char outputPath[OUTPUT_PATH_SIZE] {};
-        (void) std::snprintf(
-            outputPath,
-            OUTPUT_PATH_SIZE,
-            "%s/%s",
-            outputDirectory.c_str(),
-            fsbFileName.c_str());
+        std::filesystem::path outputAudioFilePath { outputDirectoryPath / fsbFileName };
+
         outputAudioData(
             inputFileName,
             fsbIndexes[i],
             FSB_HEADER_SIZE,
             fsbDataSize,
-            outputPath);
+            outputAudioFilePath.string());
     }
 }
 
@@ -287,15 +264,10 @@ void readAndWriteToNewFile(
 
     //store bytes from input in intermediate buffer
     //(plus one extra byte for null terminator)
-    //NOTE: we use calloc here to ensure that the bytes of the buffer that don't get read to
+    //NOTE: buffer is initialized to 0 to ensure that the bytes of it that don't get read to
     // can still be written to the file as "zero padding" if padWithZeroes is enabled.
-    char *const buffer { static_cast<char *>(std::calloc(readCount + 1, sizeof(char))) };
+    char *const buffer { new char[readCount + 1]{} };
     {
-        if (buffer == nullptr) {
-            std::cerr << "ERROR: Failed to allocate memory!\n";
-            std::exit(EXIT_FAILURE);
-        }
-
         std::FILE *const inputFileHandle { MyIO::fopen(inputFileName.c_str(), "rb") };
         {
             MyIO::fseekunsigned(inputFileHandle, readPosition, SEEK_SET);
@@ -323,7 +295,7 @@ void readAndWriteToNewFile(
         }
         (void) std::fclose(inputFileHandle);
     }
-    std::free(buffer);
+    delete[] buffer;
 }
 
 void replaceLongInFile(
@@ -355,77 +327,62 @@ void replaceLongInFile(
 
 void replaceAudioinPCSSB(
     const std::string& pcssbFilePath,
-    const std::string& replaceFilePath) {
+    const std::string& replaceFilePath,
+    const std::string& outputFilePath) {
 
-    //length of output path including null terminator
-    //- byte for null terminator is included in sizeof("-mod")
-    const std::size_t outputFilePathSize { (std::strlen(pcssbFilePath.c_str()) + sizeof("-mod"))
-        * sizeof(char) };
-    char *const outputFilePath { static_cast<char *>(std::malloc(outputFilePathSize)) };
-    {
-        if (outputFilePath == nullptr) {
-            std::cerr << "ERROR: Failed to allocate memory!\n";
-            std::exit(EXIT_FAILURE);
-        }
+    //find audio file in PCSSB using its filename (including file extension but excluding path)
+    //NOTE: we convert paths into strings first instead of using c_str() directly because the former
+    //paths have a value type of wchar_t on windows and we need multi byte char c style strings.
+    const std::string audioFileName { std::filesystem::path{replaceFilePath}.filename().string() };
 
-        //generate output file name
-        (void) std::snprintf(outputFilePath, outputFilePathSize, "%s-mod", pcssbFilePath.c_str());
+    const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName);
+    const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
+    const std::intmax_t replaceDataSize = MyIO::getfilesize(replaceFilePath.c_str());
 
-        //find audio file in PCSSB using its filename (including file extension but excluding path)
-        //NOTE: we convert paths into strings first instead of using c_str() directly because the former
-        //paths have a value type of wchar_t on windows and we need multi byte char c style strings.
-        const std::string audioFileName { std::filesystem::path{replaceFilePath}.filename().string()};
-
-        const std::size_t fsbHeaderIndex = findFirstFSBMatchingFileName(pcssbFilePath, audioFileName);
-        const std::uint32_t originalDataSize = readDataSize(pcssbFilePath, fsbHeaderIndex);
-        const std::intmax_t replaceDataSize = MyIO::getfilesize(replaceFilePath.c_str());
-
-        if (static_cast<std::size_t>(replaceDataSize) > originalDataSize) {
-            std::cerr << "ERROR: Given replacement audio has a larger file size than the original. "
-                         "Inserting it into the PCSSB would result in undesirable side effects. Aborting.\n";
-            std::exit(EXIT_FAILURE);
-        }
-
-        //TODO could trim metadata from the replacement audio
-
-        const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
-        //write everything up to the existing audio data into the output files
-        readAndWriteToNewFile(
-            pcssbFilePath,
-            outputFilePath,
-            fsbAudioDataIndex,
-            0,
-            false,
-            false);
-
-        //append the replacement audio data into the output file
-        readAndWriteToNewFile(
-            replaceFilePath,
-            outputFilePath,
-            originalDataSize,
-            0,
-            true,
-            true);
-
-        //append the rest of the original file after the audio data
-        readAndWriteToNewFile(
-            pcssbFilePath,
-            outputFilePath,
-            //NOTE: this will overflow but it shouldn't matter
-            //ensures all the bytes after from original file is read
-            static_cast<std::size_t>(MyIO::getfilesize(pcssbFilePath.c_str())),
-            fsbAudioDataIndex + originalDataSize,
-            true,
-            false);
-
-        /* NOTE: we currently don't modify the data size field in the FSB because
-            we only insert the replacement audio when it is smaller than
-            or the same size as the original. in the former case, we use 00 for the
-            remaining bytes - while technically they aren't really part of the audio
-            so the value of the data size field won't actually be representative,
-            in practise the game just ignores the null bytes and the original audio
-            in some of the FSBs is formatted the same way anyway. */
+    if (static_cast<std::size_t>(replaceDataSize) > originalDataSize) {
+        std::cerr << "ERROR: Given replacement audio has a larger file size than the original. "
+                        "Inserting it into the PCSSB would result in undesirable side effects. Aborting.\n";
+        std::exit(EXIT_FAILURE);
     }
-    std::free(outputFilePath);
+
+    //TODO could trim metadata from the replacement audio
+
+    const std::size_t fsbAudioDataIndex = fsbHeaderIndex + FSB_HEADER_SIZE;
+    //write everything up to the existing audio data into the output files
+    readAndWriteToNewFile(
+        pcssbFilePath,
+        outputFilePath,
+        fsbAudioDataIndex,
+        0,
+        false,
+        false);
+
+    //append the replacement audio data into the output file
+    readAndWriteToNewFile(
+        replaceFilePath,
+        outputFilePath,
+        originalDataSize,
+        0,
+        true,
+        true);
+
+    //append the rest of the original file after the audio data
+    readAndWriteToNewFile(
+        pcssbFilePath,
+        outputFilePath,
+        //NOTE: this will overflow but it shouldn't matter
+        //ensures all the bytes after from original file is read
+        static_cast<std::size_t>(MyIO::getfilesize(pcssbFilePath.c_str())),
+        fsbAudioDataIndex + originalDataSize,
+        true,
+        false);
+
+    /* NOTE: we currently don't modify the data size field in the FSB because
+        we only insert the replacement audio when it is smaller than
+        or the same size as the original. in the former case, we use 00 for the
+        remaining bytes - while technically they aren't really part of the audio
+        so the value of the data size field won't actually be representative,
+        in practise the game just ignores the null bytes and the original audio
+        in some of the FSBs is formatted the same way anyway. */
 }
 
