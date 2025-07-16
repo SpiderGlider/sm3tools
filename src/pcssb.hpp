@@ -66,9 +66,8 @@ constexpr std::string_view FSB_MAGIC_STRING { "FSB3" };
 //The size of the vector is the number of instances that were found.
 std::vector<size_t> findFSBIndexes(const std::string& filePath);
 
-//prints out location of each instance of the text "FSB3" in the file.
-//in format "[result number]: decimal = [address in decimal], hex = [address in hex]"
-void printFSBHeaderIndexes(const std::string& filePath);
+//prints out information about each FSB (excluding duplicates) in the file.
+void printFSBList(const std::string& filePath);
 
 constexpr int DATA_SIZE_OFFSET { 3 * sizeof(std::uint32_t) };
 

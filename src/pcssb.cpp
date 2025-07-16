@@ -81,7 +81,7 @@ std::vector<size_t> findFSBIndexes(const std::string& filePath) {
     return fsbIndexes;
 }
 
-void printFSBHeaderIndexes(const std::string& filePath) {
+void printFSBList(const std::string& filePath) {
     assert(!filePath.empty());
 
     const std::vector<size_t> indexes { findFSBIndexes(filePath) };
@@ -89,17 +89,14 @@ void printFSBHeaderIndexes(const std::string& filePath) {
         if (i < indexes.size() - 2) {
             const std::string fsbFileName = readFileName(filePath, indexes.at(i));
             std::printf("%zu: "
-                        "file name %s, "
-                        "hex address = 0x%zX, "
-                        "fsb size = %zu, "
-                        "duplicate size = %zu, "
-                        "total size including duplicate = %zu\n",
+                        "Offset (hexadecimal) = 0x%zX, "
+                        "FSB File Name %s, "
+                        "FSB Data Size = %lu \n",
                         i+1,
-                        fsbFileName.c_str(),
                         indexes.at(i),
-                        indexes.at(i+1)-indexes.at(i),
-                        indexes.at(i+2)-indexes.at(i+1),
-                        indexes.at(i+2)-indexes.at(i));
+                        fsbFileName.c_str(),
+                        //avoids needing to import <inttypes.h> for the PRIu64 format specifier
+                        static_cast<unsigned long>(readDataSize(filePath, indexes.at(i))));
         }
     }
 }
