@@ -1,6 +1,6 @@
-# sm3tools
+# sm3tools (ALPHA)
 
-A program with tools for extracting various types of Spider-Man 3 the game (PC) files including PCSSB and PCPACK.
+A program that can currently extract data from PCSSB archives from Spider-Man 3 The Game (PC).
 
 ## Building
 
@@ -30,10 +30,7 @@ cmake --build .
 `-i <path to input file>`
 `-v` - verbose
 `-r <path to replacement file>`
-`-r <file to replace> <path to replacement file>`
 `-l --list` - list files in archive
-`-t PCSSB | pcpack` type to interpret as, if not specified
-then inferred from the file name
 
 ## Example Workflow - PCSSB
 
