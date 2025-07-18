@@ -27,10 +27,11 @@ cmake --build .
 
 ## Flags
 
-`-i <path to input file>`
-`-v` - verbose
-`-r <path to replacement file>`
-`-l --list` - list files in archive
+`-i <arg> | --input <arg>` - recommended way to pass the path to an input file
+`-v | --verbose` - verbose (currently unused)
+`-r <arg> | --replace <arg>` - recommended way to pass the path to a 
+file to replace within the input file
+`-l | --list` - list files in archive
 
 ## Example Workflow - PCSSB
 
