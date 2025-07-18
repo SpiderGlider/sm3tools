@@ -136,7 +136,7 @@ void printHelp() {
         "the file with the same name.\n";
 }
 
-std::string defaultModifiedFileOutPath(const std::string& inputFilePath) {
+std::string defaultModifiedFileOutPath(const std::string& inputFilePath, const std::string& outputDirectory) {
     std::ostringstream strStream{};
     const std::filesystem::path inputFSPath { inputFilePath };
     //construct output file name
@@ -144,9 +144,8 @@ std::string defaultModifiedFileOutPath(const std::string& inputFilePath) {
         << inputFSPath.stem().string()
         << "-mod" 
         << inputFSPath.extension().string();
-    const std::string outputFileName { strStream.str() };
-    //output in the same directory as the input file
-    return (std::filesystem::path("./out") / outputFileName).string();
+    const std::filesystem::path outputFileName { strStream.str() };
+    return (outputDirectory / outputFileName).string();
 }
 
 void pcssbMain(const Options& options) {
@@ -161,7 +160,7 @@ void pcssbMain(const Options& options) {
              replaceAudioinPCSSB(
                  options.inputFilePath, 
                  options.replaceFilePath, 
-                 defaultModifiedFileOutPath(options.inputFilePath));
+                 defaultModifiedFileOutPath(options.inputFilePath, "./out"));
          }
          else {
              replaceAudioinPCSSB(options.inputFilePath, options.replaceFilePath, options.outputPath);

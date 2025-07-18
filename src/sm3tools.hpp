@@ -95,8 +95,10 @@ Options parseFlags(const std::vector<std::string>& args);
 
 // generates a default output file path given an input file.
 // adds "-mod" onto the end of the stem (i.e. before the file extension).
-// outputs in default directory (./out)
-std::string defaultModifiedFileOutPath(const std::string& inputFilePath);
+// outputs in outputDirectory (./out)
+std::string defaultModifiedFileOutPath(
+    const std::string& inputFilePath,
+    const std::string& outputDirectory);
 
 // performs operations on a PCSSB file using the specified program options
 void pcssbMain(const Options& options);
