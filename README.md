@@ -1,6 +1,8 @@
 # sm3tools (ALPHA)
 
-A program that can currently extract data from PCSSB archives from Spider-Man 3 The Game (PC).
+A program that is currently limited to 
+extracting and editing data in PCSSB archives 
+from Spider-Man 3 The Game (PC).
 
 ## Building
 
@@ -36,13 +38,13 @@ file to replace within the input file
 
 ## Example Workflow - PCSSB
 
-1. Copy a .pcssb file that you want to extract from the game's sound folder
-2. Run `sm3tools <path to copied PCSSB file>` to extract the audio from it
-3. View the extracted audio files in `<directory of copied PCSSB file location>/out`
-4. Modify the relevant audio file that you want to edit, keeping the file name the same
+1. Copy the path of a .pcssb file that you want to extract from the game's sound folder
+2. Run `sm3tools -i <path to PCSSB file>` to extract the audio from it
+3. View the extracted audio files in `./out`
+4. Modify and replace the relevant audio file that you want to change
 5. Inject the modified audio into the PCSSB by running 
-`sm3tools <path to copied PCSSB file> <path to modified audio>`
-6. Modified PCSSB will be where the copied PCSSB file is with "-mod" at the end of the file name
+`sm3tools -i <path to PCSSB file> -r <path to modified audio>`
+6. Modified PCSSB will be placed in `./out`
 
 ## Caveats
 
