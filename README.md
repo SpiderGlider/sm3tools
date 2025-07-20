@@ -1,31 +1,23 @@
 # sm3tools (ALPHA)
 
+# Description
+
 A program that is currently limited to 
 extracting and editing data in PCSSB archives 
 from Spider-Man 3 The Game (PC).
 
-## Building
+## Program Modes
 
-### Visual Studio
+When you run the executable, there are a couple of "modes"
+of operation you can choose between. 
 
-Assuming you have the right C++ development packages installed,
-Visual Studio should be able to detect the CMake project when 
-loading the project folder.
-
-### CMake
-
-Create a directory for building inside the project folder, e.g. `build`.
-
-Move into that directory, then in the terminal run:
-```
-cmake ..
-```
-to generate build files.
-
-To run those build files you can use:
-```
-cmake --build .
-```
+- The default is **extract**, which just outputs
+the files found within the specified input file to the output directory.
+- Another is **list**, set by using the `--list` (or `-l`) flag,
+which prints out a listing of files within the archive.
+- Finally, there's **replace**, set by using the `--replace` (or `-r`) flag,
+where you must simultaneously pass a path as a flag value
+to specify the file to replace within the archive.
 
 ## Flags
 
@@ -52,3 +44,26 @@ file to replace within the input file
 in the PCSSB. This is because doing so alters the offsets of FSB files after the file that is replaced,
 which prevents them from playing properly in-game.
 * The program does not currently validate the modified audio apart from checking its total size.
+
+## Building
+
+### Visual Studio
+
+Assuming you have the right C++ development packages installed,
+Visual Studio should be able to detect the CMake project when
+loading the project folder.
+
+### CMake
+
+Create a directory for building inside the project folder, e.g. `build`.
+
+Move into that directory, then in the terminal run:
+```
+cmake ..
+```
+to generate build files.
+
+To run those build files you can use:
+```
+cmake --build .
+```
