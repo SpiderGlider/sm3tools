@@ -22,11 +22,22 @@ to specify the file to replace within the archive.
 ## Flags
 
 `-i <arg> | --input <arg>` - recommended way to pass the path to an input file
-`-v | --verbose` - verbose (currently unused)
-`-r <arg> | --replace <arg>` - recommended way to pass the path to a 
+`-r <arg> | --replace <arg>` - recommended way to pass the path to a
 file to replace within the input file
+`-v | --verbose` - verbose (currently unused)
 `-o <arg> | --replace <arg>` - pass the path to the output directory (defaults to `./out`)
 `-l | --list` - list files in archive
+
+### Positional Arguments
+
+For convenience some arguments can be passed without using their respective flag
+in certain situations. However it is still recommended that you do use the flag
+version of the command because it parses correctly more consistently.
+
+Positional arguments are only accepted at the very beginning, before any flags are passed.
+
+Argument 1 - Input File Argument (equivalent to `--input <arg>` or `-i <arg>`)
+Argument 2 - File to replace (equivalent to `--replace <arg>` or `-r <arg>`) (sets mode to replace)
 
 ## Example Workflow - PCSSB
 
