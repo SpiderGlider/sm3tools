@@ -129,11 +129,14 @@ Options parseFlags(const std::vector<std::string>& args) {
 }
 
 void printHelp() {
-    std::cout << "Usage (1): sm3tools.exe <PCSSB File>\n";
-    std::cout << "Usage (2): sm3tools.exe <Input PCSSB File> <Audio File To Replace>\n";
-    std::cout << "(1) Outputs all audio files from the PCSSB into the out directory.\n";
-    std::cout << "(2) Injects the specified audio file into the PCSSB file, replacing "
-        "the file with the same name.\n";
+    constexpr std::string_view USAGE_TEXT {
+        "Usage (1): sm3tools.exe <PCSSB File>\n"
+        "Usage (2): sm3tools.exe <Input PCSSB File> <Audio File To Replace>\n"
+        "(1) Outputs all audio files from the PCSSB into the out directory.\n"
+        "(2) Injects the specified audio file into the PCSSB file, replacing "
+            "the file with the same name.\n" };
+
+    std::cout << USAGE_TEXT;
 }
 
 std::string defaultModifiedFileOutPath(const std::string& inputFilePath, const std::string& outputDirectory) {
