@@ -130,19 +130,20 @@ Options parseFlags(const std::vector<std::string>& args) {
 
 void printHelp() {
     constexpr std::string_view USAGE_TEXT {
-        "Usage (1): sm3tools.exe <PCSSB File>\n"
-        "Usage (2): sm3tools.exe <Input PCSSB File> <Audio File To Replace>\n"
-        "(1) Outputs all audio files from the PCSSB into the out directory.\n"
+        "Usage (1): sm3tools.exe <Input PCSSB File> --out <Output Directory>\n"
+        "Usage (2): sm3tools.exe <Input PCSSB File> --replace <Audio File To Replace> "
+            "--out <Output Directory>\n"
+        "(1) Outputs all audio files from the PCSSB into the output directory.\n"
         "(2) Injects the specified audio file into the PCSSB file, replacing "
-            "the file with the same name.\n" };
+            "it in the FSB with the same filename.\n" };
 
     constexpr std::string_view FLAGS_TEXT {
         "FLAGS\n"
         "   -i <arg> | --input <arg> - Recommended way to pass the path to an input file\n"
         "   -r <arg> | --replace <arg> - Recommended way to pass the path to a "
             "file to replace within the input file\n"
-        "   -o <arg> | --replace <arg> - Pass the path to the output directory (defaults to `./out` "
-        "   if not specified)\n"
+        "   -o <arg> | --replace <arg> - Pass the path to the output directory (defaults to ./out"
+            " if not specified)\n"
         "   -v | --verbose - Increase verbosity (currently unused)\n"
         "   -l | --list` - List files in archive\n"
     };
