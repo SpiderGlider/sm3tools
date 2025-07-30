@@ -131,12 +131,14 @@ Options parseFlags(const std::vector<std::string>& args) {
 
 void printHelp() {
     constexpr std::string_view USAGE_TEXT {
-        "Usage (1): sm3tools.exe <Input PCSSB File> --out <Output Directory>\n"
-        "Usage (2): sm3tools.exe <Input PCSSB File> --replace <Audio File To Replace> "
+        "Usage (1): sm3tools.exe <Input PCSSB File> --list\n"
+        "Usage (2): sm3tools.exe <Input PCSSB File> --out <Output Directory>\n"
+        "Usage (3): sm3tools.exe <Input PCSSB File> --replace <Audio File To Replace> "
             "--out <Output Directory>\n"
-        "(1) Outputs all audio files from the PCSSB into the output directory.\n"
-        "(2) Injects the specified audio file into the PCSSB file, replacing "
-            "it in the FSB with the same filename.\n" };
+        "(1) Prints out a listing of all the FSB files found within the PCSSB\n"
+        "(2) Outputs all audio files from the PCSSB into the output directory\n"
+        "(3) Injects the specified audio file into the PCSSB file, replacing "
+            "it in the FSB with the same filename\n" };
 
     constexpr std::string_view FLAGS_TEXT {
         "FLAGS\n"
@@ -146,7 +148,7 @@ void printHelp() {
             "file to replace within the input file\n"
         "   -o <arg> | --replace <arg> - Pass the path to the output directory \n"
         "       Defaults to ./out if not specified. Does nothing if `--overwrite-input | -oi` is specified\n"
-        "   -oi | --overwrite-input - overwrites the input file (only works in replace mode)\n"
+        "   -oi | --overwrite-input - Overwrites the input file (only works in replace mode)\n"
         "   -v | --verbose - Increase verbosity (currently unused)\n"
         "   -l | --list` - List files in archive\n"
     };
