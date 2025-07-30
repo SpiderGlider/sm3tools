@@ -43,6 +43,7 @@ struct Options {
     bool help { false }; // whether to display usage information and exit
     bool list { false }; // whether to list files within the input archive and exit
     bool verbose { false }; // (UNUSED) whether to increase verbosity of output
+    bool overwrite { false }; // whether to overwrite the original file
     std::string inputFilePath {}; // path to an input file archive
     std::string replaceFilePath {}; // path to a file to replace within the input archive
     // either the output directory (if outputting contents of archive),
@@ -99,6 +100,10 @@ Options parseFlags(const std::vector<std::string>& args);
 std::string defaultModifiedFileOutPath(
     const std::string& inputFilePath,
     const std::string& outputDirectory);
+
+// generates a temporary output file path given an input file.
+// adds ".tmp" onto the end of the file path
+std::string tempFileOutPath(const std::string& inputFilePath);
 
 // performs operations on a PCSSB file using the specified program options
 void pcssbMain(const Options& options);
