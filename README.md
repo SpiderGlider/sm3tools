@@ -21,14 +21,14 @@ to specify the file to replace within the archive.
 
 ## Flags
 
-`-i <arg> | --input <arg>` - recommended way to pass the path to an input file
+`-i <arg> | --input <arg>` - recommended way to pass the path to an input file  
 `-r <arg> | --replace <arg>` - recommended way to pass the path to a
-file to replace within the input file
-`--overwrite-input | -oi` - overwrites the input file (only works in replace mode)
-`-v | --verbose` - verbose (currently unused)
+file to replace within the input file  
 `-o <arg> | --replace <arg>` - pass the path to the output directory (defaults to `./out`).
-Does nothing if `--overwrite-input | -oi` is specified.
-`-l | --list` - list files in archive
+Does nothing if `--overwrite-input | -oi` is specified.  
+`--overwrite-input | -oi` - overwrites the input file (only works in replace mode)  
+`-v | --verbose` - verbose (currently unused)  
+`-l | --list` - list files in archive  
 
 ### Positional Arguments
 
@@ -38,7 +38,7 @@ version of the command because it parses correctly more consistently.
 
 Positional arguments are only accepted at the very beginning, before any flags are passed.
 
-Argument 1 - Input File Argument (equivalent to `--input <arg>` or `-i <arg>`)
+Argument 1 - Input File Argument (equivalent to `--input <arg>` or `-i <arg>`)  
 Argument 2 - File to replace (equivalent to `--replace <arg>` or `-r <arg>`) (sets mode to replace)
 
 ## Example Workflow - PCSSB

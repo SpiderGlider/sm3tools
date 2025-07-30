@@ -130,11 +130,31 @@ Options parseFlags(const std::vector<std::string>& args) {
 }
 
 void printHelp() {
-    std::cout << "Usage (1): sm3tools.exe <PCSSB File>\n";
-    std::cout << "Usage (2): sm3tools.exe <Input PCSSB File> <Audio File To Replace>\n";
-    std::cout << "(1) Outputs all audio files from the PCSSB into the out directory.\n";
-    std::cout << "(2) Injects the specified audio file into the PCSSB file, replacing "
-        "the file with the same name.\n";
+    constexpr std::string_view USAGE_TEXT {
+        "Usage (1): sm3tools.exe <Input PCSSB File> --list\n"
+        "Usage (2): sm3tools.exe <Input PCSSB File> --out <Output Directory>\n"
+        "Usage (3): sm3tools.exe <Input PCSSB File> --replace <Audio File To Replace> "
+            "--out <Output Directory>\n"
+        "(1) Prints out a listing of all the FSB files found within the PCSSB\n"
+        "(2) Outputs all audio files from the PCSSB into the output directory\n"
+        "(3) Injects the specified audio file into the PCSSB file, replacing "
+            "it in the FSB with the same filename\n" };
+
+    constexpr std::string_view FLAGS_TEXT {
+        "FLAGS\n"
+        //indented with four spaces
+        "   -i <arg> | --input <arg> - Recommended way to pass the path to an input file\n"
+        "   -r <arg> | --replace <arg> - Recommended way to pass the path to a "
+            "file to replace within the input file\n"
+        "   -o <arg> | --replace <arg> - Pass the path to the output directory \n"
+        "       Defaults to ./out if not specified. Does nothing if `--overwrite-input | -oi` is specified\n"
+        "   -oi | --overwrite-input - Overwrites the input file (only works in replace mode)\n"
+        "   -v | --verbose - Increase verbosity (currently unused)\n"
+        "   -l | --list` - List files in archive\n"
+    };
+
+    std::cout << USAGE_TEXT << '\n';
+    std::cout << FLAGS_TEXT;
 }
 
 std::string defaultModifiedFileOutPath(const std::string& inputFilePath, const std::string& outputDirectory) {
