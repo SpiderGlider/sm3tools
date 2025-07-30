@@ -24,8 +24,10 @@ to specify the file to replace within the archive.
 `-i <arg> | --input <arg>` - recommended way to pass the path to an input file
 `-r <arg> | --replace <arg>` - recommended way to pass the path to a
 file to replace within the input file
-`-o <arg> | --replace <arg>` - pass the path to the output directory (defaults to `./out`)
+`-o <arg> | --replace <arg>` - pass the path to the output directory (defaults to `./out`).
+`--overwrite-input | -oi` - overwrites the input file (only works in replace mode)
 `-v | --verbose` - verbose (currently unused)
+Does nothing if `--overwrite-input | -oi` is specified.
 `-l | --list` - list files in archive
 
 ### Positional Arguments
@@ -47,7 +49,7 @@ Argument 2 - File to replace (equivalent to `--replace <arg>` or `-r <arg>`) (se
 4. Modify and replace the relevant audio file that you want to change
 5. Inject the modified audio into the PCSSB by running 
 `sm3tools -i <path to PCSSB file> -r <path to modified audio>`
-6. Modified PCSSB will be placed in `./out`
+6. Modified PCSSB will be placed in the default output directory (`./out`)
 
 ## Caveats
 
