@@ -105,12 +105,13 @@ namespace MyIO {
             (void) std::fclose(stream);
             std::exit(EXIT_FAILURE);
         }
-        if (std::feof(stream)) {
-            std::cout << "LOG: EOF encountered when reading file.\n";
-        }
-        if (objsRead < count) {
-            (void) std::printf("LOG: count was %zu, amount read was only %zu.\n", count, objsRead);
-        }
+        // TODO these logs have been left out for now, could be used when verbose is set?
+        // if (std::feof(stream)) {
+        //     std::cout << "LOG: EOF encountered when reading file.\n";
+        // }
+        // if (objsRead < count) {
+        //     (void) std::printf("LOG: count was %zu, amount read was only %zu.\n", count, objsRead);
+        // }
 
         return objsRead;
     }
@@ -133,9 +134,9 @@ namespace MyIO {
             (void) std::fclose(stream);
             std::exit(EXIT_FAILURE);
         }
-        if (objsWritten < count) {
-            (void) std::printf("LOG: count was %zu, amount written was only %zu.\n", count, objsWritten);
-        }
+        // if (objsWritten < count) {
+        //     (void) std::printf("LOG: count was %zu, amount written was only %zu.\n", count, objsWritten);
+        // }
 
         return objsWritten;
     }
