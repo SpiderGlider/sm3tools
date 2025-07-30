@@ -24,8 +24,8 @@ to specify the file to replace within the archive.
 `-i <arg> | --input <arg>` - recommended way to pass the path to an input file
 `-r <arg> | --replace <arg>` - recommended way to pass the path to a
 file to replace within the input file
-`-v | --verbose` - verbose (currently unused)
 `-o <arg> | --replace <arg>` - pass the path to the output directory (defaults to `./out`)
+`-v | --verbose` - verbose (currently unused)
 `-l | --list` - list files in archive
 
 ### Positional Arguments

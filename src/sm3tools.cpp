@@ -136,7 +136,19 @@ void printHelp() {
         "(2) Injects the specified audio file into the PCSSB file, replacing "
             "the file with the same name.\n" };
 
-    std::cout << USAGE_TEXT;
+    constexpr std::string_view FLAGS_TEXT {
+        "FLAGS\n"
+        "   -i <arg> | --input <arg> - Recommended way to pass the path to an input file\n"
+        "   -r <arg> | --replace <arg> - Recommended way to pass the path to a "
+            "file to replace within the input file\n"
+        "   -o <arg> | --replace <arg> - Pass the path to the output directory (defaults to `./out` "
+        "   if not specified)\n"
+        "   -v | --verbose - Increase verbosity (currently unused)\n"
+        "   -l | --list` - List files in archive\n"
+    };
+
+    std::cout << USAGE_TEXT << '\n';
+    std::cout << FLAGS_TEXT;
 }
 
 std::string defaultModifiedFileOutPath(const std::string& inputFilePath, const std::string& outputDirectory) {
