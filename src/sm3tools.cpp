@@ -140,11 +140,13 @@ void printHelp() {
 
     constexpr std::string_view FLAGS_TEXT {
         "FLAGS\n"
+        //NOTE: Indented with a tab (\t)character
         "   -i <arg> | --input <arg> - Recommended way to pass the path to an input file\n"
         "   -r <arg> | --replace <arg> - Recommended way to pass the path to a "
             "file to replace within the input file\n"
-        "   -o <arg> | --replace <arg> - Pass the path to the output directory (defaults to ./out"
-            " if not specified)\n"
+        "   -o <arg> | --replace <arg> - Pass the path to the output directory \n"
+        "       Defaults to ./out if not specified. Does nothing if `--overwrite-input | -oi` is specified\n"
+        "   -oi | --overwrite-input - overwrites the input file (only works in replace mode)\n"
         "   -v | --verbose - Increase verbosity (currently unused)\n"
         "   -l | --list` - List files in archive\n"
     };
