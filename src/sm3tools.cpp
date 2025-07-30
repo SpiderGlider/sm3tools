@@ -121,11 +121,12 @@ Options parseFlags(const std::vector<std::string>& args) {
     const bool help { checkFlagPresent(args, "--help", "-h") };
     const bool list { checkFlagPresent(args, "--list", "-l") };
     const bool verbose = { checkFlagPresent(args, "--verbose", "-v") };
+    const bool overwrite = { checkFlagPresent(args, "--overwrite-input", "-oi") };
     const std::string inputFilePath { getArgOrFlagValue(args, "--input", "-i", 1) };
     const std::string replaceFilePath { getArgOrFlagValue(args, "--replace", "-r", 2)};
     const std::string outputPath { getFlagValue(args, "--out", "-o") };
 
-    return { help, list, verbose, inputFilePath, replaceFilePath, outputPath };
+    return { help, list, verbose, overwrite, inputFilePath, replaceFilePath, outputPath };
 }
 
 void printHelp() {
@@ -148,6 +149,16 @@ std::string defaultModifiedFileOutPath(const std::string& inputFilePath, const s
     return (outputDirectory / outputFileName).string();
 }
 
+std::string tempFileOutPath(const std::string& inputFilePath) {
+    std::ostringstream strStream{};
+    const std::filesystem::path inputFSPath { inputFilePath };
+    //construct output file name
+    strStream
+        << inputFSPath.string()
+        << ".tmp";
+    return strStream.str();
+}
+
 void pcssbMain(const Options& options) {
     if (options.list) {
         std::cout << "INFO: Listing FSBs in " << options.inputFilePath << '\n';
@@ -155,7 +166,19 @@ void pcssbMain(const Options& options) {
     }
     else if (!options.replaceFilePath.empty()) {
          std::cout << "Replacing " << options.replaceFilePath << " in " << options.inputFilePath << '\n';
-         if (options.outputPath.empty()) {
+         if (options.overwrite) {
+             //output to a temporary file (input file name except with .tmp at the end)
+             const std::string tempOutPath = tempFileOutPath(options.inputFilePath);
+
+             replaceAudioinPCSSB(
+                options.inputFilePath,
+                options.replaceFilePath,
+                tempOutPath);
+
+             //replace the input file with the temporary file
+             std::filesystem::rename(tempOutPath, options.inputFilePath);
+         }
+         else if (options.outputPath.empty()) {
              //default output path (input file name with -mod at the end of it, in the same directory)
              replaceAudioinPCSSB(
                  options.inputFilePath, 
