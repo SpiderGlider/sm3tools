@@ -140,7 +140,7 @@ void printHelp() {
 
     constexpr std::string_view FLAGS_TEXT {
         "FLAGS\n"
-        //NOTE: Indented with a tab (\t)character
+        //indented with four spaces
         "   -i <arg> | --input <arg> - Recommended way to pass the path to an input file\n"
         "   -r <arg> | --replace <arg> - Recommended way to pass the path to a "
             "file to replace within the input file\n"
