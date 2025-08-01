@@ -28,6 +28,7 @@
 #include <cstdlib>
 
 #include "pcssb.hpp"
+#include "pcpack.hpp"
 
 FileType getFileType(const std::string_view filePath) {
     const std::string fileExtension { std::filesystem::path(filePath).extension().string() };

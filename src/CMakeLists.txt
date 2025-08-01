@@ -1,4 +1,4 @@
-add_executable(sm3tools sm3tools.cpp pcssb.cpp)
+add_executable(sm3tools sm3tools.cpp pcssb.cpp pcpack.cpp)
 target_compile_features(sm3tools PUBLIC cxx_std_17)
 set_target_properties(sm3tools PROPERTIES CXX_EXTENSIONS OFF)
 

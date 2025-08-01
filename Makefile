@@ -22,7 +22,7 @@ else
      -Wnull-dereference -Wuseless-cast
 endif
 
-bin/sm3tools: src/sm3tools.cpp src/pcssb.cpp src/myIO.cpp
+bin/sm3tools: src/sm3tools.cpp src/pcssb.cpp src/pcpack.cpp src/myIO.cpp
 	$(C++) $(DEFAULTFLAGS) $(EXTRAFLAGS) $(GCCFLAGS) $^ -o $@
 
 %: %.cpp

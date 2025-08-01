@@ -20,4 +20,19 @@
 #ifndef PCPACK_H
 #define PCPACK_H
 
+#include <string>
+#include <vector>
+
+#include <cstddef>
+#include <cstdint>
+
+struct PCPACK {
+    std::uint64_t header {}; // 1311768466702824296 = hsamxV4 + (byte)18
+
+    std::uint32_t fileHash {};
+    std::uint32_t fileType {};
+    std::uint32_t fileOffset {};
+    std::uint32_t fileSize {};
+};
+
 #endif
