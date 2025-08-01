@@ -1,0 +1,15 @@
+name: Push GitHub Commits to Codeberg
+# https://github.com/marketplace/actions/mirror-repository#example-workflows
+on: [push]
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: yesolutions/mirror-action@18fc60c
+      with:
+        REMOTE: 'ssh://git@github.com/SpiderGlider/sm3tools.git'
+        GIT_SSH_PRIVATE_KEY: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+        GIT_SSH_KNOWN_HOSTS: ${{ secrets.GIT_SSH_KNOWN_HOSTS }}
