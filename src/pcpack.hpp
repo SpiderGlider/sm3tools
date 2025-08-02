@@ -27,7 +27,33 @@
 #include <cstdint>
 
 struct PCPACK {
+    std::uint32_t unknown1 {}; // 26
+    std::uint32_t unknown2 {}; // 2816
+    std::uint32_t unknown3 {}; // 2658
+    std::uint32_t unknown4 {}; // 849
+    std::uint32_t unknown5 {}; // 411
+    std::uint32_t unknown6 {}; // 4 / 0
+    std::uint32_t unknown7 {}; // 48
+
+    std::uint32_t dataOffset {};
+
+    std::uint32_t unknown8 {};
+    std::uint32_t null1 {};
+    std::uint32_t null2 {};
+    std::uint32_t null3 {};
+    std::uint32_t null4 {};
+
     std::uint64_t header {}; // 1311768466702824296 = hsamxV4 + (byte)18
+
+    std::uint32_t unknown9 {};
+    std::uint32_t unknown10 {};
+    std::uint32_t null5 {};
+    std::uint32_t numOfNulls {}; // 11 / 1
+    std::uint32_t unknown11 {}; // 1
+    std::uint32_t unknown12 {}; // 16 / 8
+    std::uint32_t null6 {};
+
+    std::uint32_t numOfFiles {};
 
     std::uint32_t fileHash {};
     std::uint32_t fileType {};
